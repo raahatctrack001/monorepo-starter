@@ -15,13 +15,6 @@ app
         credentials: true,
     }))
     .use(cookieParser())
-    .use((err: ApiError, req: Request, res: Response, next: NextFunction)=>{
-        res
-        .status(err.statusCode||500)
-        .json(
-            new ApiResponse(err.statusCode||400, err.message||"something went wrong", err)
-        );
-    })
     .use((req, res, next) => {
         res.set('Cache-Control', 'no-store');
         next();
@@ -34,5 +27,11 @@ import authRouter from './routes/auth.route';
 
 app.use('/api/v1/auth', authRouter);
 
-
+app.use((err: ApiError, req: Request, res: Response, next: NextFunction)=>{
+        res
+        .status(err.statusCode || 500)
+        .json(
+            new ApiResponse(err.statusCode || 400, err.message || "something went wrong", err)
+        );
+    })
 export default app;
