@@ -1,4 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
+import  bcrypt  from 'bcrypt';
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
 //schema = mongoose.schema
 //Types = mongoose.schema.Types.ObjectId
 
@@ -63,6 +66,9 @@ export interface IUser extends Document {
   vrAvatarConfig?: Record<string, unknown>;
   gamingStats?: Record<string, unknown>;
   deletedAt?: Date;
+  accessToken?: String,
+  refreshToken?: String,
+  otp?: String,
   createdAt: Date;
   updatedAt: Date;
 }
@@ -72,7 +78,7 @@ const UserSchema = new Schema<IUser>(
     fullName: { type: String, required: true },
     username: { type: String, unique: true, required: true },
     email: { type: String, unique: true, required: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
     phoneNumber: String,
     avatar: [String],
     coverPhoto: [String],
@@ -149,11 +155,62 @@ const UserSchema = new Schema<IUser>(
     vrAvatarConfig: { type: Schema.Types.Mixed },
     gamingStats: { type: Schema.Types.Mixed },
     deletedAt: Date,
-    // created_at: { type: Date, default: Date.now },
-    // updated_at: { type: Date, default: Date.now },
+    accessToken: {  type: String, default: "", select: false  },
+    refreshToken: { type: String, default: "", select: false  },
+    otp: {  type: String, select: false  }
   },
   { timestamps: true }
 );
 
+UserSchema.methods.isPasswordCorrect = function(password: string){
+    return bcrypt.compare(password, this.password)
+}
+
+// UserSchema.methods.generateAccessToken = function(){
+//     return jwt.sign(
+//         {
+//             _id: this._id,
+//             email: this.email,
+//             username: this.username,
+//             fullName: this.fullName,
+//         },
+//         process.env.ACCESS_TOKEN_SECRET!,
+//         {
+//             expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+//         }
+//     )
+// }
+// UserSchema.methods.generateRefreshToken = function(){
+//     return jwt.sign(
+//         {
+//             _id: this._id,
+//             username: this.username,
+//             fullName: this.fullName,
+            
+//         },
+//         process.env.REFRESH_TOKEN_SECRET,
+//         {
+//             expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+//         }
+//     )
+// }
+
+// Generate password reset token
+
+UserSchema.methods.generateResetPasswordToken = function () {
+    // Gernerate token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+  
+    // Hash and set to resetPasswordToken field
+    this.resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+  
+    // Set token expire time
+    this.resetPasswordTokenExpiry = Date.now() + 30 * 60 * 1000;  
+    return resetToken;
+  };
+  
 const User = mongoose.model<IUser>('User', UserSchema);
 export default User;
