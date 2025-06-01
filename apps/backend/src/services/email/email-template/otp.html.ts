@@ -50,7 +50,7 @@ export const otpHtml = (email: string, otp: string)=>{
     </head>
     <body>
       <div class="container">
-        <div class="header">OTP Verification for Social Fusion</div>
+        <div class="header"> Credential's Verification for Social Project</div>
         <div class="content">
           <p>Hello ${email} user,</p>
           <p>Thank you for registering with Social Project! To complete your verification process, please use the following OTP:</p>

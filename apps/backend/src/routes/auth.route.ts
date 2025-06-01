@@ -1,9 +1,11 @@
 import { upload } from './../middlewares/multer.middleware';
 import express from "express";
-import { registerUser } from "../controllers/auth.controller";
+import { registerUser, sendOTP, verifyOTP } from "../controllers/auth.controller";
 
 const router = express.Router();
 
 
 router.route("/register").post(upload.none(), registerUser);
+router.route("/send-otp").post(upload.none(), sendOTP);
+router.route("/verify-otp").post(upload.none(), verifyOTP);
 export default router

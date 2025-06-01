@@ -5,7 +5,7 @@ export interface IOtp extends Document {
   identifier: string;                  // email / phone number / etc.
   otpHash: string;                     // hashed OTP
   purpose: 'email_verification' | 'password_reset' | 'phone_verification' | 'other';
-  expiresAt: Date;
+  expiresAt?: Date;
   verified: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -33,7 +33,7 @@ const OtpSchema = new Schema<IOtp>(
     },
     expiresAt: {
       type: Date,
-      required: true,
+      // required: true,
     },
     verified: {
       type: Boolean,

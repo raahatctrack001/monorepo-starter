@@ -1,8 +1,8 @@
-import { User } from "@repo/database";
+import { Secret } from 'jsonwebtoken';
+import { User, IUser } from "@repo/database";
 import ApiError from "../../utils/apiError";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { Types } from "mongoose";
 dotenv.config();
 
 export interface TokenPayload {
@@ -14,7 +14,7 @@ export interface TokenPayload {
 // Validate and type the token secrets more strictly
 const getTokenSecrets = () => {
   const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
-  const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY;
+  const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY ;
   const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
   const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY;
 
@@ -31,13 +31,11 @@ const getTokenSecrets = () => {
   };
 };
 
-import { Secret, SignOptions } from 'jsonwebtoken';
-import { IUser } from "@repo/database/dist/models/user/user.model";
-
-// ... other code
 
 export const generateAccessToken = (payload: TokenPayload): string => {
   const { ACCESS_TOKEN_SECRET, ACCESS_TOKEN_EXPIRY } = getTokenSecrets();
+
+  //@ts-ignore
   return jwt.sign(payload, ACCESS_TOKEN_SECRET as Secret, {
     expiresIn: ACCESS_TOKEN_EXPIRY,
   });
@@ -46,6 +44,8 @@ export const generateAccessToken = (payload: TokenPayload): string => {
 // Generate Refresh Token
 export const generateRefreshToken = (payload: TokenPayload): string => {
   const { REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY } = getTokenSecrets();
+  
+  // @ts-ignore
   return jwt.sign(payload, REFRESH_TOKEN_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRY,
   });
