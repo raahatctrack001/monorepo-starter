@@ -1,9 +1,8 @@
 import { ZodError, ZodIssue } from "zod";
 import ApiError from "../utils/apiError";
 import { asyncHandler } from "../utils/asyncHandler";
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from "express";
 import { emailSchema, registerUserSchema } from "@repo/common";
-
 import ApiResponse from "../utils/apiResponse";
 import bcrypt from "bcrypt";
 import { Otp, User } from "@repo/database";
@@ -62,7 +61,7 @@ export const registerUser = asyncHandler(async (req: Request, res: Response, nex
                 .status(201)
                 .cookie('accessToken', accessToken, options)
                 .cookie('refreshToken', refreshToken, options)
-                .json(new ApiResponse(202, "User registered", newUser));
+                .json(new ApiResponse(201, "User registered", newUser));
         } catch (error) {
             next(error)
         }
@@ -174,6 +173,45 @@ export const verifyOTP = asyncHandler(async(req: Request, res: Response, next: N
         }, {new: true})
         
         res.status(200).json(new ApiResponse(200, "Email verified!", updateUser));
+    } catch (error) {
+        next(error)
+    }
+})
+
+export const loginUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userEmail, password } = req.body;
+        if(!userEmail.trim()){
+            throw new ApiError(404, "username or email is required!")
+        }
+
+        if(!password.trim()){
+            throw new ApiError(404, "Password is missing!")
+        }
+        const query = userEmail.includes('@') ? { email: userEmail } : { username: userEmail };
+
+        const user = await User.findOne(query).select("+password");
+        if(!user){
+            throw new ApiError(404, "User with this credentials does not exist!")
+        }
+        
+        const isPasswordMatching = await bcrypt.compare(password, user?.password);
+        if(!isPasswordMatching){
+            throw new ApiError(404, "Authorization Failed due to credential's mismatch!")
+        }
+        
+        // @ts-ignore
+        const { password: Password, ...rest } = user?._doc;
+        
+        const tokens = await generateAccessAndRefreshToken(user?._id);
+        const { accessToken, refreshToken } = tokens;
+        
+        return res
+                .status(200)
+                .cookie('accessToken', accessToken, options)
+                .cookie('refreshToken', refreshToken, options)
+                .json(new ApiResponse(200, "User Logged In!", rest));        
+
     } catch (error) {
         next(error)
     }
