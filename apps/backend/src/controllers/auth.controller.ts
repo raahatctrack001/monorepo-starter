@@ -16,7 +16,7 @@ export const registerUser = asyncHandler(async (req: Request, res: Response, nex
         try {
             console.log("inside register controller")
             //check if no fields are empty
-            const { email, password: Password, repeatPassword, username, fullName } = req.body;
+            const { email, password: Password, repeatPassword, username, fullName, device } = req.body;
             if([email, Password, repeatPassword, username, fullName].some(field=>field?.trim()?0:1)){
                 throw new ApiError(404, "All fields are necessary!");
             }
@@ -41,11 +41,18 @@ export const registerUser = asyncHandler(async (req: Request, res: Response, nex
             //hash password before putting into database then create user
             const hashedPassword =  await bcrypt.hash(Password, 10);
             const newUser = await User.create({
-                username,
-                password: hashedPassword,
-                email,
-                fullName,
-            });
+                 username,
+                 password: hashedPassword,
+                 email,
+                 fullName,
+                 lastLogin: new Date(),   
+                 loginCount: 1,
+                 loginDetail: [{ 
+                     loginTimestamp: new Date(),   
+                     device 
+                 }]
+             });
+
     
             if(!newUser){
                 throw new ApiError(500, "Internal error while registering user", newUser);
@@ -104,6 +111,13 @@ export const sendOTP = asyncHandler(async (req: Request, res: Response, next: Ne
             throw new ApiError(500, "Failed to generate OTP, please try again later!");
         }
         
+        const updateUserOtpStore = await User.findOneAndUpdate({email}, {
+            $push: {
+                otpStore: otp
+            }
+        }, {new: true});
+        // console.log(updateUserOtpStore);
+
         //prepare data for sending email
         const subject = "Social Project: Email Verification";
         const emailHTML = otpHtml(email, newOTP);
@@ -165,6 +179,8 @@ export const verifyOTP = asyncHandler(async(req: Request, res: Response, next: N
             throw new ApiError(403, "Please enter valid OTP")
         }
 
+        //check the frequency of request for otp verificatio using redis and deploy rate limit
+
         //update user that email has been verified
         const updateUser = await User.findOneAndUpdate({email}, {
             $set: {
@@ -180,7 +196,7 @@ export const verifyOTP = asyncHandler(async(req: Request, res: Response, next: N
 
 export const loginUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { userEmail, password } = req.body;
+        const { userEmail, password, device } = req.body;
         if(!userEmail.trim()){
             throw new ApiError(404, "username or email is required!")
         }
@@ -200,17 +216,27 @@ export const loginUser = asyncHandler(async (req: Request, res: Response, next: 
             throw new ApiError(404, "Authorization Failed due to credential's mismatch!")
         }
         
-        // @ts-ignore
-        const { password: Password, ...rest } = user?._doc;
-        
-        const tokens = await generateAccessAndRefreshToken(user?._id);
+        const tokens = await generateAccessAndRefreshToken(user?._id as string);
         const { accessToken, refreshToken } = tokens;
-        
+
+        const { loginCount: lc } = user;
+        const updateUser = await User.findByIdAndUpdate(user?._id, {
+            $set: {
+                lastLogin: new Date(),
+                loginCount: lc+1,
+            }, 
+            $push: {
+                loginDetail: {
+                    loginTimestamp: new Date(),   
+                    device
+                }
+            }
+        }, { new: true })
         return res
                 .status(200)
                 .cookie('accessToken', accessToken, options)
                 .cookie('refreshToken', refreshToken, options)
-                .json(new ApiResponse(200, "User Logged In!", rest));        
+                .json(new ApiResponse(200, "User Logged In!", updateUser));        
 
     } catch (error) {
         next(error)
