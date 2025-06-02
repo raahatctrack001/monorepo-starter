@@ -243,4 +243,34 @@ export const loginUser = asyncHandler(async (req: Request, res: Response, next: 
     }
 })
 
+export const logoutUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Clear the user's refresh token in the database
+        const { device } = req.body;
+        const currentUser = await User.findByIdAndUpdate(req.user?._id, {
+            $set: {
+                refreshToken: null,
+                lastLogout: new Date(),
+            },
+            $push: {
+                logoutDetail: {
+                    logoutTimestamp: new Date(),
+                    device,
+                }
+            }
+        }, { new: true})
 
+        if(!currentUser){
+            throw new ApiError(500, "failed to clear refresh token!")
+        }        
+
+        // Clear cookies and respond
+        return res
+            .status(200)
+            .clearCookie('accessToken', options)
+            .clearCookie('refreshToken', options)
+            .json(new ApiResponse(200, "User logged out", currentUser));
+    } catch (error) {
+        next(error);
+    }
+});
