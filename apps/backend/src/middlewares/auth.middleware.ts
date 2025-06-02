@@ -11,6 +11,7 @@ export const isUserLoggedIn = asyncHandler(async (req: Request, res: Response, n
 
     // If no accessToken, but refreshToken exists
     if (!accessToken) {
+      console.log("access token expired, generating new access token")
       if (!refreshToken) {
         throw new ApiError(401, "Session expired, please log in again.");
       }
@@ -35,14 +36,12 @@ export const isUserLoggedIn = asyncHandler(async (req: Request, res: Response, n
 
     // If accessToken exists
     const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET as string);
+    console.log("access token decoded", decodedToken);
+    // @ts-ignore
     req.user = decodedToken;
-
     return next();
   } catch (err: any) {
-    if (err.name === 'TokenExpiredError') {
-      throw new ApiError(401, "Access token expired, please log in again.");
-    }
-    throw new ApiError(401, "Invalid access token, please log in again.");
+    next(err)
   }
 });
 
