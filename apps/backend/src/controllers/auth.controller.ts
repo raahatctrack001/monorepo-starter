@@ -12,7 +12,7 @@ import { otpHtml } from "../services/email/email-template/otp.html";
 import { sendEmail } from "../services/email/email.service";
 
 
-export const registerUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {    
+export const registerUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {  
         try {
             console.log("inside register controller")
             //check if no fields are empty
