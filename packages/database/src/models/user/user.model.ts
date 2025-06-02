@@ -27,6 +27,8 @@ export interface IUser extends Document {
   lastLogin: Date;
   loginCount: number;
   loginDetail: { loginTimestamp: Date; device: string }[];
+  lastLogout: Date;
+  logoutDetail: { logoutTimestamp: Date; device: string }[];
   badges?: string[];
   followers?: Types.ObjectId[];
   followings?: Types.ObjectId[];
@@ -103,6 +105,13 @@ const UserSchema = new Schema<IUser>(
     loginDetail: [
       {
         loginTimestamp: Date,
+        device: String,
+      },
+    ],
+    lastLogout: {type: Date, default: Date.now},
+    logoutDetail: [
+      {
+        logoutTimestamp: Date,
         device: String,
       },
     ],
