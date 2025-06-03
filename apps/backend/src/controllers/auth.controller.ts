@@ -28,7 +28,7 @@ export const registerUser = asyncHandler(async (req: Request, res: Response, nex
             }
             
             //validate user data with zod schema
-            const result = registerUserSchema.safeParse({ email, username, fullName, password: Password });
+            const result = registerUserSchema.safeParse({ email, username, fullName, password: Password, repeatPassword });
             if (!result.success) {
                 const errors = (result.error as ZodError).errors.map((err: ZodIssue) => ({
                     path: err.path.join("."),  // e.g. "email"
@@ -63,7 +63,9 @@ export const registerUser = asyncHandler(async (req: Request, res: Response, nex
                 throw new ApiError(500, "Failed to generate access and refresh token!");
             }
             
+
             //set cookies and send required data
+            newUser.password = "";
             return res
                 .status(201)
                 .cookie('accessToken', accessToken, options)
