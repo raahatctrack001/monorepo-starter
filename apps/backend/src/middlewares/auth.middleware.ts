@@ -4,44 +4,56 @@ import { Request, Response, NextFunction } from 'express';
 import ApiError from '../utils/apiError';
 import { generateAccessToken, options, TokenPayload } from '../services/tokens/login.token';
 
+const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET as string;
+const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET as string;
+
+// Utility to safely verify token
+const verifyToken = (token: string, secret: string): TokenPayload | null => {
+  try {
+    return jwt.verify(token, secret) as TokenPayload;
+  } catch (err) {
+    return null;
+  }
+};
 
 export const isUserLoggedIn = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    let { accessToken, refreshToken } = req.cookies;
+  const { accessToken, refreshToken } = req.cookies;
 
-    // If no accessToken, but refreshToken exists
-    if (!accessToken) {
-      console.log("access token expired, generating new access token")
-      if (!refreshToken) {
-        throw new ApiError(401, "Session expired, please log in again.");
-      }
+  // If accessToken exists, verify it
+  if (accessToken) {
+    const decodedAccess = verifyToken(accessToken, ACCESS_SECRET);
 
-      // Verify refresh token
-      const decodedRefresh = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as TokenPayload;
-      if (!decodedRefresh) {
-        throw new ApiError(403, "Failed to generate access token, please log in again!");
-      }
+    if (decodedAccess) {
+      req.user = decodedAccess;
+      return next();
+    } else {
+      // Invalid or expired token — optionally log this
+      console.log("[Auth] Access token expired or invalid.");
+    }
+  }
+
+  // If no valid access token, check refresh token
+  if (refreshToken) {
+    const decodedRefresh = verifyToken(refreshToken, REFRESH_SECRET);
+
+    if (decodedRefresh) {
+      const { _id, username, fullName } = decodedRefresh;
 
       // Generate new access token
-      const { _id, fullName, username } = decodedRefresh;
-      const newAccessToken = generateAccessToken({ _id, fullName, username });
+      const newAccessToken = generateAccessToken({ _id, username, fullName });
+      res.cookie("accessToken", newAccessToken, options);
 
-      // Set it in cookie
-      res.cookie('accessToken', newAccessToken, options);
-
-      // Attach to req.user and proceed
       req.user = decodedRefresh;
       return next();
+    } else {
+      console.log("[Auth] Invalid refresh token. Clearing cookie.");
+      res.clearCookie("refreshToken");
     }
-
-    // If accessToken exists
-    const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET as string);
-    console.log("access token decoded", decodedToken);
-    // @ts-ignore
-    req.user = decodedToken;
-    return next();
-  } catch (err: any) {
-    next(err)
   }
-});
 
+  // If neither token is valid
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
+
+  throw new ApiError(401, "Session expired. Please log in again.");
+});
