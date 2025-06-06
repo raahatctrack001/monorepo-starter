@@ -153,8 +153,7 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response, next:
     }
 });
 
-export const updatePassword = asyncHandler(async (req, res, next)=>{
-    
+export const updatePassword = asyncHandler(async (req: Request, res: Response, next: NextFunction)=>{    
     try {        
         console.log(req.params)
         console.log(req.body)
@@ -186,7 +185,7 @@ export const updatePassword = asyncHandler(async (req, res, next)=>{
             throw new ApiError(404, "old password is wrong")
         }
 
-        if(!bcrypt.compare(newPassword, currentUser?.password)){
+        if(!await bcrypt.compare(newPassword, currentUser?.password)){
             throw new ApiError(406, "Old and new password can't be same!")
         }
 
@@ -204,17 +203,174 @@ export const updatePassword = asyncHandler(async (req, res, next)=>{
     }
 })
 
-
 export const forgotPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     console.log("Update Password")
 })
-export const resetPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    console.log("Update Password")
-})
+
 export const verifyResetPasswordToken = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     console.log("Update Password")
 })
+
+export const resetPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    console.log("Update Password")
+})
+
 export const deleteUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     console.log("Update Password")
 })
 
+export const verifyEmailOTP = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Email OTP verified." });
+});
+
+export const resendEmailOTP = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Email OTP resent." });
+});
+
+export const sendPhoneVerificationOTP = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Phone verification OTP sent." });
+});
+
+export const verifyPhoneOTP = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Phone OTP verified." });
+});
+
+export const checkUsernameAvailability = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ available: true });
+});
+
+export const loginWithEmailAndPassword = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Login successful." });
+});
+
+export const loginWithPhoneAndOTP = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Phone login successful." });
+});
+
+export const loginWithSocialProvider = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Social login successful." });
+});
+
+export const loginWithBiometricOrPasskey = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Biometric/Passkey login successful." });
+});
+
+export const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ token: "newAccessToken" });
+});
+
+export const logout = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Logged out successfully." });
+});
+
+export const sendPasswordResetEmail = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Password reset email sent." });
+});
+
+export const sendPhonePasswordResetOTP = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Phone password reset OTP sent." });
+});
+
+export const verifyPhonePasswordResetOTP = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Phone password reset OTP verified." });
+});
+
+export const getActiveSessions = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ sessions: [] });
+});
+
+export const terminateSession = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Session terminated." });
+});
+
+export const terminateAllSessions = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "All sessions terminated." });
+});
+
+export const enableTwoFactorAuth = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "2FA enabled." });
+});
+
+export const disableTwoFactorAuth = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "2FA disabled." });
+});
+
+export const verifyTwoFactorAuthCode = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "2FA code verified." });
+});
+
+export const generateBackupCodes = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ codes: ["code1", "code2"] });
+});
+
+export const authorizeNewDevice = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Device authorized." });
+});
+
+export const getAuthorizedDevices = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ devices: [] });
+});
+
+export const revokeDeviceAccess = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Device access revoked." });
+});
+
+export const generateAPIKey = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ apiKey: "generatedKey" });
+});
+
+export const revokeAPIKey = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "API key revoked." });
+});
+
+export const listAPIKeys = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ keys: [] });
+});
+
+export const deactivateAccount = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Account deactivated." });
+});
+
+export const reactivateAccount = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Account reactivated." });
+});
+
+export const deleteAccountPermanently = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Account permanently deleted." });
+});
+
+export const verifyCurrentPassword = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Current password verified." });
+});
+
+export const getAccountSecuritySettings = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ settings: {} });
+});
+
+export const updateAccountSecuritySettings = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Security settings updated." });
+});
+
+export const linkSocialAccount = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Social account linked." });
+});
+
+export const unlinkSocialAccount = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Social account unlinked." });
+});
+
+export const sendConsentUpdateNotification = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Consent update notification sent." });
+});
+
+export const recordUserConsent = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "User consent recorded." });
+});
+
+export const verifyIdentityDocument = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Identity document verified." });
+});
+
+export const requestBiometricLoginSetup = asyncHandler(async (req: Request, res: Response) => {
+  res.status(200).json({ message: "Biometric login setup requested." });
+});

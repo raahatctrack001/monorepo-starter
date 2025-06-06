@@ -37,4 +37,5 @@ app.use((err: ApiError, req: Request, res: Response, next: NextFunction)=>{
             new ApiResponse(err.statusCode || 400, err.message || "something went wrong", err)
         );
     })
+
 export default app;
