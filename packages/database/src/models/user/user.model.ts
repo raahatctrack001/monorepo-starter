@@ -27,6 +27,8 @@ export interface IUser extends Document {
   lastLogin: Date;
   loginCount: number;
   loginDetail: { loginTimestamp: Date; device: string }[];
+  lastLogout: Date;
+  logoutDetail: { logoutTimestamp: Date; device: string }[];
   badges?: string[];
   followers?: Types.ObjectId[];
   followings?: Types.ObjectId[];
@@ -41,7 +43,6 @@ export interface IUser extends Document {
   liveStreamHosted?: Types.ObjectId[];
   eventsParticipated?: Types.ObjectId[];
   vrRoomsJoined?: Types.ObjectId[];
-  otpCodes?: number[];
   deviceTokens?: string[];
   reportedContentCount?: number;
   reportedCount?: { type: string; contentId: Types.ObjectId }[];
@@ -66,7 +67,7 @@ export interface IUser extends Document {
   vrAvatarConfig?: Record<string, unknown>;
   gamingStats?: Record<string, unknown>;
   deletedAt?: Date;
-  accessToken?: String,
+  otpStore?: Types.ObjectId[],
   refreshToken?: String,
   otp?: String,
   createdAt: Date;
@@ -107,6 +108,13 @@ const UserSchema = new Schema<IUser>(
         device: String,
       },
     ],
+    lastLogout: {type: Date, default: Date.now},
+    logoutDetail: [
+      {
+        logoutTimestamp: Date,
+        device: String,
+      },
+    ],
     badges: [String],
     followers: [{ type: Schema.Types.ObjectId, ref: 'Follow' }],
     followings: [{ type: Schema.Types.ObjectId, ref: 'Follow' }],
@@ -121,7 +129,6 @@ const UserSchema = new Schema<IUser>(
     liveStreamHosted: [{ type: Schema.Types.ObjectId, ref: 'Livestream' }],
     eventsParticipated: [{ type: Schema.Types.ObjectId, ref: 'Event' }],
     vrRoomsJoined: [{ type: Schema.Types.ObjectId, ref: 'VRRoom' }],
-    otpCodes: [Number],
     deviceTokens: [String],
     reportedContentCount: { type: Number, default: 0 },
     reportedCount: [
@@ -155,7 +162,7 @@ const UserSchema = new Schema<IUser>(
     vrAvatarConfig: { type: Schema.Types.Mixed },
     gamingStats: { type: Schema.Types.Mixed },
     deletedAt: Date,
-    accessToken: {  type: String, default: "", select: false  },
+    otpStore: [{ type: Schema.Types.ObjectId, ref: 'Otp' }],
     refreshToken: { type: String, default: "", select: false  },
     otp: {  type: String, select: false  }
   },

@@ -24,8 +24,11 @@ app
     })
 
 import authRouter from './routes/auth.route';
+import OtpRouter from './routes/otp.route';
 
-app.use('/api/v1/auth', authRouter);
+app
+    .use('/api/v1/auth', authRouter)
+    .use('/api/v1/otp', OtpRouter)
 
 app.use((err: ApiError, req: Request, res: Response, next: NextFunction)=>{
         res
@@ -34,4 +37,5 @@ app.use((err: ApiError, req: Request, res: Response, next: NextFunction)=>{
             new ApiResponse(err.statusCode || 400, err.message || "something went wrong", err)
         );
     })
+
 export default app;
