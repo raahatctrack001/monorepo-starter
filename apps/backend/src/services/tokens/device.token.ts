@@ -1,17 +1,23 @@
-export default async function generateDeviceToken() {
-  const userAgent = navigator.userAgent;
-//   const platform = navigator.platform;
-  const resolution = `${window.screen.width}x${window.screen.height}`;
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const language = navigator.language;
+import ApiError from "../../utils/apiError";
+
+interface DeviceInfo {
+  userAgent: string,
+  language: string,
+  resolution: string,
+  timezone: string,
+}
+export default async function generateDeviceToken(deviceInfo: DeviceInfo) {
+  const { userAgent, resolution, timezone, language } = deviceInfo;
 
   const rawData = `${userAgent}-${resolution}-${timezone}-${language}`;
-  
-  // Simple SHA-256 hash using Web Crypto API
-  return crypto.subtle.digest("SHA-256", new TextEncoder().encode(rawData))
-    .then(buffer => {
-      return Array.from(new Uint8Array(buffer))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-    });
+  const encodedData = new TextEncoder().encode(rawData);
+  console.log(rawData, encodedData)
+  try {
+    const buffer = await crypto.subtle.digest("SHA-256", encodedData);
+    const hashArray = Array.from(new Uint8Array(buffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+  } catch (error) {
+    throw new ApiError(400, "Failed to create device token");
+  }
 }

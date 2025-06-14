@@ -1,11 +1,19 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import  bcrypt  from 'bcrypt';
-import jwt from "jsonwebtoken";
-import crypto from "crypto";
-//schema = mongoose.schema
-//Types = mongoose.schema.Types.ObjectId
+
+export interface IDevice {
+    type: "Mobile" | "Desktop" | "Tablet",
+    os: string,
+    browser: string,
+    resolution: string,
+    language: string,
+    timezone: string,
+    useragent: string,
+    token: string,
+    // platform: string,
+  }
 
 export interface IUser extends Document {
+  //basic details
   fullName: string;
   username: string;
   email: string;
@@ -16,26 +24,24 @@ export interface IUser extends Document {
   bio?: string[];
   audioBio?: string[];
   videoIntro?: string[];
-  location?: string;
-  website?: { name: string; desc: string; url: string }[];
   gender?: 'male' | 'female' | 'other';
   birthday?: Date;
+  themePreference: 'light' | 'dark' | 'system';
+  website?: { name: string; desc: string; url: string }[];
+
+  //device details
+  location?: {country: string, state: string, city: string}[];
   status: 'active' | 'banned' | 'deleted';
   role: 'User' | 'Moderator' | 'Admin';
-  themePreference: 'light' | 'dark' | 'system';
   language?: string;
-  device: {
-    type: "Mobile" | "Desktop" | "Tablet",
-    os: string,
-    browser: string,
-    // platform: string,
-    token: string,
-  }[],
+  device: IDevice[],
   lastLogin: Date;
   loginCount: number;
-  loginDetail: { loginTimestamp: Date; device: string }[];
+  loginDetail: { loginTimestamp: Date; deviceToken: string }[];
   lastLogout: Date;
-  logoutDetail: { logoutTimestamp: Date; device: string }[];
+  logoutDetail: { logoutTimestamp: Date; deviceToken: string }[];
+
+  //interaction details
   badges?: string[];
   followers?: Types.ObjectId[];
   followings?: Types.ObjectId[];
@@ -58,11 +64,6 @@ export interface IUser extends Document {
   searchHistory?: Types.ObjectId[];
   recentHistory?: Types.ObjectId[];
   feedbackGiven?: Types.ObjectId[];
-  emailVerified?: boolean;
-  phoneVerified?: boolean;
-  twoFactorEnabled?: boolean;
-  premiumStatus?: 'none' | 'gold' | 'platinum';
-  premiumExpiresAt?: Date;
   postsCount?: number;
   postsCreated?: Types.ObjectId[];
   commentsCount?: number;
@@ -71,28 +72,57 @@ export interface IUser extends Document {
   likesReceived?: number;
   preferences?: { categories: string }[];
   vrAvatarConfig?: Record<string, unknown>;
+
+  //verification details;
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+  twoFactorEnabled?: boolean;
+  premiumStatus?: 'none' | 'gold' | 'platinum';
+  premiumExpiresAt?: Date;
   gamingStats?: Record<string, unknown>;
   deletedAt?: Date;
   otpStore?: Types.ObjectId[],
-  refreshToken?: String,
   otp?: String,
+  refreshToken?: String,
+  resetPasswordToken?: String,
   createdAt: Date;
   updatedAt: Date;
 }
+
+
+const deviceSchema = new mongoose.Schema({
+  type: String,
+  os: String,
+  useragent: String,
+  language: String,
+  timezone: String,
+  resolution: String,
+  browser: String,
+  token: String,
+}, { _id: false }); // if you don't want an _id for each device entry
+
 
 const UserSchema = new Schema<IUser>(
   {
     fullName: { type: String, required: true },
     username: { type: String, unique: true, required: true },
-    email: { type: String, unique: true, required: true },
     password: { type: String, required: true, select: false },
+    email: { type: String, unique: true, required: true },
+    emailVerified: { type: Boolean, default: false },
     phoneNumber: String,
+    phoneVerified: { type: Boolean, default: false },
     avatar: [String],
     coverPhoto: [String],
     bio: [String],
     audioBio: [String],
     videoIntro: [String],
-    location: String,
+    location: [
+      {
+        country: String,
+        state: String,
+        city: String,
+      }
+    ],
     website: [
       {
         name: String,
@@ -106,30 +136,24 @@ const UserSchema = new Schema<IUser>(
     role: { type: String, enum: ['User', 'Moderator', 'Admin'], default: 'User' },
     themePreference: { type: String, enum: ['light', 'dark', 'system'], default: 'system' },
     language: String,
-    device: [
-      {
-        type: String, 
-        os: String,
-        browser: String,
-        // platform: String,
-        token: String,
-      }
-    ],
+    device: [deviceSchema],
     lastLogin: Date,
     loginCount: { type: Number, default: 0 },
     loginDetail: [
       {
         loginTimestamp: Date,
-        device: String,
+        deviceToken: String,
       },
     ],
     lastLogout: {type: Date, default: Date.now},
     logoutDetail: [
       {
         logoutTimestamp: Date,
-        device: String,
+        deviceToken: String,
       },
     ],
+
+
     badges: [String],
     followers: [{ type: Schema.Types.ObjectId, ref: 'Follow' }],
     followings: [{ type: Schema.Types.ObjectId, ref: 'Follow' }],
@@ -158,8 +182,7 @@ const UserSchema = new Schema<IUser>(
     searchHistory: [{ type: Schema.Types.ObjectId, ref: 'SearchHistory' }],
     recentHistory: [{ type: Schema.Types.ObjectId, ref: 'RecentHistory' }],
     feedbackGiven: [{ type: Schema.Types.ObjectId, ref: 'Feedback' }],
-    emailVerified: { type: Boolean, default: false },
-    phoneVerified: { type: Boolean, default: false },
+    
     twoFactorEnabled: { type: Boolean, default: false },
     premiumStatus: { type: String, enum: ['none', 'gold', 'platinum'], default: 'none' },
     premiumExpiresAt: Date,
@@ -179,60 +202,12 @@ const UserSchema = new Schema<IUser>(
     deletedAt: Date,
     otpStore: [{ type: Schema.Types.ObjectId, ref: 'Otp' }],
     refreshToken: { type: String, default: "", select: false  },
+    resetPasswordToken: {type: String, default: "", select: false},
     otp: {  type: String, select: false  }
   },
   { timestamps: true }
 );
 
-UserSchema.methods.isPasswordCorrect = function(password: string){
-    return bcrypt.compare(password, this.password)
-}
-
-// UserSchema.methods.generateAccessToken = function(){
-//     return jwt.sign(
-//         {
-//             _id: this._id,
-//             email: this.email,
-//             username: this.username,
-//             fullName: this.fullName,
-//         },
-//         process.env.ACCESS_TOKEN_SECRET!,
-//         {
-//             expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
-//         }
-//     )
-// }
-// UserSchema.methods.generateRefreshToken = function(){
-//     return jwt.sign(
-//         {
-//             _id: this._id,
-//             username: this.username,
-//             fullName: this.fullName,
-            
-//         },
-//         process.env.REFRESH_TOKEN_SECRET,
-//         {
-//             expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
-//         }
-//     )
-// }
-
-// Generate password reset token
-
-UserSchema.methods.generateResetPasswordToken = function () {
-    // Gernerate token
-    const resetToken = crypto.randomBytes(32).toString("hex");
-  
-    // Hash and set to resetPasswordToken field
-    this.resetPasswordToken = crypto
-      .createHash("sha256")
-      .update(resetToken)
-      .digest("hex");
-  
-    // Set token expire time
-    this.resetPasswordTokenExpiry = Date.now() + 30 * 60 * 1000;  
-    return resetToken;
-  };
   
 const User = mongoose.model<IUser>('User', UserSchema);
 export default User;

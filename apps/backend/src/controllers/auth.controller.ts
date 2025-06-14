@@ -7,6 +7,7 @@ import ApiResponse from "../utils/apiResponse";
 import bcrypt from "bcrypt";
 import { User } from "@repo/database";
 import { generateAccessAndRefreshToken, options } from "../services/tokens/login.token";
+import generateDeviceToken from "../services/tokens/device.token";
 
 export const registerUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {  
         try {
@@ -73,32 +74,42 @@ export const registerUser = asyncHandler(async (req: Request, res: Response, nex
 })
 
 export const loginUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { userEmail, password, device } = req.body;
-        if(!userEmail.trim()){
-            throw new ApiError(404, "username or email is required!")
-        }
+    try {      
+    
+      const { userEmail, password, device } = req.body;
+      if([userEmail, password].some(field=>field?.trim() ? 0 : 1)){
+        throw new ApiError(404, "All fields are necessary!")
+      }
+      
+      if(!userEmail?.trim()){
+        throw new ApiError(404, "username or email is required!")
+      }
+      
+      if(!password?.trim()){
+        throw new ApiError(404, "Password is missing!")
+      }
+      const query = userEmail.includes('@') ? { email: userEmail } : { username: userEmail };
+      
+      const user = await User.findOne(query).select("+password");
+      if(!user){
+        throw new ApiError(404, "User with this credentials does not exist!")
+      }        
+      
+      const isPasswordMatching = await bcrypt.compare(password, user?.password);
+      if(!isPasswordMatching){
+          throw new ApiError(404, "Authorization Failed due to credential's mismatch!")
+      }
+      
+      const tokens = await generateAccessAndRefreshToken(user?._id as string);
+      const { accessToken, refreshToken } = tokens;
+      const { token } = device[0];
 
-        if(!password.trim()){
-            throw new ApiError(404, "Password is missing!")
-        }
-        const query = userEmail.includes('@') ? { email: userEmail } : { username: userEmail };
+      const { device: deviceData} = user;
+      const isNewDevice = !deviceData.some(data=>data.token === token)
 
-        const user = await User.findOne(query).select("+password");
-        if(!user){
-            throw new ApiError(404, "User with this credentials does not exist!")
-        }
-        
-        const isPasswordMatching = await bcrypt.compare(password, user?.password);
-        if(!isPasswordMatching){
-            throw new ApiError(404, "Authorization Failed due to credential's mismatch!")
-        }
-        
-        const tokens = await generateAccessAndRefreshToken(user?._id as string);
-        const { accessToken, refreshToken } = tokens;
-
-        const { loginCount: lc } = user;
-        const updateUser = await User.findByIdAndUpdate(user?._id, {
+      const { loginCount: lc } = user; 
+      const updateUser = isNewDevice ? 
+        await User.findByIdAndUpdate(user?._id, {
             $set: {
                 lastLogin: new Date(),
                 loginCount: lc+1,
@@ -106,16 +117,29 @@ export const loginUser = asyncHandler(async (req: Request, res: Response, next: 
             $push: {
                 loginDetail: {
                     loginTimestamp: new Date(),   
-                    device
-                }
+                    deviceToken: token
+                },
+                device: device[0],
+            }
+        }, { new: true }) :
+        await User.findByIdAndUpdate(user?._id, {
+            $set: {
+                lastLogin: new Date(),
+                loginCount: lc+1,
+            }, 
+            $push: {
+                loginDetail: {
+                    loginTimestamp: new Date(),   
+                    deviceToken: token
+                },
+                device: device[0],
             }
         }, { new: true })
-        return res
-                .status(200)
-                .cookie('accessToken', accessToken, options)
-                .cookie('refreshToken', refreshToken, options)
-                .json(new ApiResponse(200, "User Logged In!", updateUser));        
-
+      return res
+              .status(200)
+              .cookie('accessToken', accessToken, options)
+              .cookie('refreshToken', refreshToken, options)
+              .json(new ApiResponse(200, "User Logged In!", updateUser));        
     } catch (error) {
         next(error)
     }

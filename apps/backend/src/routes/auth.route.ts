@@ -60,7 +60,7 @@ const isAdmin = ()=>{
 }
 
 router.route("/register").post(upload.none(), registerLimiter, registerUser);
-router.route("/login").post(upload.none(), loginLimiter, loginUser);
+router.route("/login").post(upload.none(), loginLimiter,  loginUser);
 router.route("/logout").post(upload.none(), isUserLoggedIn, logoutUser);
 
 router.route("/update-password/:userId").patch(upload.none(), isUserLoggedIn,  updatePassword);
