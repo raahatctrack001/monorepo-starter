@@ -21,9 +21,16 @@ export interface IUser extends Document {
   gender?: 'male' | 'female' | 'other';
   birthday?: Date;
   status: 'active' | 'banned' | 'deleted';
-  roles: 'User' | 'Moderator' | 'Admin';
+  role: 'User' | 'Moderator' | 'Admin';
   themePreference: 'light' | 'dark' | 'system';
   language?: string;
+  device: {
+    type: "Mobile" | "Desktop" | "Tablet",
+    os: string,
+    browser: string,
+    // platform: string,
+    token: string,
+  }[],
   lastLogin: Date;
   loginCount: number;
   loginDetail: { loginTimestamp: Date; device: string }[];
@@ -43,7 +50,6 @@ export interface IUser extends Document {
   liveStreamHosted?: Types.ObjectId[];
   eventsParticipated?: Types.ObjectId[];
   vrRoomsJoined?: Types.ObjectId[];
-  deviceTokens?: string[];
   reportedContentCount?: number;
   reportedCount?: { type: string; contentId: Types.ObjectId }[];
   paymentHistory?: Types.ObjectId[];
@@ -97,9 +103,18 @@ const UserSchema = new Schema<IUser>(
     gender: { type: String, enum: ['male', 'female', 'other'] },
     birthday: Date,
     status: { type: String, enum: ['active', 'banned', 'deleted'], default: 'active' },
-    roles: { type: String, enum: ['User', 'Moderator', 'Admin'], default: 'User' },
+    role: { type: String, enum: ['User', 'Moderator', 'Admin'], default: 'User' },
     themePreference: { type: String, enum: ['light', 'dark', 'system'], default: 'system' },
     language: String,
+    device: [
+      {
+        type: String, 
+        os: String,
+        browser: String,
+        // platform: String,
+        token: String,
+      }
+    ],
     lastLogin: Date,
     loginCount: { type: Number, default: 0 },
     loginDetail: [
@@ -129,7 +144,7 @@ const UserSchema = new Schema<IUser>(
     liveStreamHosted: [{ type: Schema.Types.ObjectId, ref: 'Livestream' }],
     eventsParticipated: [{ type: Schema.Types.ObjectId, ref: 'Event' }],
     vrRoomsJoined: [{ type: Schema.Types.ObjectId, ref: 'VRRoom' }],
-    deviceTokens: [String],
+    // deviceTokens: [String],/
     reportedContentCount: { type: Number, default: 0 },
     reportedCount: [
       {
