@@ -7,11 +7,22 @@ interface UserPayload extends JwtPayload {
   username: string;
 }
 
+interface DevicePayload {
+  userAgent: string;
+  ip: string;
+  details: {
+    os: string;
+    browser: string;
+    platform: string;
+  };
+  isKnownDevice: boolean;
+}
 
 declare global {
   namespace Express {
     interface Request {
       user?: UserPayload & JwtPayload;
+      device?: DevicePayload;
     }
   }
 }
