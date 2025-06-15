@@ -13,7 +13,7 @@ export const authApi = {
   loginWithOTP: () => withPrefix('/login-otp'),
   loginWithSocial: () => withPrefix('/login-social'),
   loginWithBiometric: () => withPrefix('/login-biometric'),
-
+  
   // Logout & Sessions
   logoutUser: () => withPrefix('/logout'),
   refreshToken: () => withPrefix('/refresh-token'),
