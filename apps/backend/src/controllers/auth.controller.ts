@@ -7,36 +7,57 @@ import ApiResponse from "../utils/apiResponse";
 import bcrypt from "bcrypt";
 import { User } from "@repo/database";
 import { generateAccessAndRefreshToken, options } from "../services/tokens/login.token";
-import generateDeviceToken from "../services/tokens/device.token";
+import { validateData } from "../utils/zod.validator";
+import { emptyDeviceData } from "../utils/constants";
+import { generatePasswordResetToken } from "../services/tokens/resetPassword.token";
+import { resetPasswordHTML } from "../services/email/email-template/reset.password";
+import { sendEmail } from "../services/email/email.service";
+
 
 export const registerUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {  
         try {
-            console.log("inside register controller")
+            console.log("inside register controller", req.body);
+            
             //check if no fields are empty
             const { email, password: Password, repeatPassword, username, fullName, device } = req.body;
             if([email, Password, repeatPassword, username, fullName].some(field=>field?.trim()?0:1)){
                 throw new ApiError(404, "All fields are necessary!");
             }
             
+            let deviceInfo = device || [emptyDeviceData];            
+            /****
+             * 
+             * 
+             * 
+             * 
+             * check if user with this email or username already exist?
+             * 
+             * 
+             * 
+             * 
+             */
+            
             //check if password and repeat password is matching
             if(Password !== repeatPassword){
                 console.log("password didn't matched")
                 throw new ApiError(409, "Password didn't matched")
             }
+            await validateData(registerUserSchema, {email, username, password: Password, repeatPassword, fullName});
             
             //validate user data with zod schema
-            const result = registerUserSchema.safeParse({ email, username, fullName, password: Password, repeatPassword });
-            if (!result.success) {
-                const errors = (result.error as ZodError).errors.map((err: ZodIssue) => ({
-                    path: err.path.join("."),  // e.g. "email"
-                    message: err.message       // e.g. "Invalid email format"
-                }));
+            // const result = registerUserSchema.safeParse({ email, username, fullName, password: Password, repeatPassword });
+            // if (!result.success) {
+            //     const errors = (result.error as ZodError).errors.map((err: ZodIssue) => ({
+            //         path: err.path.join("."),  // e.g. "email"
+            //         message: err.message       // e.g. "Invalid email format"
+            //     }));
     
-                throw new ApiError(403, "Error while validating data", errors);
-            }    
+            //     throw new ApiError(403, "Error while validating data", errors);
+            // }    
             
             //hash password before putting into database then create user
             const hashedPassword =  await bcrypt.hash(Password, 10);
+            const { token } = deviceInfo[0];
             const newUser = await User.create({
                  username,
                  password: hashedPassword,
@@ -46,8 +67,9 @@ export const registerUser = asyncHandler(async (req: Request, res: Response, nex
                  loginCount: 1,
                  loginDetail: [{ 
                      loginTimestamp: new Date(),   
-                     device 
-                 }]
+                     deviceToken: token 
+                 }],
+                 device: deviceInfo[0]
              });
 
     
@@ -58,8 +80,7 @@ export const registerUser = asyncHandler(async (req: Request, res: Response, nex
             const { accessToken, refreshToken } = await generateAccessAndRefreshToken(newUser._id as string);
             if(!(accessToken && refreshToken)){
                 throw new ApiError(500, "Failed to generate access and refresh token!");
-            }
-            
+            }            
 
             //set cookies and send required data
             newUser.password = "";
@@ -80,14 +101,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response, next: 
       if([userEmail, password].some(field=>field?.trim() ? 0 : 1)){
         throw new ApiError(404, "All fields are necessary!")
       }
-      
-      if(!userEmail?.trim()){
-        throw new ApiError(404, "username or email is required!")
-      }
-      
-      if(!password?.trim()){
-        throw new ApiError(404, "Password is missing!")
-      }
+
       const query = userEmail.includes('@') ? { email: userEmail } : { username: userEmail };
       
       const user = await User.findOne(query).select("+password");
@@ -102,7 +116,9 @@ export const loginUser = asyncHandler(async (req: Request, res: Response, next: 
       
       const tokens = await generateAccessAndRefreshToken(user?._id as string);
       const { accessToken, refreshToken } = tokens;
-      const { token } = device[0];
+      let deviceInfo = device || [emptyDeviceData];
+      
+      const { token } = deviceInfo[0];
 
       const { device: deviceData} = user;
       const isNewDevice = !deviceData.some(data=>data.token === token)
@@ -119,7 +135,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response, next: 
                     loginTimestamp: new Date(),   
                     deviceToken: token
                 },
-                device: device[0],
+                device: deviceInfo[0],
             }
         }, { new: true }) :
         await User.findByIdAndUpdate(user?._id, {
@@ -132,7 +148,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response, next: 
                     loginTimestamp: new Date(),   
                     deviceToken: token
                 },
-                device: device[0],
+                device: deviceInfo[0],
             }
         }, { new: true })
       return res
@@ -149,6 +165,8 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response, next:
     try {
         // Clear the user's refresh token in the database
         const { device } = req.body;
+        let deviceInfo = device || [emptyDeviceData]
+        const { token } = deviceInfo;
         const currentUser = await User.findByIdAndUpdate(req.user?._id, {
             $set: {
                 refreshToken: null,
@@ -157,7 +175,7 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response, next:
             $push: {
                 logoutDetail: {
                     logoutTimestamp: new Date(),
-                    device,
+                    deviceToken: token || "",
                 }
             }
         }, { new: true})
@@ -179,8 +197,8 @@ export const logoutUser = asyncHandler(async (req: Request, res: Response, next:
 
 export const updatePassword = asyncHandler(async (req: Request, res: Response, next: NextFunction)=>{    
     try {        
+        console.log(req.user);
         console.log(req.params)
-        console.log(req.body)
         if(req.user?._id !== req.params?.userId){
             throw new ApiError(401, "Unauthorized attempt!")
         }
@@ -190,26 +208,19 @@ export const updatePassword = asyncHandler(async (req: Request, res: Response, n
             throw new ApiError(404, "repeat password didn't match");
         }
         
-        const result = passwordSchema.safeParse(newPassword);
-        if (!result.success) {
-            const errors = (result.error as ZodError).errors.map((err: ZodIssue) => ({
-                path: err.path.join("."),  // e.g. "email"
-                message: err.message       // e.g. "Invalid email format"
-            }));
-
-            throw new ApiError(403, "Password should contain capital letter, small letter, a digit and one special character, also it should be at least 8 characaters long", errors);
-        }
+        await validateData(passwordSchema, newPassword);
         
         const currentUser = await User.findById(req.params?.userId).select("+password");
         if(!currentUser){
             throw new ApiError(404, "User doesn't exist")
         }
         const isPasswordMatching = await bcrypt.compare(oldPassword, currentUser?.password);
-        if(isPasswordMatching){
-            throw new ApiError(404, "old password is wrong")
+        if(!isPasswordMatching){
+            throw new ApiError(404, "Please enter the correct password")
         }
 
-        if(!await bcrypt.compare(newPassword, currentUser?.password)){
+        const isCurrentAndOldPasswordSame = await bcrypt.compare(newPassword, currentUser?.password)
+        if(isCurrentAndOldPasswordSame){
             throw new ApiError(406, "Old and new password can't be same!")
         }
 
@@ -228,7 +239,35 @@ export const updatePassword = asyncHandler(async (req: Request, res: Response, n
 })
 
 export const forgotPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    console.log("Update Password")
+    const { userEmail } = req.body;    
+    const query = userEmail?.includes('@') ? { email: userEmail } : { username: userEmail };
+    console.log(query);
+    const currentUser = await User.findOne(query).select("+resetPasswordToken");
+    try {
+        if (!currentUser) {
+            throw new ApiError(404, "User doesn't exist");
+        }
+        
+        const resetToken = await generatePasswordResetToken(currentUser?._id as string);
+        const resetPasswordURL = `${process.env.FRONTEND_URL}/token-verification/${resetToken}`;
+        const html = resetPasswordHTML(currentUser?.fullName, resetPasswordURL);
+        // console.log(html);
+        const subject = "Social Media Account Recovery!";
+        const emailStatus = await sendEmail(currentUser?.email, subject, html); // Ensure sendEmail returns a promise
+         
+        if(emailStatus.success){
+            return res.status(200).json(new ApiResponse(200, `reset token has been sent at ${currentUser?.email}, please click on the given link inside to reset password.`, {}))
+        }
+        throw new ApiError(500, "failed to send email!, please again after sometime.")
+    
+    } catch (error) {
+        if (currentUser) { // Ensure currentUser is defined before attempting to reset the token
+            currentUser.resetPasswordToken = undefined;
+            currentUser.resetPasswordTokenExpiry = undefined;
+            await currentUser.save();
+        }
+        next(error);
+    }   
 })
 
 export const verifyResetPasswordToken = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {

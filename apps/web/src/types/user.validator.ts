@@ -55,18 +55,13 @@ export const updateUserSchema = z.object({
   bio: bioSchema,
 });
 
-// export const uniqueIdValidator = (userEmail)=>{
-//     const uniqueId = emailSchema.safeParse(userEmail);
-//     let query = {};
-//     if(uniqueId.success){
-//         query = {
-//             email: uniqueId.data,
-//         }
-//     }
-//     else{
-//         query = {
-//             username: userEmail
-//         }
-//     }
-//     return query;
-// }
+export const deviceSchema = z.object({
+  type: z.string().optional(),
+  os: z.string().optional(),
+  browser: z.string().optional(),
+  resolution: z.string().optional(),
+  language: z.string().optional(),
+  timezeone: z.string().optional(),
+  useragent: z.string().optional(),
+  token: z.string().optional(),
+})

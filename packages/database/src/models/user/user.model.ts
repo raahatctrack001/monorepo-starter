@@ -85,6 +85,7 @@ export interface IUser extends Document {
   otp?: String,
   refreshToken?: String,
   resetPasswordToken?: String,
+  resetPasswordTokenExpiry?: Date,
   createdAt: Date;
   updatedAt: Date;
 }
@@ -202,7 +203,8 @@ const UserSchema = new Schema<IUser>(
     deletedAt: Date,
     otpStore: [{ type: Schema.Types.ObjectId, ref: 'Otp' }],
     refreshToken: { type: String, default: "", select: false  },
-    resetPasswordToken: {type: String, default: "", select: false},
+    resetPasswordToken: { type: String, default: "", select: false },
+    resetPasswordTokenExpiry: { type: Date, select: false },
     otp: {  type: String, select: false  }
   },
   { timestamps: true }

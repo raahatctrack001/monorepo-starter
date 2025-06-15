@@ -9,6 +9,7 @@ import { Input } from '../../../src/components/ui/input';
 import { Button } from '../../../src/components/ui/button';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '../../../src/components/ui/form';
 import { useRouter } from 'next/navigation';
+import { getDeviceInfo } from '@/lib/deviceInfo';
 
 type RegisterUserInput = z.infer<typeof registerUserSchema>;
 
@@ -28,16 +29,17 @@ export default function RegisterForm() {
     const onSubmit = async (data: RegisterUserInput) => {
       console.log('Form submitted:', data);
       // Handle form submission logic here
-    
+      
       try {
-          const formData = new FormData();
-          Object.entries(data).forEach(([key, value]) => {
-            formData.append(key, value);
-          });
-        
+          const deviceInfo = await getDeviceInfo();
+          const newData = { ...data, device: [deviceInfo]};  
+          // console.log(newData);
           const response = await fetch("http://localhost:3010/api/v1/auth/register", {
             method: "POST",
-            body: formData,
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(newData),
           })
           
           console.log(response)
@@ -48,7 +50,7 @@ export default function RegisterForm() {
           }
           
           localStorage.setItem("email", recData?.email);
-          router.push("/email-verification"); 
+          router.push("/register?tab=email-verification"); 
           
       } catch (error) {
         console.log(error)
