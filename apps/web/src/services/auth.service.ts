@@ -1,24 +1,40 @@
-import { getDeviceInfo } from "@/lib/deviceInfo";
+import { authApi } from "@/lib/apiEndPoints/authEndPints";
+import { apiConnector } from "@/lib/axiosConnector";
+import { ApiConnectorParams, ApiResponse } from "@/types/apiConnector.type";
+import { LoginUserSchema, RegisterUserSchema } from "@/types/user.validator";
 
-export const loginUser = async (data: {data: {userEmail: string, password: string}})=>{
-    const deviceInfo = await getDeviceInfo();
-      const newData = { ...data, device: [deviceInfo] };
+export const registerUserService = async (data: RegisterUserSchema) => {
+    const apiData: ApiConnectorParams = {
+      url: authApi.registerUser(),
+      method: "POST",
+      bodyData: data,
+    };
     
-      try {
-        const response = await fetch("http://localhost:3010/api/v1/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(newData),
-        });
+    const response = await apiConnector<ApiResponse>(apiData);
+    const result = response.data;
+  
+    if (!result.success) {
+      throw new Error(result.message || "Registration failed!");
+    }
+  
+    return result;  
+};
+
+export const loginUserService = async (data: LoginUserSchema) => {
+    const apiData: ApiConnectorParams = {
+      url: authApi.loginUser(),
+      method: "POST",
+      bodyData: data,
+    };
     
-        const dataRes = await response.json();
-        if (!response.ok) {
-          throw new Error(dataRes.message || "Network response wasn't good while logging in");
-        }
-        return dataRes;
-      } catch (error) {
-        console.log(error);
-      }
-}
+    const response = await apiConnector<ApiResponse>(apiData);
+    const result = response.data;
+  
+    if (!result.success) {
+      throw new Error(result.message || "Login failed!");
+    }
+  
+    return result;  
+};
+
+

@@ -5,49 +5,44 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { getDeviceInfo } from "@/lib/deviceInfo"
-
-type LoginFormValues = {
-  userEmail: string
-  password: string
-}
+import { LoginUserSchema } from "@/types/user.validator"
+import { useLoginUser } from "@/hooks/auth/useLogin"
+import { useRouter } from "next/navigation"
+import RedAlert from "@/components/common/RedAlert"
 
 export default function LoginForm() {
-  const form = useForm<LoginFormValues>({
+  const form = useForm<LoginUserSchema>({
     defaultValues: {
       userEmail: "",
       password: "",
     },
   })
-
   
+const { loginUser, loading, error } = useLoginUser();
+const router = useRouter();
+const onSubmit = async (data: LoginUserSchema) => {
+  console.log("login form submitted", data)
+  console.log('Form submitted:', data);
 
-const onSubmit = async (data: LoginFormValues) => {
-  const deviceInfo = await getDeviceInfo();
-  const newData = { ...data, device: [deviceInfo] };
+      const deviceInfo = await getDeviceInfo();
 
-  try {
-    const response = await fetch("http://localhost:3010/api/v1/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(newData),
-    });
+      const newData = {...data, device: [deviceInfo]};
+      const result = await loginUser(newData);
+      console.log("login successfull", result)
 
-    const dataRes = await response.json();
-    if (!response.ok) {
-      throw new Error(dataRes.message || "Network response wasn't good while logging in");
-    }
-    console.log(dataRes);
-  } catch (error) {
-    console.log(error);
-  }
+      if(result?.success){
+        console.log(result)
+        localStorage.setItem("user_detail@login", JSON.stringify(result))
+        router.push("/dashboard")
+      }
 }
 
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 border-2 p-2 rounded-xl shadow-md">
+        <h1 className="font-bold text-lg"> Login Form </h1>
+        {error && <RedAlert heading="Login Error" description={error} />}
         <FormField
           control={form.control}
           name="userEmail"

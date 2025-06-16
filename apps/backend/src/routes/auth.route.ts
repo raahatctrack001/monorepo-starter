@@ -65,7 +65,7 @@ router.route("/logout").post(upload.none(), isUserLoggedIn, logoutUser);
 
 router.route("/update-password/:userId").patch(upload.none(), isUserLoggedIn,  updatePassword);
 router.route("/send-reset-password-token").post(upload.none(), forgotPassword); //send reset password token
-router.route("/verify-reset-password-token/:token").post(verifyResetPasswordToken);
+router.route("/verify-reset-password-token/:userId/:token").post(verifyResetPasswordToken);
 router.route("/reset-password/:token").patch(upload.none(), resetPassword);
 router.route("/delete-user").delete(isUserLoggedIn, deleteUser);
 

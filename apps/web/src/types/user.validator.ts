@@ -24,36 +24,17 @@ export const passwordSchema = z.string()
   .regex(/[0-9]/, { message: "Password must contain at least one number" })
   .regex(/[^a-zA-Z0-9]/, { message: "Password must contain at least one special character" });
 
-  export const emailSchema = z.string().email({ message: "Invalid email address" });
+export const emailSchema = z.string().email({ message: "Invalid email address" });
   
-  export const fullNameSchema = z
-  .string()
-  .min(2, { message: "FullName must be at least 2 character long"})
-  .max(40, { message: "FullName must be at most 40 character long"})
+export const fullNameSchema = z
+.string()
+.min(2, { message: "FullName must be at least 2 character long"})
+.max(40, { message: "FullName must be at most 40 character long"})
 
   
-  const bioSchema = z.string()
-    .max(250, 'Bio cannot exceed 250 characters.')
-    .optional();
-
-export const registerUserSchema = z
-  .object({
-    email: emailSchema,
-    fullName: fullNameSchema,
-    username: usernameSchema,
-    password: passwordSchema,
-    repeatPassword: z.string(),
-  })
-  .refine((data) => data.password === data.repeatPassword, {
-    message: "Passwords don't match",
-    path: ["repeatPassword"], // set error on repeatPassword field
-  });
-
-export const updateUserSchema = z.object({
-  username: usernameSchema,
-  fullName: fullNameSchema, 
-  bio: bioSchema,
-});
+export const bioSchema = z.string()
+  .max(250, 'Bio cannot exceed 250 characters.')
+  .optional();
 
 export const deviceSchema = z.object({
   type: z.string().optional(),
@@ -65,3 +46,47 @@ export const deviceSchema = z.object({
   useragent: z.string().optional(),
   token: z.string().optional(),
 })
+
+export const registerUserSchema = z
+  .object({
+    email: emailSchema,
+    fullName: fullNameSchema,
+    username: usernameSchema,
+    password: passwordSchema,
+    repeatPassword: z.string(),
+    device: z.array(deviceSchema).optional(),
+  })
+  .refine((data) => data.password === data.repeatPassword, {
+    message: "Passwords don't match",
+    path: ["repeatPassword"], // set error on repeatPassword field
+  });
+export type RegisterUserSchema = z.infer<typeof registerUserSchema>;
+
+export const loginUserSchema = z.object({
+  userEmail: z.string(),
+  password: z.string(),
+  device: z.array(deviceSchema).optional(),
+})
+export type LoginUserSchema = z.infer<typeof loginUserSchema>;
+
+export const updatePasswordSchema = z
+  .object({
+    oldPassword: z.string(),
+    newPassword: passwordSchema,
+    repeatPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.repeatPassword, {
+    message: "Passwords don't match",
+    path: ["repeatPassword"], // set error on repeatPassword field
+  });
+
+export const resetPasswordSchema = z
+  .object({
+    password: passwordSchema,
+    repeatPassword: z.string(),
+  })
+  .refine((data) => data.password === data.repeatPassword, {
+    message: "Passwords don't match",
+    path: ["repeatPassword"], // set error on repeatPassword field
+  });
+

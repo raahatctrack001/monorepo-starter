@@ -4,13 +4,13 @@ import { useForm } from 'react-hook-form'
 import axios from 'axios'
 import { useState } from 'react'
 import { authApi } from '@/lib/apiEndPoints/authEndPints'
+import { resetPasswordSchema } from '@/types/user.validator'
+import { z } from 'zod'
 
-type ResetPasswordFormValues = {
-  newPassword: string
-  repeatPassword: string
-}
+type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>
 
 export default function ResetPasswordForm() {
+ 
   const {
     register,
     handleSubmit,
@@ -23,7 +23,7 @@ export default function ResetPasswordForm() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const onSubmit = async (data: ResetPasswordFormValues) => {
-    if (data.newPassword !== data.repeatPassword) {
+    if (data.password !== data.repeatPassword) {
       setServerError('New Password and Repeat Password do not match.')
       return
     }
@@ -33,7 +33,7 @@ export default function ResetPasswordForm() {
       setSuccessMessage(null)
 
       const response = await axios.put(authApi.updatePassword(), {
-          newPassword: data.newPassword,
+          newPassword: data.password,
       })
 
       setSuccessMessage('Password updated successfully!')
@@ -58,7 +58,7 @@ export default function ResetPasswordForm() {
         <label className="block mb-1 font-medium">New Password</label>
         <input
           type="password"
-          {...register('newPassword', {
+          {...register('password', {
             required: 'New password is required',
             minLength: {
               value: 6,
@@ -67,8 +67,8 @@ export default function ResetPasswordForm() {
           })}
           className="w-full border p-2 rounded"
         />
-        {errors.newPassword && (
-          <p className="text-red-600 text-sm mt-1">{errors.newPassword.message}</p>
+        {errors.password && (
+          <p className="text-red-600 text-sm mt-1">{errors.password.message}</p>
         )}
       </div>
 

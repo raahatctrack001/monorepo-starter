@@ -4,59 +4,43 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { registerUserSchema }  from '../../../src/types/user.validator';
+import { RegisterUserSchema, registerUserSchema }  from '../../../src/types/user.validator';
 import { Input } from '../../../src/components/ui/input';
 import { Button } from '../../../src/components/ui/button';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '../../../src/components/ui/form';
 import { useRouter } from 'next/navigation';
 import { getDeviceInfo } from '@/lib/deviceInfo';
-
-type RegisterUserInput = z.infer<typeof registerUserSchema>;
+import { useRegisterUser } from '@/hooks/auth/useRegister';
+import RedAlert from '@/components/common/RedAlert';
 
 export default function RegisterForm() {
     const router = useRouter();  
-    const form = useForm<RegisterUserInput>({
+    const form = useForm<RegisterUserSchema>({
       resolver: zodResolver(registerUserSchema),
       defaultValues: {
         email: '',
         fullName: '',
         username: '',
         password: '',
-        repeatPassword: ''
+        repeatPassword: '',
       },
     });
   
-    const onSubmit = async (data: RegisterUserInput) => {
+    const {registerUser, loading, error } = useRegisterUser();
+    const onSubmit = async (data: RegisterUserSchema) => {
       console.log('Form submitted:', data);
-      // Handle form submission logic here
-      
-      try {
-          const deviceInfo = await getDeviceInfo();
-          const newData = { ...data, device: [deviceInfo]};  
-          // console.log(newData);
-          const response = await fetch("http://localhost:3010/api/v1/auth/register", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(newData),
-          })
-          
-          console.log(response)
-          const recData = await response.json(); //recieved data
-          console.log(recData)
-          if(!recData?.success){
-            throw new Error(recData.statusCode||500, recData.message||"Network error");
-          }
-          
-          localStorage.setItem("email", recData?.email);
-          router.push("/register?tab=email-verification"); 
-          
-      } catch (error) {
-        console.log(error)
-      }
-    };
 
+      const deviceInfo = await getDeviceInfo();
+
+      const newData = {...data, device: [deviceInfo]};
+      const result = await registerUser(newData);
+      console.log("registration successfull", result)
+
+      if(result?.success){
+        localStorage.setItem("user_detail@social", JSON.stringify(result))
+        router.push("/homepage")
+      }
+    }
     return (
         <div className='w-full min-h-screen flex justify-center items-center mx-2'>
           <Form {...form} >
@@ -132,7 +116,8 @@ export default function RegisterForm() {
                 )}
                 />
   
-              <Button type="submit" className="w-full">
+              {error && <RedAlert heading='Registration Error' description={error} />}
+              <Button type="submit" className="w-full" disabled={loading}>
                 Register
               </Button>
             </form>

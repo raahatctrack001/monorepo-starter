@@ -1,4 +1,4 @@
-const authConstant = '/api/v1/auth';
+const authConstant = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth`;
 const withPrefix = (path: string) => `${authConstant}${path}`;
 
 export const authApi = {
@@ -27,7 +27,7 @@ export const authApi = {
   resetPassword: () => withPrefix('/reset-password'),
   verifyPasswordOtp: () => withPrefix('/verify-password-otp'),
   sendResetPasswordToken: () => withPrefix('/send-reset-password-token'),
-  verifyResetPasswordToken: (token: string) => withPrefix(`/verify-reset-password-token/${token}`),
+  verifyResetPasswordToken: (userId: string, token: string) => withPrefix(`/verify-reset-password-token/${userId}/${token}`),
   resetPasswordWithToken: (token: string) => withPrefix(`/reset-password/${token}`),
   updatePassword: () => withPrefix('/password'),
   verifyCurrentPassword: () => withPrefix('/verify-password'),

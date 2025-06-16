@@ -199,28 +199,28 @@ export const updatePassword = asyncHandler(async (req: Request, res: Response, n
     try {        
         console.log(req.user);
         console.log(req.params)
-        if(req.user?._id !== req.params?.userId){
+        if (req.user?._id !== req.params?.userId) {
             throw new ApiError(401, "Unauthorized attempt!")
         }
 
         const { oldPassword, newPassword, repeatPassword } = req.body;
-        if(newPassword !== repeatPassword){
+        if (newPassword !== repeatPassword) {
             throw new ApiError(404, "repeat password didn't match");
         }
         
         await validateData(passwordSchema, newPassword);
         
         const currentUser = await User.findById(req.params?.userId).select("+password");
-        if(!currentUser){
+        if (!currentUser) {
             throw new ApiError(404, "User doesn't exist")
         }
         const isPasswordMatching = await bcrypt.compare(oldPassword, currentUser?.password);
-        if(!isPasswordMatching){
+        if (!isPasswordMatching) {
             throw new ApiError(404, "Please enter the correct password")
         }
 
         const isCurrentAndOldPasswordSame = await bcrypt.compare(newPassword, currentUser?.password)
-        if(isCurrentAndOldPasswordSame){
+        if (isCurrentAndOldPasswordSame) {
             throw new ApiError(406, "Old and new password can't be same!")
         }
 
@@ -239,9 +239,17 @@ export const updatePassword = asyncHandler(async (req: Request, res: Response, n
 })
 
 export const forgotPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  //TO DO 
+  /****
+   * 1. Extract username or email from req.body
+   * 2. set query if its username or email
+   * 3. check if user with this credentials exits or not
+   * 4. generate reset password token as set it in user's corresponding field
+   * 5. send email the reset password link
+   * 6. if everything is success then ok else clear resetPasswordToken field and reset passwor token expiry;
+   */
     const { userEmail } = req.body;    
     const query = userEmail?.includes('@') ? { email: userEmail } : { username: userEmail };
-    console.log(query);
     const currentUser = await User.findOne(query).select("+resetPasswordToken");
     try {
         if (!currentUser) {
@@ -255,7 +263,7 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response, n
         const subject = "Social Media Account Recovery!";
         const emailStatus = await sendEmail(currentUser?.email, subject, html); // Ensure sendEmail returns a promise
          
-        if(emailStatus.success){
+        if (emailStatus.success) {
             return res.status(200).json(new ApiResponse(200, `reset token has been sent at ${currentUser?.email}, please click on the given link inside to reset password.`, {}))
         }
         throw new ApiError(500, "failed to send email!, please again after sometime.")
@@ -271,7 +279,32 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response, n
 })
 
 export const verifyResetPasswordToken = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    console.log("Update Password")
+    
+  /**To Do
+   * 1. extract userId and token from req.params;
+   * 2. search in the database whether use with this hashcode exist
+   * 3. if yes send true else send false
+   * 
+   * 
+   */
+  try {
+      console.log(req.params);
+      const { token } = req.params;
+      const user = await User
+          .findOne({
+          resetPasswordToken: token, 
+          resetPasswordTokenExpiry: {$gt: Date.now()}})
+          .select("+resetPasswordToken, +resetPasswordTokenExpirty, +password");
+      if(!user){
+        throw new ApiError(404, "Token expired, resend reset password token email...")
+      }
+      return res.status(200).json(new ApiResponse(200, "token is found", user))
+
+        
+
+    } catch (error) {
+      next(error)
+    }
 })
 
 export const resetPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {

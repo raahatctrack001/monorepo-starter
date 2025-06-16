@@ -4,12 +4,10 @@ import { useForm } from 'react-hook-form'
 import axios from 'axios'
 import { useState } from 'react'
 import { authApi } from '@/lib/apiEndPoints/authEndPints'
+import { updatePasswordSchema } from '@/types/user.validator'
+import { z } from 'zod'
 
-type UpdatePasswordFormValues = {
-  oldPassword: string
-  newPassword: string
-  repeatPassword: string
-}
+type UpdatePasswordInput = z.infer<typeof updatePasswordSchema>;
 
 export default function UpdatePasswordForm() {
   const {
@@ -18,12 +16,12 @@ export default function UpdatePasswordForm() {
     watch,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<UpdatePasswordFormValues>()
+  } = useForm<UpdatePasswordInput>()
 
   const [serverError, setServerError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
-  const onSubmit = async (data: UpdatePasswordFormValues) => {
+  const onSubmit = async (data: UpdatePasswordInput) => {
     if (data.newPassword !== data.repeatPassword) {
       setServerError('New Password and Repeat Password do not match.')
       return
