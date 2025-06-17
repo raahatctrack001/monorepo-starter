@@ -1,9 +1,7 @@
 'use client'
 
 import { useForm } from 'react-hook-form'
-import axios from 'axios'
 import { useState } from 'react'
-import { authApi } from '@/lib/apiEndPoints/authEndPints'
 import { resetPasswordSchema } from '@/types/user.validator'
 import { z } from 'zod'
 
@@ -23,27 +21,9 @@ export default function ResetPasswordForm() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const onSubmit = async (data: ResetPasswordFormValues) => {
-    if (data.password !== data.repeatPassword) {
-      setServerError('New Password and Repeat Password do not match.')
-      return
-    }
+    console.log("reset password data", data);
 
-    try {
-      setServerError(null)
-      setSuccessMessage(null)
-
-      const response = await axios.put(authApi.updatePassword(), {
-          newPassword: data.password,
-      })
-
-      setSuccessMessage('Password updated successfully!')
-      reset()
-
-    } catch (error: any) {
-      setServerError(
-        error.response?.data?.message || 'Failed to update password.'
-      )
-    }
+    
   }
 
   return (

@@ -1,40 +1,35 @@
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import type { Metadata } from 'next'
+import localFont from 'next/font/local'
+import './globals.css'
+import Providers from './Provider'
 
 const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-});
+  src: './fonts/GeistVF.woff',
+  variable: '--font-geist-sans',
+})
 const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-});
+  src: './fonts/GeistMonoVF.woff',
+  variable: '--font-geist-mono',
+})
 
 export const metadata: Metadata = {
-  title: "Social Media: LaRa",
-  description: "Developed by Captain",
-};
+  title: 'Social Media: LaRa',
+  description: 'Developed by Captain',
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
-         <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-
-          {children}
-        </ThemeProvider>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable}`}
+        suppressHydrationWarning
+      >
+        <Providers>{children}</Providers>
       </body>
     </html>
-  );
+  )
 }

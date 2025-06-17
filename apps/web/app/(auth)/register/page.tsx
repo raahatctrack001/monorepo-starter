@@ -1,18 +1,11 @@
-"use client";
+import { Suspense } from "react";
+import RegisterClientWrapper from "./RegisterClientWrapper";
 
-import { useSearchParams } from "next/navigation";
-import RegisterForm from "../_components/RegisterForm";
-import EmailVerification from "../_components/EmailVerification";
 
-export default function RegisterUser(){
-    const searchParams = useSearchParams();
-    const tab = searchParams.get("tab");
-
-    console.log("tab", tab)
-    if(!tab){
-        return <RegisterForm />
-    }
-    return <>
-        { tab === "email-verification" && <EmailVerification />}
-    </>
+export default function RegisterUserPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <RegisterClientWrapper />
+    </Suspense>
+  );
 }

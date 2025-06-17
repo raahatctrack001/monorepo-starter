@@ -9,8 +9,11 @@ import { LoginUserSchema } from "@/types/user.validator"
 import { useLoginUser } from "@/hooks/auth/useLogin"
 import { useRouter } from "next/navigation"
 import RedAlert from "@/components/common/RedAlert"
+import { useAppDispatch } from "@/lib/store/hooks"
+import { signInSuccess } from "@/lib/store/slices/user.slice"
 
 export default function LoginForm() {
+  const dispatch = useAppDispatch();
   const form = useForm<LoginUserSchema>({
     defaultValues: {
       userEmail: "",
@@ -31,9 +34,10 @@ const onSubmit = async (data: LoginUserSchema) => {
       console.log("login successfull", result)
 
       if(result?.success){
+        dispatch(signInSuccess(result.data));
         console.log(result)
         localStorage.setItem("user_detail@login", JSON.stringify(result))
-        router.push("/dashboard")
+        // router.push("/dashboard")
       }
 }
 

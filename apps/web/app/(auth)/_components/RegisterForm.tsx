@@ -3,7 +3,6 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { RegisterUserSchema, registerUserSchema }  from '../../../src/types/user.validator';
 import { Input } from '../../../src/components/ui/input';
 import { Button } from '../../../src/components/ui/button';
