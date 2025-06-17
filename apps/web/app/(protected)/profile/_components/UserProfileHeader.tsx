@@ -4,6 +4,8 @@ import Image from "next/image";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { IUser } from "@/types/user/user.types";
+import { Button } from "@/components/ui/button";
+import { Edit, Settings, ThumbsUp } from "lucide-react";
 
 export const UserProfileHeader = ({ user }: {user: IUser|null}) => {
   return (
@@ -31,9 +33,19 @@ export const UserProfileHeader = ({ user }: {user: IUser|null}) => {
             />
             <AvatarFallback>{user?.fullName.charAt(0)}</AvatarFallback>
         </Avatar>
-        <div className="flex flex-col">
-          <h2 className="text-2xl font-bold">{user?.fullName}</h2>
-          <p className="text-muted-foreground text-sm">@{user?.username}</p>
+        <div className="flex flex-col w-full">
+            <div className="flex items-center w-full justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">{user?.fullName}</h2>
+                  <p className="text-muted-foreground text-sm">@{user?.username}</p>
+                </div>
+
+                <div className="space-x-2">
+                    <Button> <ThumbsUp name="like"/> <span className="hidden sm:inline"> Like </span> </Button>
+                    <Button> <Edit /> <span className="hidden sm:inline"> Edit Profile </span>  </Button>
+                    <Button> <Settings /> <span className="hidden sm:inline"> Settings </span> </Button>
+                </div>
+            </div>
           <div className="flex gap-2 mt-2 flex-wrap">
             {user?.bio?.map((b: string, i: number) => (
               <Badge key={i} variant="secondary">
