@@ -1,17 +1,35 @@
-import { configureStore } from '@reduxjs/toolkit'
+import { configureStore, combineReducers } from '@reduxjs/toolkit'
+import storage from 'redux-persist/lib/storage'
+import { persistReducer, persistStore } from 'redux-persist'
+
 import userReducer from './slices/user.slice'
 import postReducer from './slices/post.slice'
 import reelReducer from './slices/reel.slice'
 import messageReducer from './slices/message.slice'
+import themeReducer from './slices/theme.slice'
 
+// Combine reducers first
+const rootReducer = combineReducers({
+  user: userReducer,
+  post: postReducer,
+  reel: reelReducer,
+  message: messageReducer,
+  theme: themeReducer,
+})
 
+// Redux Persist config
+const persistConfig = {
+  key: 'root',
+  storage,
+  whitelist: ['user', 'reel', 'message'], // persist slices you want — omit post if not needed
+}
+
+// Wrap reducers with persistReducer
+const persistedReducer = persistReducer(persistConfig, rootReducer)
+
+// Create the store
 export const store = configureStore({
-  reducer: {
-    user: userReducer,
-    post: postReducer,
-    reel: reelReducer,
-    message: messageReducer,
-  },
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
@@ -19,7 +37,9 @@ export const store = configureStore({
   devTools: process.env.NEXT_PUBLIC_NODE_ENV !== 'production',
 })
 
-// Infer RootState and AppDispatch types
+// Create persistor instance
+export const persistor = persistStore(store)
 
+// Types
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
