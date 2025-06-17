@@ -12,7 +12,11 @@ export interface IDevice {
     token: string,
     // platform: string,
   }
-
+export interface IWebsite{
+  url: string;
+  name?: string; 
+  desc?: string; 
+}
 export interface IUser {
   _id: string,
   //basic details
@@ -29,7 +33,7 @@ export interface IUser {
   gender?: 'male' | 'female' | 'other';
   birthday?: Date;
   themePreference: 'light' | 'dark' | 'system';
-  website?: { name: string; desc: string; url: string }[];
+  website?: IWebsite[];
 
   //device details
   location?: {country: string, state: string, city: string}[];
