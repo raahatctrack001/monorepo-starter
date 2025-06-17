@@ -2,54 +2,53 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 
 // TypeScript interface
 export interface IConversation extends Document {
-  conversationId?: Types.ObjectId;
-  participants: Types.ObjectId[];
-  isGroup: boolean;
-  groupId?: Types.ObjectId;
-  groupName?: string;
-  groupImage?: string;
-  groupDescription?: string;
-  createdBy: Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
-  lastMessage?: Types.ObjectId;
-  lastMessageAt?: Date;
-  unreadCount?: Record<string, number>;
-  pinnedMessages?: Types.ObjectId[];
-  mutedBy?: Types.ObjectId[];
-  conversationType?: string;
-  inviteCode?: string;
-  messagesCount?: number;
-  attachmentsCount?: number;
-  archivedBy?: Types.ObjectId[];
-  deletedBy?: Types.ObjectId[];
-  blockStatus?: Record<string, boolean>;
-  allowedMessageTypes?: string;
-  lastTypingStatus?: Record<string, Date>;
-  isEncrypted: boolean;
-  encryptionKey?: string;
-  customTheme?: {
-    user: {
-      color: string;
-      bg: string;
-      imageURL: string;
-      fontSize: string;
-    }
-  }[];
-  customNickname?: {
-    user: string;
-  }[];
-  isDeleted: boolean;
-  reportCount: number;
-  activityLogs?: any;
-  scheduledMessages?: string;
-  customOrder?: Record<string, number>;
-}
+    _id: string,
+    participants: Types.ObjectId[];
+    isGroup: boolean;
+    groupId?: Types.ObjectId;
+    groupName?: string;
+    groupImage?: string;
+    groupDescription?: string;
+    createdBy: Types.ObjectId;
+    createdAt: Date;
+    updatedAt: Date;
+    lastMessage?: Types.ObjectId;
+    lastMessageAt?: Date;
+    unreadCount?: Record<string, number>;
+    pinnedMessages?: Types.ObjectId[];
+    mutedBy?: Types.ObjectId[];
+    conversationType?: string;
+    inviteCode?: string;
+    messagesCount?: number;
+    attachmentsCount?: number;
+    archivedBy?: Types.ObjectId[];
+    deletedBy?: Types.ObjectId[];
+    blockStatus?: Record<string, boolean>;
+    allowedMessageTypes?: string;
+    lastTypingStatus?: Record<string, Date>;
+    isEncrypted: boolean;
+    encryptionKey?: string;
+    customTheme?: {
+      user: {
+        color: string;
+        bg: string;
+        imageURL: string;
+        fontSize: string;
+      }
+    }[];
+    customNickname?: {
+      user: string;
+    }[];
+    isDeleted: boolean;
+    reportCount: number;
+    activityLogs?: any;
+    scheduledMessages?: string;
+    customOrder?: Record<string, number>;
+}   
 
-// Mongoose Schema
+//Mongoose Schema
 const ConversationSchema = new Schema<IConversation>(
   {
-    conversationId: { type: Schema.Types.ObjectId, ref: "Conversation" },
     participants: [{ type: Schema.Types.ObjectId, ref: "User" }],
     isGroup: { type: Boolean, required: true, default: false },
     groupId: { type: Schema.Types.ObjectId, ref: "Group" },
