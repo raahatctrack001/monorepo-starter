@@ -30,12 +30,10 @@ export const fullNameSchema = z
 .string()
 .min(2, { message: "FullName must be at least 2 character long"})
 .max(40, { message: "FullName must be at most 40 character long"})
-
   
 export const bioSchema = z.string()
   .max(250, 'Bio cannot exceed 250 characters.')
   .optional();
-
 export const deviceSchema = z.object({
   type: z.string().optional(),
   os: z.string().optional(),
@@ -60,14 +58,12 @@ export const registerUserSchema = z
     message: "Passwords don't match",
     path: ["repeatPassword"], // set error on repeatPassword field
   });
-export type RegisterUserSchema = z.infer<typeof registerUserSchema>;
 
 export const loginUserSchema = z.object({
-  userEmail: z.string(),
-  password: z.string(),
+  userEmail: z.string().min(1, {message: "Username or Email is required"}),
+  password: z.string().min(1, {message: "Password is missing"}),
   device: z.array(deviceSchema).optional(),
 })
-export type LoginUserSchema = z.infer<typeof loginUserSchema>;
 
 export const updatePasswordSchema = z
   .object({
@@ -89,4 +85,14 @@ export const resetPasswordSchema = z
     message: "Passwords don't match",
     path: ["repeatPassword"], // set error on repeatPassword field
   });
-
+  
+export type UsernameSchema = z.infer<typeof usernameSchema>;
+export type Password = z.infer<typeof passwordSchema>;
+export type EmailSchema = z.infer<typeof emailSchema>;
+export type FullNameSchema = z.infer<typeof fullNameSchema>;
+export type BioSchema = z.infer<typeof bioSchema>;
+export type DeviceSchema = z.infer<typeof deviceSchema>;
+export type RegisterUserSchema = z.infer<typeof registerUserSchema>;
+export type LoginUserSchema = z.infer<typeof loginUserSchema>;
+export type UpdatePasswordSchema = z.infer<typeof updatePasswordSchema>
+export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema >

@@ -1,7 +1,6 @@
-import { Schema, model, Document, Types } from "mongoose";
+import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IMessage extends Document {
-  _id: Types.ObjectId;
   conversationId: Types.ObjectId;
   senderId: Types.ObjectId;
   receiverIds: Types.ObjectId[];
@@ -22,20 +21,20 @@ export interface IMessage extends Document {
   forwardedFrom?: Types.ObjectId;
   forwardedFromUser?: Types.ObjectId;
   isDeletedFor?: Types.ObjectId[];
-  isEdited?: boolean;
+  isEdited: boolean;
   editedAt?: Date;
-  isPinned?: boolean;
+  isPinned: boolean;
   reactions?: Record<string, Types.ObjectId[]>;
   scheduledAt?: Date;
-  sentAt?: Date;
+  sentAt: Date;
   deliveredTo?: Types.ObjectId[];
   seenBy?: Types.ObjectId[];
   systemEventType?: string;
   systemEventData?: Record<string, any>;
-  isEncrypted?: boolean;
+  isEncrypted: boolean;
   encryptionKey?: string;
   extraMetadata?: Record<string, any>;
-  deletedByAdmin?: boolean;
+  deletedByAdmin: boolean;
   priorityLevel?: string;
   attachmentsCount?: number;
 }
@@ -47,40 +46,40 @@ const MessageSchema = new Schema<IMessage>(
     receiverIds: [{ type: Schema.Types.ObjectId, ref: "User" }],
     groupId: { type: Schema.Types.ObjectId, ref: "Group" },
     messageType: { type: String, required: true },
-    textContent: String,
+    textContent: { type: String },
     mediaUrl: { type: Schema.Types.ObjectId, ref: "MediaURL" },
-    thumbnailUrl: String,
-    fileName: String,
-    fileSize: Number,
-    contactDetails: Schema.Types.Mixed,
-    location: Schema.Types.Mixed,
+    thumbnailUrl: { type: String },
+    fileName: { type: String },
+    fileSize: { type: Number },
+    contactDetails: { type: Schema.Types.Mixed },
+    location: { type: Schema.Types.Mixed },
     pollDetails: { type: Schema.Types.ObjectId, ref: "Poll" },
-    voiceNoteUrl: String,
-    callLog: Schema.Types.Mixed,
-    eventDetails: Schema.Types.Mixed,
+    voiceNoteUrl: { type: String },
+    callLog: { type: Schema.Types.Mixed },
+    eventDetails: { type: Schema.Types.Mixed },
     replyTo: { type: Schema.Types.ObjectId, ref: "Message" },
     forwardedFrom: { type: Schema.Types.ObjectId, ref: "Message" },
     forwardedFromUser: { type: Schema.Types.ObjectId, ref: "User" },
     isDeletedFor: [{ type: Schema.Types.ObjectId, ref: "User" }],
     isEdited: { type: Boolean, default: false },
-    editedAt: Date,
+    editedAt: { type: Date },
     isPinned: { type: Boolean, default: false },
-    reactions: Schema.Types.Mixed,
-    scheduledAt: Date,
+    reactions: { type: Schema.Types.Mixed },
+    scheduledAt: { type: Date },
     sentAt: { type: Date, default: Date.now },
     deliveredTo: [{ type: Schema.Types.ObjectId, ref: "User" }],
     seenBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    systemEventType: String,
-    systemEventData: Schema.Types.Mixed,
+    systemEventType: { type: String },
+    systemEventData: { type: Schema.Types.Mixed },
     isEncrypted: { type: Boolean, default: false },
-    encryptionKey: String,
-    extraMetadata: Schema.Types.Mixed,
+    encryptionKey: { type: String },
+    extraMetadata: { type: Schema.Types.Mixed },
     deletedByAdmin: { type: Boolean, default: false },
-    priorityLevel: String,
-    attachmentsCount: Number,
+    priorityLevel: { type: String },
+    attachmentsCount: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
 
-const Message = model<IMessage>("Message", MessageSchema);
+const Message = mongoose.model<IMessage>("Message", MessageSchema);
 export default Message;

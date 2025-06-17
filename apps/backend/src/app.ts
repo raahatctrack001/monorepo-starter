@@ -24,11 +24,17 @@ app
     })
 
 import authRouter from './routes/auth.route';
-import OtpRouter from './routes/otp.route';
+import otpRouter from './routes/otp.route';
+import conversationRouter from './routes/communication/conversation.routes';
+import groupRouter from './routes/communication/group.routes';
+import messageRouter from './routes/communication/message.routes';
 
 app
     .use('/api/v1/auth', authRouter)
-    .use('/api/v1/otp', OtpRouter)
+    .use('/api/v1/otp', otpRouter)
+    .use('/api/v1/conversation', conversationRouter)
+    .use('/api/v1/group', groupRouter)
+    .use('/api/v1/message', messageRouter)
 
 app.use((err: ApiError, req: Request, res: Response, next: NextFunction)=>{
         res

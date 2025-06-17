@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import { store, persistor } from '@/lib/store/store'
 import { ThemeProvider } from '@/components/theme-provider'
-import GlobalLayout from '@/components/common/layouts/GlobalLayout'
+import ProtectedRoute from './ProtectedRouter'
 
 type Props = {
   children: React.ReactNode
@@ -20,7 +20,7 @@ export default function Providers({ children }: Props) {
           enableSystem
           disableTransitionOnChange
         >
-          <GlobalLayout>{children}</GlobalLayout>
+          { children }         
         </ThemeProvider>
       </PersistGate>
     </Provider>

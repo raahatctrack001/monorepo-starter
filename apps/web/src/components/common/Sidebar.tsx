@@ -30,10 +30,10 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="h-screen border-r w-64 p-4 flex flex-col justify-between">
+    <aside className="h-screen border-r w-20 md:w-64 p-4 flex flex-col justify-between">
       <div>
-        <h1 className="text-3xl font-bold mb-6 px-2">Social Fusion</h1>
-        <nav className="space-y-2">
+        <h1 className="text-lg md:text-3xl font-bold mb-6 px-2 flex items-start">Social Media</h1>
+        <nav className="space-y-2 flex flex-col items-center md:items-start ">
           {navItems.map(({ label, icon: Icon, href }) => (
             <Link
               key={label}
@@ -44,8 +44,8 @@ export default function Sidebar() {
                   : ""
               }`}
             >
-              <Icon className="w-6 h-6" />
-              <span className="text-base">{label}</span>
+              <Icon className="w-6 h-6" name={label}/>
+              <span className="text-base hidden md:inline">{label}</span>
             </Link>
           ))}
         </nav>

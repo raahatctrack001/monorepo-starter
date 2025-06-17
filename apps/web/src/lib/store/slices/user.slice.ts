@@ -1,75 +1,34 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { IUser, UserSliceStateSchema } from '@/types/user/user.types';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-const initialState = {
+const initialState: UserSliceStateSchema = {
   currentUser: null,
-  error: null,
-  loading: false,
 };
 
 const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    signInStart: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    signInSuccess: (state, action) => {
+    logInSuccess: (state, action: PayloadAction<IUser>) => {
       state.currentUser = action.payload;
-      state.loading = false;
-      state.error = null;
     },
-    signInFailure: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
+    logOutSuccess: (state) => {
+      state.currentUser = null;
     },
-    updateStart: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    updateSuccess: (state, action) => {
+    updateSuccess: (state, action: PayloadAction<IUser>) => {
       state.currentUser = action.payload;
-      state.loading = false;
-      state.error = null;
-      // console.log("state: ", state);
-      // console.log("action: ", action);
-    },
-    updateFailure: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-    deleteUserStart: (state) => {
-      state.loading = true;
-      state.error = null;
     },
     deleteUserSuccess: (state) => {
       state.currentUser = null;
-      state.loading = false;
-      state.error = null;
-    },
-    deleteUserFailure: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-    signoutSuccess: (state) => {
-      state.currentUser = null;
-      state.error = null;
-      state.loading = false;
     },
   },
 });
 
 export const {
-  signInStart,
-  signInSuccess,
-  signInFailure,
-  updateStart,
+  logInSuccess,  
   updateSuccess,
-  updateFailure,
-  deleteUserStart,
   deleteUserSuccess,
-  deleteUserFailure,
-  signoutSuccess,
+  logOutSuccess,
 } = userSlice.actions;
 
 export default userSlice.reducer;

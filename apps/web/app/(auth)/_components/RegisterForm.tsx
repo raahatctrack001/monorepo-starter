@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { getDeviceInfo } from '@/lib/deviceInfo';
 import { useRegisterUser } from '@/hooks/auth/useRegister';
 import RedAlert from '@/components/common/RedAlert';
+import Link from 'next/link';
 
 export default function RegisterForm() {
     const router = useRouter();  
@@ -41,10 +42,19 @@ export default function RegisterForm() {
       }
     }
     return (
-        <div className='w-full min-h-screen flex justify-center items-center mx-2'>
-          <Form {...form} >
-    
-            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-xl space-y-6">
+        <div className='w-full min-h-screen flex flex-col justify-center items-center mx-2'>
+          <div>
+            <div className="text-3xl font-semibold w-full flex flex-col items-center">
+              Social Desk
+            </div>
+            <p className='text-md font-semibold w-full mx-auto grid place-items-center mb-5'> 
+              Register here to interact with people around the globe. 
+            </p>
+          </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-3xl space-y-6 border-2 p-5 rounded-xl shadow-xl">
+            <h1 className="font-bold text-lg"> Registration Form </h1>
+              
               <FormField
                 control={form.control}
                 name="email"
@@ -119,6 +129,9 @@ export default function RegisterForm() {
               <Button type="submit" className="w-full" disabled={loading}>
                 Register
               </Button>
+              <div> Already have an account? 
+                <Link href={'/login'} className='text-blue-700 italic underline underline-offset-8'> login here </Link>
+              </div>
             </form>
           </Form>
       </div>
