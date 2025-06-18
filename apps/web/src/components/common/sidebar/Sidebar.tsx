@@ -13,10 +13,12 @@ import {
   User,
   Menu
 } from "lucide-react";
-import SidebarBottomDropdown from "./SidebarBottomDropdown";
+import SidebarBottomDropdown from "../SidebarBottomDropdown";
+import { useAppSelector } from "@/lib/store/hooks";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { currentUser } = useAppSelector(state=>state.user);
 
   const navItems = [
     { label: "Home", icon: Home, href: "/" },
@@ -26,7 +28,7 @@ export default function Sidebar() {
     { label: "Messages", icon: Send, href: "/messages" },
     { label: "Notifications", icon: Heart, href: "/notifications" },
     { label: "Create", icon: PlusSquare, href: "/create" },
-    { label: "Profile", icon: User, href: "/profile" },
+    { label: "Profile", icon: User, href: `/profile/${currentUser?._id}` },
   ];
 
   return (
@@ -52,17 +54,17 @@ export default function Sidebar() {
       </div>
 
       <div>
-        <Link
-          href="/more"
+        <span
+          
           className={`flex items-center gap-4 px-3 py-2 rounded-xl transition hover:bg-gray-100 dark:hover:bg-gray-800 ${
-            pathname === "/more"
+            pathname === ""
               ? "bg-gray-100 dark:bg-gray-800 font-semibold"
               : ""
           }`}
         >
           <Menu className="w-6 h-6" />
           <SidebarBottomDropdown />
-        </Link>
+        </span>
       </div>
     </aside>
   );

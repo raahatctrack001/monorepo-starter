@@ -40,4 +40,23 @@ export const loginUserService = async (data: LoginUserSchema) => {
     return result;  
 };
 
+export const logoutUserService = async (data: {token: string}) => {
+    const apiData: ApiConnectorParams = {
+      url: authApi.logoutUser(),
+      method: "POST",
+      bodyData: JSON.stringify(data),
+      credentials: "include",
+
+    };
+    
+    const response = await apiConnector<ApiResponse>(apiData);
+    const result = response.data;
+  
+    if (!result.success) {
+      throw new Error(result.message || "Logout failed!");
+    }
+  
+    return result;  
+};
+
 

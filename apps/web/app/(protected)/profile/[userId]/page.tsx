@@ -12,23 +12,23 @@ import GlobalLoader from "@/components/common/GlobalLoader";
 import { IUser } from "@/types/user/user.types";
 import RedAlert from "@/components/common/RedAlert";
 import { userApi } from "@/lib/apiEndPoints/userEndpoints";
+import { set } from "mongoose";
 
 
 export default function UserProfilePage() {
   const { userId } = useParams();
+  const [user, setUser] = useState<IUser | null>(null);
+
   const { getUser, loading, error } = useGetUserProfile();
 
-  const { currentUser: user} = useAppSelector(state=>state.user)
+  // const { currentUser: user} = useAppSelector(state=>state.user)
   useEffect(() => {
     const fetchUser = async () => {
-      const response = await fetch(userApi.getUserProfile(userId as string), {
-        method: "GET",
-        credentials: "include"
-      });
-      const data = await response.json();
-      if (data?.success) {
-        console.log("userprofiledadta", data)
+      const result = await getUser(userId as string)
+      if(result?.success){
+        setUser(result?.data);
       }
+      console.log(result)
     };
 
     fetchUser();
@@ -47,7 +47,7 @@ return (
     loading ? (
       <GlobalLoader heading="Please wait" description="We are fetching data from server." />
     ) : user ? (
-      <div className="flex flex-col gap-6 max-w-5xl mx-auto py-8">
+      <div className="flex flex-col gap-6 max-w-8xl mx-auto py-8">
         <UserProfileHeader user={user} />
         <UserStats user={user} />
         <Card className="shadow-xl border rounded-2xl">
@@ -57,7 +57,7 @@ return (
         </Card>
       </div>
     ) : (
-      <div className="text-center text-muted py-10">No user found.</div>
+      <div className="py-10 w-full h-screen grid place-items-center text-xl md:text-5xl">No user found.</div>
     )
   );
 }

@@ -5,10 +5,12 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { IUser } from "@/types/user/user.types";
 import { Button } from "@/components/ui/button";
-import { Edit, Edit2, EditIcon, Settings, ThumbsUp } from "lucide-react";
+import { Edit, Settings, ThumbsUp } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/lib/store/hooks";
 
 export const UserProfileHeader = ({ user }: {user: IUser|null}) => {
+  const { currentUser } = useAppSelector(state=>state.user);
   const router = useRouter();
   return (
     <div className="relative w-full rounded-2xl overflow-hidden shadow-lg">
@@ -51,9 +53,14 @@ export const UserProfileHeader = ({ user }: {user: IUser|null}) => {
                 </div>
 
                 <div className="space-x-2">
-                    <Button className="cursor-pointer" > <ThumbsUp name="like"/> <span className="hidden sm:inline"> Like </span> </Button>
-                    <Button className="cursor-pointer" onClick={()=>router.push(`/edit-profile/${user?._id}`)} > <Edit /> <span className="hidden sm:inline"> Edit Profile </span>  </Button>
-                    <Button className="cursor-pointer"> <Settings /> <span className="hidden sm:inline"> Settings </span> </Button>
+                    {currentUser?._id !== user?._id && <Button className="cursor-pointer" > <ThumbsUp name="like"/> <span className="hidden sm:inline"> Like </span> </Button>}
+                    {
+                    currentUser?._id === user?._id  && 
+                    <>
+                      <Button className="cursor-pointer" onClick={()=>router.push(`/edit-profile/${user?._id}`)} > <Edit /> <span className="hidden sm:inline"> Edit Profile </span>  </Button>
+                      <Button className="cursor-pointer"> <Settings /> <span className="hidden sm:inline"> Settings </span> </Button>
+                    </>
+                    }
                 </div>
             </div>
           <div className="flex gap-2 mt-2 flex-wrap">

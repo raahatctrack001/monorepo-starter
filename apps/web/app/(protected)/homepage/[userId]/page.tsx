@@ -1,5 +1,5 @@
+import RightSidebar from "@/components/common/sidebar/RightSidebar";
 import MainSection from "../_components/MainSection";
-import RightSection from "../_components/RighttSection";
 
 export default function Page(){
     return <div className="flex justify-around"> 
@@ -7,7 +7,7 @@ export default function Page(){
             <MainSection />
         </div>
         <div className="w-1/4">
-            <RightSection />
+            <RightSidebar />
         </div>
     </div>
 }

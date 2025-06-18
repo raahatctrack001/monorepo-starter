@@ -9,8 +9,36 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu, Settings, BookOpen, Palette, Flag, LogOut, SwitchCamera, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getDeviceInfo } from "@/lib/deviceInfo";
+import { useLogoutUser } from "@/hooks/auth/useLogout";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { logOutSuccess } from "@/lib/store/slices/user.slice";
+import { useRouter } from "next/navigation";
+import GlobalLoader from "./GlobalLoader";
 
 export default function SidebarBottomDropdown() {
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+  const { logoutUser, loading, error } = useLogoutUser();
+  const handleLogout = async () => {
+    try {
+        const { token } = await getDeviceInfo();
+        const result = await logoutUser({token});
+        if(result?.success){
+          dispatch(logOutSuccess());
+          router.push('/login')
+        }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  if(loading){
+    return <GlobalLoader heading="Please Wait..." description="Logout in process!" />
+  }
+
+  
+  
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -55,7 +83,7 @@ export default function SidebarBottomDropdown() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="w-4 h-4 mr-3 text-red-500" />
           <span className="text-red-500">Log Out</span>
         </DropdownMenuItem>

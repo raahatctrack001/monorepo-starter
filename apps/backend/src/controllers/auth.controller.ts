@@ -172,9 +172,8 @@ export const loginUser = asyncHandler(async (req: Request, res: Response, next: 
 export const logoutUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     try {
         // Clear the user's refresh token in the database
-        const { device } = req.body;
-        let deviceInfo = device || [emptyDeviceData]
-        const { token } = deviceInfo;
+        console.log("logoutcontroller", req.body)
+        const { token } = req.body || "";
         const currentUser = await User.findByIdAndUpdate(req.user?._id, {
             $set: {
                 refreshToken: null,
