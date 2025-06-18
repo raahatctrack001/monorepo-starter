@@ -122,6 +122,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response, next: 
 
       const { device: deviceData} = user;
       const isNewDevice = !deviceData.some(data=>data.token === token)
+      //if(isNewDevice) sendWarningEmail with device details
 
       const { loginCount: lc } = user; 
       const updateUser = isNewDevice ? 
@@ -238,7 +239,7 @@ export const updatePassword = asyncHandler(async (req: Request, res: Response, n
     }
 })
 
-export const forgotPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+export const sendPasswordResetEmail = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   //TO DO 
   /****
    * 1. Extract username or email from req.body
@@ -278,7 +279,7 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response, n
     }   
 })
 
-export const verifyResetPasswordToken = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+export const verifyPasswordResetToken = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     
   /**To Do
    * 1. extract userId and token from req.params;
@@ -298,6 +299,7 @@ export const verifyResetPasswordToken = asyncHandler(async (req: Request, res: R
       if(!user){
         throw new ApiError(404, "Token expired, resend reset password token email...")
       }
+
       return res.status(200).json(new ApiResponse(200, "token is found", user))
 
         
@@ -308,7 +310,11 @@ export const verifyResetPasswordToken = asyncHandler(async (req: Request, res: R
 })
 
 export const resetPassword = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    console.log("Update Password")
+    try {
+      const { token } = req.params;
+    } catch (error) {
+      next(error)
+    }
 })
 
 export const deleteUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -353,14 +359,6 @@ export const loginWithBiometricOrPasskey = asyncHandler(async (req: Request, res
 
 export const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json({ token: "newAccessToken" });
-});
-
-export const logout = asyncHandler(async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Logged out successfully." });
-});
-
-export const sendPasswordResetEmail = asyncHandler(async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Password reset email sent." });
 });
 
 export const sendPhonePasswordResetOTP = asyncHandler(async (req: Request, res: Response) => {

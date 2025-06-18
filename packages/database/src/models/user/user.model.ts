@@ -11,7 +11,12 @@ export interface IDevice {
     token: string,
     // platform: string,
   }
-
+export interface IStatusUpdateDetails {
+  status: 'active' | 'banned' | 'deleted' | 'deactivated';
+  reason: string,
+  timestamp: Date,
+  device: IDevice,
+}
 export interface IUser extends Document {
   //basic details
   fullName: string;
@@ -31,7 +36,8 @@ export interface IUser extends Document {
 
   //device details
   location?: {country: string, state: string, city: string}[];
-  status: 'active' | 'banned' | 'deleted';
+  status: 'active' | 'banned' | 'deleted' | 'deactivated';
+  statusUpdateDetails?: IStatusUpdateDetails[]
   role: 'User' | 'Moderator' | 'Admin';
   language?: string;
   device: IDevice[],
@@ -102,6 +108,12 @@ const deviceSchema = new mongoose.Schema({
   token: String,
 }, { _id: false }); // if you don't want an _id for each device entry
 
+const statusUpdateSchema = new mongoose.Schema({
+  status: { type: String, enum: ['active', 'banned', 'deactivated', 'deleted'] },
+  reason: String,
+  timestamp: Date,
+  device: { type: Schema.Types.ObjectId, ref: "deviceSchema"}
+})
 
 const UserSchema = new Schema<IUser>(
   {
@@ -133,7 +145,8 @@ const UserSchema = new Schema<IUser>(
     ],
     gender: { type: String, enum: ['male', 'female', 'other'] },
     birthday: Date,
-    status: { type: String, enum: ['active', 'banned', 'deleted'], default: 'active' },
+    status: { type: String, enum: ['active', 'banned', 'deactivated', 'deleted'], default: 'active' },
+    statusUpdateDetails: [statusUpdateSchema],
     role: { type: String, enum: ['User', 'Moderator', 'Admin'], default: 'User' },
     themePreference: { type: String, enum: ['light', 'dark', 'system'], default: 'system' },
     language: String,
