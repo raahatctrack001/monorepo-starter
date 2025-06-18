@@ -1,4 +1,4 @@
-import { registerUserService } from "@/services/auth.service"
+import { registerUserService } from "@/lib/services/auth.service"
 import { RegisterUserSchema } from "@/types/user.validator"
 import { useState } from "react"
 

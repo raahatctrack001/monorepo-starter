@@ -18,7 +18,7 @@ const verifyToken = (token: string, secret: string): TokenPayload | null => {
 
 export const isUserLoggedIn = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   const { accessToken, refreshToken } = req.cookies;
-
+  console.log("cookies is here bro!", req.cookies)
   // If accessToken exists, verify it
   if (accessToken) {
     const decodedAccess = verifyToken(accessToken, ACCESS_SECRET);
@@ -38,18 +38,17 @@ export const isUserLoggedIn = asyncHandler(async (req: Request, res: Response, n
 
     if (decodedRefresh) {
       const { _id, username, fullName } = decodedRefresh;
-
-      // Generate new access token
       const newAccessToken = generateAccessToken({ _id, username, fullName });
       res.cookie("accessToken", newAccessToken, options);
 
       req.user = decodedRefresh;
       return next();
     } else {
-      console.log("[Auth] Invalid refresh token. Clearing cookie.");
+      console.log("[Auth] Invalid refresh token.");
       res.clearCookie("refreshToken");
     }
   }
+
 
   // If neither token is valid
   res.clearCookie("accessToken");

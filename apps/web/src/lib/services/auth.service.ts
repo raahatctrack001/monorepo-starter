@@ -8,6 +8,7 @@ export const registerUserService = async (data: RegisterUserSchema) => {
       url: authApi.registerUser(),
       method: "POST",
       bodyData: data,
+      credentials: "include",
     };
     
     const response = await apiConnector<ApiResponse>(apiData);
@@ -25,6 +26,8 @@ export const loginUserService = async (data: LoginUserSchema) => {
       url: authApi.loginUser(),
       method: "POST",
       bodyData: data,
+      credentials: "include",
+
     };
     
     const response = await apiConnector<ApiResponse>(apiData);

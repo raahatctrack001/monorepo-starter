@@ -45,6 +45,7 @@ import {
     verifyPasswordResetToken, 
     verifyPhonePasswordResetOTP,  
     verifyTwoFactorAuthCode, 
+    isAuthorised,
 } from "../controllers/auth.controller";
 import { loginLimiter,registerLimiter } from '../middlewares/rateLimiter.middleware';
 
@@ -60,6 +61,7 @@ const isAdmin = ()=>{
 router.route("/register").post(upload.none(), registerLimiter, registerUser);
 router.route("/login").post(upload.none(), loginLimiter,  loginUser);
 router.route("/logout").post(upload.none(), isUserLoggedIn, logoutUser);
+router.route("/is-authenticated").post(isUserLoggedIn, isAuthorised);
 
 router.route("/update-password/:userId").patch(upload.none(), isUserLoggedIn,  updatePassword);
 router.route("/send-reset-password-token").post(upload.none(), sendPasswordResetEmail); //send reset password token

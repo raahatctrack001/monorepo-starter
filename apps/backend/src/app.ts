@@ -6,12 +6,19 @@ import ApiError from './utils/apiError';
 import ApiResponse from './utils/apiResponse';
 
 const app = express();
-
+const allowedOrigins = ["http://localhost:3000", "*"];
 app
     .use(express.json({limit:'16kb'}))
     .use(express.urlencoded({extended:true, limit:"16kb"}))
     .use(cors({
-        origin: process.env.CORS_ORIGIN,
+        origin: (origin, callback) => {
+            console.log("origin", origin)
+            if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+            } else {
+            callback(new Error("Not allowed by CORS"));
+            }
+        },
         credentials: true,
     }))
     .use(cookieParser())
@@ -24,13 +31,14 @@ app
     })
 
 import authRouter from './routes/auth.route';
+import userRouter from './routes/user.routes'
 import otpRouter from './routes/otp.route';
 import conversationRouter from './routes/communication/conversation.routes';
 import groupRouter from './routes/communication/group.routes';
 import messageRouter from './routes/communication/message.routes';
-
 app
     .use('/api/v1/auth', authRouter)
+    .use('/api/v1/user', userRouter)
     .use('/api/v1/otp', otpRouter)
     .use('/api/v1/conversation', conversationRouter)
     .use('/api/v1/group', groupRouter)

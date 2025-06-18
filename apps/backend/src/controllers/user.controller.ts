@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
+import { User } from "@repo/database";
+import ApiError from "../utils/apiError";
+import ApiResponse from "../utils/apiResponse";
 
 
 // Upload Profile Picture
@@ -48,8 +51,25 @@ export const updateUserProfile = asyncHandler(async (req: Request, res: Response
 });
 
 // Get User Profile Info
-export const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
-  res.status(200).json({ user: { fullName: "Demo User", username: "demo_user" } });
+export const getUserProfile = asyncHandler(async (req: Request, res: Response, next:NextFunction) => {
+  try {
+    console.log("getUserController")
+    if(!req.user){
+      throw new ApiError(401, "Unauthorized")
+    }
+    
+    const { userId } = req.params;
+    const requiredUser = await User.findById(userId);
+    console.log("required user", requiredUser);
+
+    if(!requiredUser){
+      throw new ApiError(404, "User not found!")
+    }
+
+    return res.status(200).json(new ApiResponse(200, "User found!", requiredUser));
+  } catch (error) {
+    next(error)
+  }
 });
 
 // Check Username Availability

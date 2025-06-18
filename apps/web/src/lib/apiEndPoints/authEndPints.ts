@@ -7,6 +7,7 @@ export const authApi = {
   verifyEmailOTP: () => withPrefix('/verify-email-otp'),
   resendEmailOTP: () => withPrefix('/resend-email-otp'),
   checkUsernameAvailability: () => withPrefix('/check-username'),
+  isUserAuthenticated: () => withPrefix('/is-authenticated'),
 
   // Login
   loginUser: () => withPrefix('/login'),

@@ -13,6 +13,13 @@ import { generatePasswordResetToken } from "../services/tokens/resetPassword.tok
 import { resetPasswordHTML } from "../services/email/email-template/reset.password";
 import { sendEmail } from "../services/email/email.service";
 
+export const isAuthorised = asyncHandler(async (req:Request, res:Response, next:NextFunction)=>{
+    console.log(req.user)
+    if(req.user){
+        return res.status(200).json( new ApiResponse(200, "User is authorised to use this app!", {status:true, use: req.user}))
+    }    
+    return res.status(401).json( new ApiResponse(401, "Unauthorised!", {status: false}))
+})
 
 export const registerUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {  
         try {

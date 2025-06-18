@@ -3,6 +3,7 @@ import { User, IUser } from "@repo/database";
 import ApiError from "../../utils/apiError";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { CookieOptions } from 'express';
 dotenv.config();
 
 export interface TokenPayload {
@@ -80,8 +81,8 @@ export const generateAccessAndRefreshToken = async (userId: string) => {
 // Cookie Options for refresh token
 const isProduction = process.env.NODE_ENV === "production";
 export const options = {
-  httpOnly: true,
-  secure: isProduction,
-  sameSite: "strict" as const,
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  httpOnly: true,                 // ✅ cookie can't be accessed via JS
+  secure: isProduction,           // ✅ only use secure cookies on HTTPS
+  sameSite: (isProduction ? "strict" : "lax") as "lax" | "strict" | "none",
+  maxAge: 7 * 24 * 60 * 60 * 1000, // ✅ 7 days expiry
 };

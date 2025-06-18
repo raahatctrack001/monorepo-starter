@@ -10,4 +10,5 @@ export interface ApiConnectorParams {
   bodyData?: any;
   headers?: Record<string, string>;
   params?: Record<string, any>;
+  credentials?: string
 }

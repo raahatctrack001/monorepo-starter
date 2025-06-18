@@ -37,9 +37,10 @@ const onSubmit = async (data: LoginUserSchema) => {
       console.log("login successfull", result)
 
       if(result?.success){
+        console.log(result)
         dispatch(logInSuccess(result.data));
         console.log("login result", result)
-        router.push(`/homepage/${result?.data?._id}`)
+        router.push(`/profile/${result?.data?._id}`)
       }
 }
 

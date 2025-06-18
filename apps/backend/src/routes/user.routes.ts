@@ -29,6 +29,7 @@ import {
   removeStoryHighlight,
   getStoryHighlights
 } from '../controllers/user.controller';
+import { isUserLoggedIn } from '../middlewares/auth.middleware';
 
 const isAuthenticated = ()=>{
 
@@ -53,7 +54,7 @@ router.get('/:userId/cover-photo', getCoverPhoto);
 
 /* Profile Information */
 router.put('/profile', isAuthenticated, updateUserProfile);
-router.get('/:userId/profile', getUserProfile);
+router.get('/profile/:userId', isUserLoggedIn, getUserProfile);
 router.get('/check-username/:username', checkUsernameAvailability);
 
 /* Followers / Following */

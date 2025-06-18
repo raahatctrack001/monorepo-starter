@@ -1,6 +1,8 @@
 'use client';
 
-import { useAppSelector } from '@/lib/store/hooks';
+import { authApi } from '@/lib/apiEndPoints/authEndPints';
+import { useAppDispatch, useAppSelector } from '@/lib/store/hooks';
+import { logOutSuccess } from '@/lib/store/slices/user.slice';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -10,7 +12,19 @@ type Props = {
 
 export default function ProtectedRoute({ children }: Props) {
   const { currentUser } = useAppSelector((state) => state.user);
-  console.log("currentUser is: ",currentUser)
+  // const dispatch = useAppDispatch();
+
+  // useEffect(()=>{
+  //   (async ()=>{
+  //     const response = await fetch(authApi.isUserAuthenticated(), {method: "POST"});
+  //     const data = await response.json();
+  //     if(!data.success){
+  //       console.log("checked authentication")
+  //       dispatch(logOutSuccess());
+  //     }
+  //   })()
+  // }, [dispatch])
+
   const router = useRouter();
 
   useEffect(() => {
