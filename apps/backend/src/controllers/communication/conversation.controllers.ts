@@ -57,91 +57,101 @@ async function migrateUsers() {
 
 // 1️⃣ Create a new conversation
 export const createConversation = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    /***To Do's
-     * 1. extract senderId from params
-     * 2. validate and see if sender is loggedIn and authorized to create conversatoin
-     * 3. extract participants from body
-     * 4. if participants.length > 1 => its group
-     * 5. check if conversation with this signature alreay present? if conversationType: secret then create new else return old
-     * 7. extract {groupName}
-    *  8. mendatory details:
-          * createdBy 
-          * participants, 
-          * groupName; if group 
-          * conversationType, 
-          * messageCount, 
-          * attachmentCount, 
-          * allowedMessageTypes, 
-          * isEncrypted, e
-          * ncryptionKey 
-     */
-    
-    // console.log(req.params);
-    // console.log(req.body);
-    // console.log(req.user);
+  /***To Do's
+   * 1. extract senderId from params
+   * 2. validate and see if sender is loggedIn and authorized to create conversatoin
+   * 3. extract participants from body
+   * 4. if participants.length > 1 => its group
+   * 5. check if conversation with this signature alreay present? if conversationType: secret then create new else return old
+   * 7. extract {groupName}
+  *  8. mendatory details:
+        * createdBy 
+        * participants, 
+        * groupName; if group 
+        * conversationType, 
+        * messageCount, 
+        * attachmentCount, 
+        * allowedMessageTypes, 
+        * isEncrypted, e
+        * ncryptionKey 
+   */
+    try {
+      const { creatorId } = req.params;
+      if (req.user?._id !== creatorId || !creatorId) {
+        throw new ApiError(401, "Unauthorized Attempt!");
+      }
 
-    const { creatorId } = req.params;
-    if(req.user?._id !== req.params?.creatorId || !creatorId){
-      throw new ApiError(401, "Unauthorized Attempt!")
+      const { participants } = req.body;
+
+      if (!participants?.length) {
+        throw new ApiError(404, "Please select at least 1 user to create a conversation.");
+      }
+
+      const isGroup = participants.length > 1;
+
+      let { conversationName } = req.body;
+
+      const partner = !isGroup ? await User.findById(participants[0]) : null;
+      if (!isGroup) {
+        conversationName = partner?.fullName || "social-user";
+      }
+
+      participants.push(creatorId);
+
+      const invalidIds = participants.filter(
+        (participantId: string) => !mongoose.Types.ObjectId.isValid(participantId)
+      );
+
+      if (invalidIds.length > 0) {
+        throw new ApiError(403, `Invalid participant IDs: ${invalidIds.join(', ')}`);
+      }
+
+      // Check for existing conversation
+      if (!isGroup) {
+        const existingConversation = await Conversation.findOne({
+          isGroup: false,
+          conversationType: "personal",
+          participants: { $all: [creatorId, participants[0]], $size: 2 }
+        }).populate("participants");
+
+        if (existingConversation) {
+          return res.status(200).json(new ApiResponse(200, "Conversation already exists", existingConversation));
+        }
+      } else {
+        const existingConversation = await Conversation.findOne({
+          isGroup: true,
+          conversationName,
+          createdBy: creatorId
+        }).populate("participants");
+
+        if (existingConversation) {
+          return res.status(200).json(new ApiResponse(200, "Group with this name already exists", existingConversation));
+        }
+      }
+
+      const conversation = await Conversation.create({
+        createdBy: creatorId,
+        conversationName,
+        participants,
+        isGroup,
+        conversationType: isGroup ? "group" : "personal",
+        messagesCount: 0,
+        attachmentsCount: 0,
+        conversationImage: isGroup
+          ? process.env.FALLBACK_GROUP_IMAGE_URL || "/fallback-cover.jpg"
+          : partner?.avatar?.at(-1) || process.env.FALLBACK_IMAGE_URL || "/fallback-cover.jpg"
+      });
+
+      if (!conversation) {
+        throw new ApiError(404, "Failed to initiate conversation");
+      }
+
+      return res.status(201).json(new ApiResponse(201, "Conversation Initiated!", { conversation }));
+    } catch (error) {
+      next(error);
     }
-
-    const { participants } = req.body;
-
-    if(participants?.length === 0){
-      throw new ApiError(404, "Please select at least 1 user to create group.")
-    }
-    
-    const isGroup = participants?.length > 1;
-
-    let { conversationName } = req.body;
-    if(!isGroup){
-        const partner = await User.findById(participants[0]);
-        conversationName = partner?.fullName || "social-user"
-    }
-
-    participants.push(creatorId);
-     // Validate all IDs are valid ObjectIds
-    const invalidIds = participants.filter(
-      (participantId: string) => !mongoose.Types.ObjectId.isValid(participantId)
-    );
-
-    if (invalidIds.length > 0) {
-      throw new ApiError(403, `Invalid participant IDs: ${invalidIds.join(', ')}`);
-    }
-    
-    const payload = {
-      createdBy: creatorId,
-      conversationName,
-      participants,
-      isGroup,
-      conversationType: isGroup ? "group" : "personal",
-    };
-
-    const existingConversation = await Conversation.findOne(payload);
-    console.log("checkIfAlreadyExisit", existingConversation);
-    if(existingConversation){
-      return res.status(200).json(new ApiResponse(200, "Conversation already exist", existingConversation))
-    }
-  
-    const conversation = await Conversation.create({
-      createdBy: creatorId,
-      conversationName: conversationName,
-      participants,
-      isGroup,
-      conversationType: isGroup ? "group" : "personal",
-      messagesCount: 0,
-      attachmentsCount: 0,
-    })
-    
-    if(!conversation){
-      throw new ApiError(404, "Failed to initiate conversation");
-    }
-    return res.status(201).json(new ApiResponse(201, "Conversation Initiated!", {conversation}));  
-  } catch (error) {
-    next(error)
-  }
 });
+
 
 // 2️⃣ Get all conversations for a user
 export const getAllConversations = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
