@@ -33,9 +33,7 @@ export interface IConversation extends Document {
         fontSize: string;
       }
     }[];
-    customNickname?: {
-      user: string;
-    }[];
+    customNickname?: Record<string, string>,
     isDeleted: boolean;
     deletedBy?: Types.ObjectId[];
     reportCount: number;
@@ -90,11 +88,10 @@ export interface IConversation extends Document {
         },
       },
     ],
-    customNickname: [
-      {
-        user: { type: String },
-      },
-    ],
+    customNickname: {
+      type: Map,
+      of: String
+    },
     isDeleted: { type: Boolean, default: false },
     reportCount: { type: Number, default: 0 },
     activityLogs: { type: Schema.Types.Mixed, default: {} },

@@ -75,81 +75,89 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
         * isEncrypted, e
         * ncryptionKey 
    */
-    try {
-      const { creatorId } = req.params;
-      if (req.user?._id !== creatorId || !creatorId) {
-        throw new ApiError(401, "Unauthorized Attempt!");
-      }
-
-      const { participants } = req.body;
-
-      if (!participants?.length) {
-        throw new ApiError(404, "Please select at least 1 user to create a conversation.");
-      }
-
-      const isGroup = participants.length > 1;
-
-      let { conversationName } = req.body;
-
-      const partner = !isGroup ? await User.findById(participants[0]) : null;
-      if (!isGroup) {
-        conversationName = partner?.fullName || "social-user";
-      }
-
-      participants.push(creatorId);
-
-      const invalidIds = participants.filter(
-        (participantId: string) => !mongoose.Types.ObjectId.isValid(participantId)
-      );
-
-      if (invalidIds.length > 0) {
-        throw new ApiError(403, `Invalid participant IDs: ${invalidIds.join(', ')}`);
-      }
-
-      // Check for existing conversation
-      if (!isGroup) {
-        const existingConversation = await Conversation.findOne({
-          isGroup: false,
-          conversationType: "personal",
-          participants: { $all: [creatorId, participants[0]], $size: 2 }
-        }).populate("participants");
-
-        if (existingConversation) {
-          return res.status(200).json(new ApiResponse(200, "Conversation already exists", existingConversation));
-        }
-      } else {
-        const existingConversation = await Conversation.findOne({
-          isGroup: true,
-          conversationName,
-          createdBy: creatorId
-        }).populate("participants");
-
-        if (existingConversation) {
-          return res.status(200).json(new ApiResponse(200, "Group with this name already exists", existingConversation));
-        }
-      }
-
-      const conversation = await Conversation.create({
-        createdBy: creatorId,
-        conversationName,
-        participants,
-        isGroup,
-        conversationType: isGroup ? "group" : "personal",
-        messagesCount: 0,
-        attachmentsCount: 0,
-        conversationImage: isGroup
-          ? process.env.FALLBACK_GROUP_IMAGE_URL || "/fallback-cover.jpg"
-          : partner?.avatar?.at(-1) || process.env.FALLBACK_IMAGE_URL || "/fallback-cover.jpg"
-      });
-
-      if (!conversation) {
-        throw new ApiError(404, "Failed to initiate conversation");
-      }
-
-      return res.status(201).json(new ApiResponse(201, "Conversation Initiated!", { conversation }));
-    } catch (error) {
-      next(error);
+  try {
+    const { creatorId } = req.params;
+    if (req.user?._id !== creatorId || !creatorId) {
+      throw new ApiError(401, "Unauthorized Attempt!");
     }
+
+    const { participants } = req.body;
+
+    if (!participants?.length) {
+      throw new ApiError(404, "Please select at least 1 user to create a conversation.");
+    }
+
+    const isGroup = participants.length > 1;
+
+    let { conversationName } = req.body;
+
+    const partner = !isGroup ? await User.findById(participants[0]) : null;
+    if (!isGroup) {
+      conversationName = partner?.fullName || "social-user";
+    }
+
+    participants.push(creatorId);
+
+    const invalidIds = participants.filter(
+      (participantId: string) => !mongoose.Types.ObjectId.isValid(participantId)
+    );
+
+    if (invalidIds.length > 0) {
+      throw new ApiError(403, `Invalid participant IDs: ${invalidIds.join(', ')}`);
+    }
+
+    //custom nickname
+    // Check for existing conversation
+    if (!isGroup) {
+      const existingConversation = await Conversation.findOne({
+        isGroup: false,
+        conversationType: "personal",
+        participants: { $all: [creatorId, participants[0]], $size: 2 }
+      }).populate("participants");
+
+      if (existingConversation) {
+        return res.status(200).json(new ApiResponse(200, "Conversation already exists", existingConversation));
+      }
+        
+    } else {
+      const existingConversation = await Conversation.findOne({
+        isGroup: true,
+        conversationName,
+        createdBy: creatorId
+      }).populate("participants");
+
+      if (existingConversation) {
+        return res.status(200).json(new ApiResponse(200, "Group with this name already exists", existingConversation));
+      }
+    }
+
+    const customNickname = isGroup ? {} : {
+      [creatorId]: partner?.fullName || "social-user",
+      [participants[0]]: req.user?.fullName || "social-user"
+    };
+
+    const conversation = await Conversation.create({
+      createdBy: creatorId,
+      conversationName,
+      participants,
+      isGroup,
+      conversationType: isGroup ? "group" : "personal",
+      messagesCount: 0,
+      attachmentsCount: 0,
+      customNickname,
+      conversationImage: isGroup
+        ? process.env.FALLBACK_GROUP_IMAGE_URL || "/fallback-cover.jpg"
+        : partner?.avatar?.at(-1) || process.env.FALLBACK_IMAGE_URL || "/fallback-cover.jpg"
+    });
+
+    if (!conversation) {
+      throw new ApiError(404, "Failed to initiate conversation");
+    }
+
+    return res.status(201).json(new ApiResponse(201, "Conversation Initiated!", { conversation }));
+  } catch (error) {
+    next(error);
+  }
 });
 
 
