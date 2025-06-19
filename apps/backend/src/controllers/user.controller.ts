@@ -85,8 +85,8 @@ export const getAllUserProfile = asyncHandler(async (req: Request, res: Response
     if(!requiredUsers.length){
       throw new ApiError(404, "No User Found!")
     }
-
-    return res.status(200).json(new ApiResponse(200, "Users found!", {users: requiredUsers, length: requiredUsers.length}));
+    const ids = requiredUsers.map(user=>user?._id);
+    return res.status(200).json(new ApiResponse(200, "Users found!", {users: requiredUsers, length: requiredUsers.length, ids}));
   } catch (error) {
     next(error)
   }

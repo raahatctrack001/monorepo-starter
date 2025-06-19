@@ -7,16 +7,19 @@ import { IConversation } from "@/types/conversations/conversation.types";
 import RedAlert from "../RedAlert";
 import LocalLoader from "../LocalLoader";
 import { storeConverstaions } from "@/lib/store/slices/conversation.slice";
+import SearchContact from "./SearchContact";
+import { IUser } from "@/types/user/user.types";
+import { SelectContent } from "@radix-ui/react-select";
 
 
 interface ChatListProps {
   onSelectUser: (user: IConversation) => void;
 }
 
-const ConversationList: React.FC<ChatListProps> = ({ onSelectUser }: ChatListProps) => {
+const ConversationList: React.FC = () => {
   const { currentUser } = useAppSelector(state=>state.user);
   const [conversations, setConversations] = useState<IConversation[]>([])
-
+  const [contact, setContact] = useState<IUser[]>([])
   const { getAllConversations, loading, error } = useGetAllConversations(); 
   const dispatch = useAppDispatch();
 
@@ -33,12 +36,15 @@ const ConversationList: React.FC<ChatListProps> = ({ onSelectUser }: ChatListPro
   return (
     <div className="w-72 border-r h-screen max-h-3/4 p-4 overflow-auto mt-15">
       <h2 className="text-xl font-bold mb-4 fixed z-1 top-5">Chats</h2>
+      <div>
+        <SearchContact />
+      </div>
       {loading && <LocalLoader description="Loading conversations"/>}
       {conversations?.length > 0 ? conversations?.map((conversation) => (
         <div
           key={conversation._id}
           className="flex items-center gap-3 p-2 rounded cursor-pointer"
-          onClick={() => onSelectUser(conversation)}
+          // onClick={() => onSelectUser(conversation)}
         >
           <div className="relative">
             <Image
@@ -53,7 +59,8 @@ const ConversationList: React.FC<ChatListProps> = ({ onSelectUser }: ChatListPro
             )} */}
           </div>
           <div>
-            <h4 className="font-medium">{conversation.conversationName}</h4>
+            <h4 className="font-medium" >{conversation?.isGroup ? conversation?.conversationName : 
+            conversation?.customNickname[currentUser?._id as string] || "social media"}</h4>
           </div>
         </div>
       )) : <div className="flex flex-col h-screen justify-start items-center">

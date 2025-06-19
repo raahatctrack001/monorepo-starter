@@ -32,9 +32,7 @@ export interface IConversation {
         fontSize: string;
       }
     }[];
-    customNickname?: {
-      user: string;
-    }[];
+    customNickname: Record<string, string>,
     isDeleted: boolean;
     deletedBy?: Types.ObjectId[];
     reportCount: number;

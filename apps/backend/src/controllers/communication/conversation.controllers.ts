@@ -131,9 +131,9 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
       }
     }
 
-    const customNickname = isGroup ? {} : {
-      [creatorId]: partner?.fullName || "social-user",
-      [participants[0]]: req.user?.fullName || "social-user"
+    const customNickname = {
+      [creatorId]: isGroup ? conversationName: partner?.fullName || "social-user",
+      [participants[0]]: isGroup ? conversationName: req.user?.fullName || "social-user"
     };
 
     const conversation = await Conversation.create({
@@ -203,6 +203,12 @@ export const updateConversation = asyncHandler(async (req: Request, res: Respons
 // 5️⃣ Delete conversation
 export const deleteConversation = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   res.status(200).json({ message: `Deleted conversation ${req.params.id}` });
+});
+
+export const deleteAllConversation = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  const deletedConversations = await Conversation.deleteMany({});
+  
+  res.status(200).json(new ApiResponse(200, `Deleted conversations`, deletedConversations));
 });
 
 // 6️⃣ Add participant to conversation
