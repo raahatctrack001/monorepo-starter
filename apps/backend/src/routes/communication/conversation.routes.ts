@@ -1,5 +1,32 @@
 import express from "express";
-import * as conversationController from "../../controllers/communication/conversation.controllers";
+import { 
+  addParticipant,
+  archiveConversation,
+  blockUserInConversation,
+  createConversation, 
+  deleteConversation, 
+  getActivityLogs, 
+  getAllConversations, 
+  getConversationById,
+  getUnreadCount,
+  incrementAttachmentsCount,
+  incrementMessagesCount,
+  markConversationAsRead,
+  muteConversation,
+  pinMessage,
+  removeParticipant,
+  reportConversation,
+  scheduleMessageInConversation,
+  setCustomNickname,
+  setCustomTheme,
+  setGroupInfo,
+  unarchiveConversation,
+  unblockUserInConversation,
+  updateConversation,
+  updateCustomOrder,
+  updateLastMessage,
+  updateTypingStatus
+} from "../../controllers/communication/conversation.controllers";
 const protect = ()=>{}
 
 
@@ -8,118 +35,116 @@ const router = express.Router();
 // Routes using .route() chain syntax
 
 // 1️⃣ Conversations collection routes
-router
-  .route("/")
-  .post(protect, conversationController.createConversation)
-  .get(protect, conversationController.getAllConversations);
+router.route("/create-conversation/:senderId/:receiverId").post(createConversation);
+router.route("/get-all-conversation/:userId").get(getAllConversations);
 
 // 2️⃣ Single conversation by ID
 router
   .route("/:id")
-  .get(protect, conversationController.getConversationById)
-  .patch(protect, conversationController.updateConversation)
-  .delete(protect, conversationController.deleteConversation);
+  .get(protect, getConversationById)
+  .patch(protect, updateConversation)
+  .delete(protect, deleteConversation);
 
 // 3️⃣ Participants management
 router
   .route("/:id/participants")
-  .post(protect, conversationController.addParticipant);
+  .post(protect, addParticipant);
 
 router
   .route("/:id/participants/:userId")
-  .delete(protect, conversationController.removeParticipant);
+  .delete(protect, removeParticipant);
 
 // 4️⃣ Group info update
 router
   .route("/:id/group-info")
-  .patch(protect, conversationController.setGroupInfo);
+  .patch(protect, setGroupInfo);
 
 // 5️⃣ Last message update
 router
   .route("/:id/last-message")
-  .patch(protect, conversationController.updateLastMessage);
+  .patch(protect, updateLastMessage);
 
 // 6️⃣ Pin message
 router
   .route("/:id/pin-message")
-  .post(protect, conversationController.pinMessage);
+  .post(protect, pinMessage);
 
 // 7️⃣ Mute conversation
 router
   .route("/:id/mute")
-  .post(protect, conversationController.muteConversation);
+  .post(protect, muteConversation);
 
 // 8️⃣ Archive / Unarchive conversation
 router
   .route("/:id/archive")
-  .post(protect, conversationController.archiveConversation);
+  .post(protect, archiveConversation);
 
 router
   .route("/:id/unarchive")
-  .post(protect, conversationController.unarchiveConversation);
+  .post(protect, unarchiveConversation);
 
 // 9️⃣ Custom theme
 router
   .route("/:id/custom-theme")
-  .post(protect, conversationController.setCustomTheme);
+  .post(protect, setCustomTheme);
 
 // 🔟 Custom nickname
 router
   .route("/:id/custom-nickname")
-  .post(protect, conversationController.setCustomNickname);
+  .post(protect, setCustomNickname);
 
 // 1️⃣1️⃣ Block / Unblock user in conversation
 router
   .route("/:id/block/:userId")
-  .post(protect, conversationController.blockUserInConversation);
+  .post(protect, blockUserInConversation);
 
 router
   .route("/:id/unblock/:userId")
-  .post(protect, conversationController.unblockUserInConversation);
+  .post(protect, unblockUserInConversation);
 
 // 1️⃣2️⃣ Report conversation
 router
   .route("/:id/report")
-  .post(protect, conversationController.reportConversation);
+  .post(protect, reportConversation);
 
 // 1️⃣3️⃣ Typing status
 router
   .route("/:id/typing-status")
-  .post(protect, conversationController.updateTypingStatus);
+  .post(protect, updateTypingStatus);
 
 // 1️⃣4️⃣ Unread message count
 router
   .route("/:id/unread-count")
-  .get(protect, conversationController.getUnreadCount);
+  .get(protect, getUnreadCount);
 
 // 1️⃣5️⃣ Mark as read
 router
   .route("/:id/mark-as-read")
-  .post(protect, conversationController.markConversationAsRead);
+  .post(protect, markConversationAsRead);
 
 // 1️⃣6️⃣ Schedule message
 router
   .route("/:id/schedule-message")
-  .post(protect, conversationController.scheduleMessageInConversation);
+  .post(protect, scheduleMessageInConversation);
 
 // 1️⃣7️⃣ Activity logs
 router
   .route("/:id/activity-logs")
-  .get(protect, conversationController.getActivityLogs);
+  .get(protect, getActivityLogs);
 
 // 1️⃣8️⃣ Increment message count
 router
   .route("/:id/increment-messages-count")
-  .post(protect, conversationController.incrementMessagesCount);
+  .post(protect, incrementMessagesCount);
 
 // 1️⃣9️⃣ Increment attachment count
 router
   .route("/:id/increment-attachments-count")
-  .post(protect, conversationController.incrementAttachmentsCount);
+  .post(protect, incrementAttachmentsCount);
 
 // 2️⃣0️⃣ Update custom order
 router
   .route("/:id/custom-order")
-  .post(protect, conversationController.updateCustomOrder);
+  .post(protect, updateCustomOrder);
 
 export default router;

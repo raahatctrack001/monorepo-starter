@@ -72,6 +72,26 @@ export const getUserProfile = asyncHandler(async (req: Request, res: Response, n
   }
 });
 
+export const getAllUserProfile = asyncHandler(async (req: Request, res: Response, next:NextFunction) => {
+  try {
+    const { userId } = req.params;
+    if(!req.user || req.user?._id !== userId){
+      throw new ApiError(401, "Unauthorized")
+    }
+    
+    const requiredUsers = await User.find({});
+    console.log("required user", requiredUsers);
+
+    if(!requiredUsers.length){
+      throw new ApiError(404, "No User Found!")
+    }
+
+    return res.status(200).json(new ApiResponse(200, "Users found!", {users: requiredUsers, length: requiredUsers.length}));
+  } catch (error) {
+    next(error)
+  }
+});
+
 // Check Username Availability
 export const checkUsernameAvailability = asyncHandler(async (req: Request, res: Response) => {
   const { username } = req.params;

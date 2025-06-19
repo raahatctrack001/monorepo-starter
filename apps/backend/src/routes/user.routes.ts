@@ -27,7 +27,8 @@ import {
   updateUserLinks,
   addStoryHighlight,
   removeStoryHighlight,
-  getStoryHighlights
+  getStoryHighlights,
+  getAllUserProfile
 } from '../controllers/user.controller';
 import { isUserLoggedIn } from '../middlewares/auth.middleware';
 
@@ -55,6 +56,7 @@ router.get('/:userId/cover-photo', getCoverPhoto);
 /* Profile Information */
 router.put('/profile', isAuthenticated, updateUserProfile);
 router.get('/profile/:userId', isUserLoggedIn, getUserProfile);
+router.get('/profiles/:userId', isUserLoggedIn, getAllUserProfile);
 router.get('/check-username/:username', checkUsernameAvailability);
 
 /* Followers / Following */

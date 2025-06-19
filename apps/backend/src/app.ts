@@ -14,9 +14,9 @@ app
         origin: (origin, callback) => {
             console.log("origin", origin)
             if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
+                callback(null, true);
             } else {
-            callback(new Error("Not allowed by CORS"));
+                callback(new Error("Unidentified Origin!"));
             }
         },
         credentials: true,

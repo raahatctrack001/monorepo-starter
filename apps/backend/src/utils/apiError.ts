@@ -28,4 +28,8 @@ class ApiError extends Error {
   }
 }
 
+export const apiErrorFunction = async (statusCode:number, message: string) => {
+  throw new ApiError(statusCode, message);
+}
+
 export default ApiError;

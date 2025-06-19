@@ -27,10 +27,26 @@
 
 import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
+import ApiError from "../../utils/apiError";
 
 // 1️⃣ Create a new conversation
 export const createConversation = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  res.status(201).json({ message: "Conversation created successfully" });
+  try {
+    const { senderId, receiverId } = req.params;    
+    if(!senderId){
+      throw new ApiError(404, "SenderId is missing!");
+    }
+
+    if(req.user?._id !== senderId){
+      throw new ApiError(401, "Unauthorized to initiate conversation");
+    }
+
+
+
+    
+  } catch (error) {
+    next(error)
+  }
 });
 
 // 2️⃣ Get all conversations for a user

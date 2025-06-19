@@ -10,19 +10,16 @@ export interface IConversation extends Document {
     groupImage?: string;
     groupDescription?: string;
     createdBy: Types.ObjectId;
-    createdAt: Date;
-    updatedAt: Date;
     lastMessage?: Types.ObjectId;
     lastMessageAt?: Date;
     unreadCount?: Record<string, number>;
     pinnedMessages?: Types.ObjectId[];
     mutedBy?: Types.ObjectId[];
-    conversationType?: string;
+    conversationType?: "personal"| "group"| "broadcast"| "secret"| string;
     inviteCode?: string;
     messagesCount?: number;
     attachmentsCount?: number;
     archivedBy?: Types.ObjectId[];
-    deletedBy?: Types.ObjectId[];
     blockStatus?: Record<string, boolean>;
     allowedMessageTypes?: string;
     lastTypingStatus?: Record<string, Date>;
@@ -40,15 +37,17 @@ export interface IConversation extends Document {
       user: string;
     }[];
     isDeleted: boolean;
+    deletedBy?: Types.ObjectId[];
     reportCount: number;
     activityLogs?: any;
     scheduledMessages?: string;
     customOrder?: Record<string, number>;
-}   
-
-//Mongoose Schema
-const ConversationSchema = new Schema<IConversation>(
-  {
+    createdAt: Date;
+    updatedAt: Date;
+  }   
+  
+  //Mongoose Schema
+  const ConversationSchema = new Schema<IConversation>({
     participants: [{ type: Schema.Types.ObjectId, ref: "User" }],
     isGroup: { type: Boolean, required: true, default: false },
     groupId: { type: Schema.Types.ObjectId, ref: "Group" },
@@ -60,10 +59,14 @@ const ConversationSchema = new Schema<IConversation>(
     updatedAt: { type: Date, default: Date.now },
     lastMessage: { type: Schema.Types.ObjectId, ref: "Message" },
     lastMessageAt: { type: Date },
-    unreadCount: { type: Schema.Types.Mixed, default: {} },
+    unreadCount: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
     pinnedMessages: [{ type: Schema.Types.ObjectId, ref: "Message" }],
     mutedBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    conversationType: { type: String },
+    conversationType: { type: String, enum: ["personal", "group", "broadcast", "secret"] },
     inviteCode: { type: String },
     messagesCount: { type: Number, default: 0 },
     attachmentsCount: { type: Number, default: 0 },
@@ -92,8 +95,8 @@ const ConversationSchema = new Schema<IConversation>(
     isDeleted: { type: Boolean, default: false },
     reportCount: { type: Number, default: 0 },
     activityLogs: { type: Schema.Types.Mixed, default: {} },
-    scheduledMessages: { type: String },
-    customOrder: { type: Schema.Types.Mixed, default: {} },
+    scheduledMessages: [{ type: String }],
+    customOrder: [{ type: Schema.Types.Mixed, default: {} }],
   },
   { timestamps: true }
 );
