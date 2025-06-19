@@ -45,11 +45,12 @@ export const deviceSchema = z.object({
   token: z.string().optional(),
 })
 
+export const publicKeySchema = z.string().min(1, {message: "public key to encrypt private key can't be empty"})
 export const registerUserSchema = z
-  .object({
-    email: emailSchema,
-    fullName: fullNameSchema,
-    username: usernameSchema,
+.object({
+  email: emailSchema,
+  fullName: fullNameSchema,
+  username: usernameSchema,
     password: passwordSchema,
     repeatPassword: z.string(),
     device: z.array(deviceSchema).optional(),
@@ -58,14 +59,14 @@ export const registerUserSchema = z
     message: "Passwords don't match",
     path: ["repeatPassword"], // set error on repeatPassword field
   });
-
-export const loginUserSchema = z.object({
-  userEmail: z.string().min(1, {message: "Username or Email is required"}),
-  password: z.string().min(1, {message: "Password is missing"}),
-  device: z.array(deviceSchema).optional(),
-})
-
-export const updatePasswordSchema = z
+  
+  export const loginUserSchema = z.object({
+    userEmail: z.string().min(1, {message: "Username or Email is required"}),
+    password: z.string().min(1, {message: "Password is missing"}),
+    device: z.array(deviceSchema).optional(),
+  })
+  
+  export const updatePasswordSchema = z
   .object({
     oldPassword: z.string(),
     newPassword: passwordSchema,
@@ -75,8 +76,8 @@ export const updatePasswordSchema = z
     message: "Passwords don't match",
     path: ["repeatPassword"], // set error on repeatPassword field
   });
-
-export const resetPasswordSchema = z
+  
+  export const resetPasswordSchema = z
   .object({
     password: passwordSchema,
     repeatPassword: z.string(),
@@ -86,13 +87,14 @@ export const resetPasswordSchema = z
     path: ["repeatPassword"], // set error on repeatPassword field
   });
   
-export type UsernameSchema = z.infer<typeof usernameSchema>;
-export type Password = z.infer<typeof passwordSchema>;
-export type EmailSchema = z.infer<typeof emailSchema>;
-export type FullNameSchema = z.infer<typeof fullNameSchema>;
-export type BioSchema = z.infer<typeof bioSchema>;
-export type DeviceSchema = z.infer<typeof deviceSchema>;
-export type RegisterUserSchema = z.infer<typeof registerUserSchema>;
-export type LoginUserSchema = z.infer<typeof loginUserSchema>;
-export type UpdatePasswordSchema = z.infer<typeof updatePasswordSchema>
-export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema >
+  export type UsernameSchema = z.infer<typeof usernameSchema>;
+  export type Password = z.infer<typeof passwordSchema>;
+  export type EmailSchema = z.infer<typeof emailSchema>;
+  export type FullNameSchema = z.infer<typeof fullNameSchema>;
+  export type BioSchema = z.infer<typeof bioSchema>;
+  export type DeviceSchema = z.infer<typeof deviceSchema>;
+  export type RegisterUserSchema = z.infer<typeof registerUserSchema>;
+  export type LoginUserSchema = z.infer<typeof loginUserSchema>;
+  export type PublicKeySchema = z.infer<typeof publicKeySchema>;
+  export type UpdatePasswordSchema = z.infer<typeof updatePasswordSchema>
+  export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema >

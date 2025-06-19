@@ -6,7 +6,7 @@ export interface IConversation extends Document {
     participants: Types.ObjectId[];
     isGroup: boolean;
     groupId?: Types.ObjectId;
-    groupName?: string;
+    conversationName?: string;
     groupImage?: string;
     groupDescription?: string;
     createdBy: Types.ObjectId;
@@ -51,7 +51,7 @@ export interface IConversation extends Document {
     participants: [{ type: Schema.Types.ObjectId, ref: "User" }],
     isGroup: { type: Boolean, required: true, default: false },
     groupId: { type: Schema.Types.ObjectId, ref: "Group" },
-    groupName: { type: String },
+    conversationName: { type: String },
     groupImage: { type: String },
     groupDescription: { type: String },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },

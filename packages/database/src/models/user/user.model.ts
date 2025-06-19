@@ -88,10 +88,11 @@ export interface IUser extends Document {
   gamingStats?: Record<string, unknown>;
   deletedAt?: Date;
   otpStore?: Types.ObjectId[],
-  otp?: String,
-  refreshToken?: String,
-  resetPasswordToken?: String,
+  otp?: string,
+  refreshToken?: string,
+  resetPasswordToken?: string,
   resetPasswordTokenExpiry?: Date,
+  publicKey: string
   createdAt: Date;
   updatedAt: Date;
 }
@@ -218,6 +219,7 @@ const UserSchema = new Schema<IUser>(
     refreshToken: { type: String, default: "", select: false  },
     resetPasswordToken: { type: String, default: "", select: false },
     resetPasswordTokenExpiry: { type: Date, select: false },
+    publicKey: {type: String, required: true},
     otp: {  type: String, select: false  }
   },
   { timestamps: true }

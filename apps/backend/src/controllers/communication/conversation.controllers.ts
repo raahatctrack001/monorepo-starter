@@ -28,9 +28,31 @@
 import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
 import ApiError from "../../utils/apiError";
-import crypto from 'crypto'
-import { User } from "@repo/database";
+import crypto, { generateKeyPairSync } from 'crypto'
+import { Conversation, User } from "@repo/database";
+import ApiResponse from "../../utils/apiResponse";
 
+async function generatePublicKey() {
+  const { publicKey } = generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+    publicKeyEncoding: { type: 'spki', format: 'pem' },
+    privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+  });
+  return publicKey;
+}
+
+async function migrateUsers() {
+  const usersWithoutKey = await User.find({ publicKey: { $exists: false } });
+
+  for (const user of usersWithoutKey) {
+    const publicKey = await generatePublicKey();
+    user.publicKey = publicKey;
+    await user.save();
+    console.log(`✔️ Updated user: ${user.username}`);
+  }
+
+  console.log(`✅ Migration complete. ${usersWithoutKey.length} users updated.`);
+}
 
 // 1️⃣ Create a new conversation
 export const createConversation = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -45,8 +67,7 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
     *  8. mendatory details:
           * createdBy 
           * participants, 
-          * groupName; if group
-          * createdBy, 
+          * groupName; if group 
           * conversationType, 
           * messageCount, 
           * attachmentCount, 
@@ -55,11 +76,58 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
           * ncryptionKey 
      */
     
-    console.log(req.params);
-    console.log(req.body);
-    console.log(req.user);
+    // console.log(req.params);
+    // console.log(req.body);
+    // console.log(req.user);
 
+    const { creatorId } = req.params;
+    if(req.user?._id !== req.params?.creatorId || !creatorId){
+      throw new ApiError(401, "Unauthorized Attempt!")
+    }
+
+    const { participants } = req.body;
+    if(participants?.length === 0){
+      throw new ApiError(404, "Please select at least 1 user to create group.")
+    }
+    
+    const isGroup = participants?.length > 1;
+
+    let { conversationName } = req.body;
+    if(!isGroup){
+        const partner = await User.findById(participants[0]);
+        conversationName = partner?.fullName || "social-user"
+    }
+    participants.push(creatorId);
+
+    const payload = {
+      createdBy: creatorId,
+      conversationName,
+      participants,
+      isGroup,
+      conversationType: isGroup ? "group" : "personal",
+    };
+
+    const existingConversation = await Conversation.findOne(payload);
+    console.log("checkIfAlreadyExisit", existingConversation);
+    if(existingConversation){
+      return res.status(200).json(new ApiResponse(200, "Conversation already exist", existingConversation))
+    }
   
+    const conversation = await Conversation.create({
+      createdBy: creatorId,
+      conversationName: conversationName,
+      participants,
+      isGroup,
+      conversationType: isGroup ? "group" : "personal",
+      messagesCount: 0,
+      attachmentsCount: 0,
+      isEncrypted: true,
+    })
+    
+    if(!conversation){
+      throw new ApiError(404, "Failed to initiate conversation");
+    }
+    return res.status(201).json(new ApiResponse(201, "Conversation Initiated!", {conversation}));  
   } catch (error) {
     next(error)
   }
