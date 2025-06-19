@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { IConversation } from "@/types/conversations/conversation.types";
 import { useAppSelector } from "@/lib/store/hooks";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface ChatHeaderProps {
   activeConversation: IConversation;
@@ -21,15 +22,33 @@ export default function ChatHeader({
   return (
     <div className="border-b px-4 py-3 flex items-center justify-between gap-3 bg-background">
       {/* Conversation Name */}
-      <div className="font-semibold text-lg truncate">
-        {activeConversation.isGroup
-          ? activeConversation.conversationName
-          : activeConversation.customNickname?.[currentUser?._id as string] ||
+      <div className="flex justify-center items-center gap-2">
+        <Image
+          src={
+            activeConversation?.conversationImage ??
+            process.env.NEXT_PUBLIC_FALLBACK_IMAGE_URL ??
+            "/fallback-cover.jpg"
+          }
+          alt="cover"
+          width={100}
+          height={100}
+          className="h-10 w-10 object-cover rounded-full "
+        />
+        <div>
+
+        <div className="font-semibold text-lg truncate">
+          {activeConversation.isGroup
+            ? activeConversation.conversationName
+            : activeConversation.customNickname?.[currentUser?._id as string] ||
             "social media"}
+        </div>
+        <p className="text-muted-foreground"> 
+          <span className=""> last seen: </span> zyx</p>
+        </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center md:gap-2">
         <Button
           variant="ghost"
           size="lg"
@@ -53,8 +72,8 @@ export default function ChatHeader({
           <Input
             type="text"
             placeholder="Search messages…"
-            onChange={(e) => onSearchMessage(e.target.value)}
-            className={cn("pl-8 h-9 w-48 rounded-md")}
+            // onChange={(e) => onSearchMessage(e.target.value)}
+            className={cn("pl-8 h-9 w-48 rounded-md hidden sm:inline")}
           />
         </div>
       </div>

@@ -25,7 +25,7 @@ export const UserProfileHeader = ({ user }: {user: IUser|null}) => {
           width={1200}
           height={300}
           className="w-full h-60 object-cover"
-          />
+        />
           <div className="flex justify-around w-full relative left-32">
             <div></div>   
             <Edit className="relative left-16 bottom-7 bg-black text-white cursor-pointer"/>

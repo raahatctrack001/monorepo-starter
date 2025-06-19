@@ -4,18 +4,22 @@ import ConversationList from "app/(protected)/conversation/_components/Conversat
 import MessageInput from "app/(protected)/conversation/_components/MessageInput";
 import { User } from "@/lib/mockData";
 import { useState } from "react";
+import MessageInputBar from "./_components/MessageInputBar";
+import { useAppSelector } from "@/lib/store/hooks";
 
 
 const ChatPage: React.FC = () => {
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const currentUserId = "u1";
-
+  const { activeConversation } = useAppSelector(state=>state.conversation)
   return (
     <div className="flex h-screen">
-      <ConversationList />
-      <div className="flex flex-col flex-1">
-        <ChatWindow />
-        {selectedUser && <MessageInput />}
+      <div className="hidden lg:inline">
+        <ConversationList />
+      </div>
+      <div className="flex flex-col w-full">
+        <div className="flex flex-col flex-1">
+          <ChatWindow />
+          {activeConversation && <MessageInputBar />}
+        </div>
       </div>
     </div>
   );

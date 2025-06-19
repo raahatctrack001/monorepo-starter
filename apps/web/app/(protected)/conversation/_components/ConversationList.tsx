@@ -1,15 +1,11 @@
 "use client";
-import Image from "next/image";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { useEffect, useState } from "react";
 import { useGetAllConversations } from "@/hooks/conversation/userGetAllConversation";
 import { IConversation } from "@/types/conversations/conversation.types";
-import RedAlert from "../../../../src/components/common/RedAlert";
 import LocalLoader from "../../../../src/components/common/LocalLoader";
 import { activateConverstaion, storeConverstaions } from "@/lib/store/slices/conversation.slice";
 import SearchContact from "./SearchContact";
-import { IUser } from "@/types/user/user.types";
-import { SelectContent } from "@radix-ui/react-select";
 import ShowConversationList from "./ShowConversationList";
 import { handleClickOnSearchedUser } from "@/lib/services/user.services";
 
