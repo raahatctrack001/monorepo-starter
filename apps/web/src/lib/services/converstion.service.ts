@@ -1,6 +1,7 @@
 import { ApiConnectorParams, ApiResponse } from "@/types/apiConnector.type";
 import { conversationApi } from "../apiEndPoints/conversationEndpoints";
 import { apiConnector } from "../axiosConnector";
+import { IConversation } from "@/types/conversations/conversation.types";
 
 export const createConversation = async (creatorId: string) => {
     const apiData: ApiConnectorParams = {
@@ -35,3 +36,7 @@ export const getAllConversation = async (creatorId: string) => {
 
     return result;  
 };
+
+export const handleSelectedConversation = (conversation: IConversation) => {
+  console.log("conversation selected", conversation)
+}

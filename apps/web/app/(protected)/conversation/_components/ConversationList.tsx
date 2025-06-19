@@ -4,12 +4,15 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { useEffect, useState } from "react";
 import { useGetAllConversations } from "@/hooks/conversation/userGetAllConversation";
 import { IConversation } from "@/types/conversations/conversation.types";
-import RedAlert from "../RedAlert";
-import LocalLoader from "../LocalLoader";
+import RedAlert from "../../../../src/components/common/RedAlert";
+import LocalLoader from "../../../../src/components/common/LocalLoader";
 import { storeConverstaions } from "@/lib/store/slices/conversation.slice";
 import SearchContact from "./SearchContact";
 import { IUser } from "@/types/user/user.types";
 import { SelectContent } from "@radix-ui/react-select";
+import ShowConversationList from "./ShowConversationList";
+import { handleSelectedConversation } from "@/lib/services/converstion.service";
+import { handleClickOnSearchedUser } from "@/lib/services/user.services";
 
 
 interface ChatListProps {
@@ -37,35 +40,10 @@ const ConversationList: React.FC = () => {
     <div className="w-72 border-r h-screen max-h-3/4 p-4 overflow-auto mt-15">
       <h2 className="text-xl font-bold mb-4 fixed z-1 top-5">Chats</h2>
       <div>
-        <SearchContact />
+        <SearchContact onSelectUser={(user)=>handleClickOnSearchedUser(user)} />
       </div>
       {loading && <LocalLoader description="Loading conversations"/>}
-      {conversations?.length > 0 ? conversations?.map((conversation) => (
-        <div
-          key={conversation._id}
-          className="flex items-center gap-3 p-2 rounded cursor-pointer"
-          // onClick={() => onSelectUser(conversation)}
-        >
-          <div className="relative">
-            <Image
-              src={conversation?.conversationImage || process.env.NEXT_PUBLIC_FALLBACK_IMAGE_URL || "/fallback-cover.jpg" }
-              alt={conversation.conversationName || "conversation"}
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
-            {/* {user.isOnline && (
-              <span className="absolute bottom-0 right-0 bg-green-500 w-3 h-3 rounded-full border-2 border-white" />
-            )} */}
-          </div>
-          <div>
-            <h4 className="font-medium" >{conversation?.isGroup ? conversation?.conversationName : 
-            conversation?.customNickname[currentUser?._id as string] || "social media"}</h4>
-          </div>
-        </div>
-      )) : <div className="flex flex-col h-screen justify-start items-center">
-          <RedAlert heading="Conversation Error" description={error || "Please initiate the conversation"}/>
-        </div>}
+      <ShowConversationList conversations={conversations} error={error} onSelectConversation={(conv)=>handleSelectedConversation(conv)} />
     </div>
   );
 };

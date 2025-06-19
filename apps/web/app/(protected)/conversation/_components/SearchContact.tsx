@@ -9,16 +9,17 @@ import Image from "next/image";
 import axios from "axios";
 import { useAppSelector } from "@/lib/store/hooks";
 import { IUser } from "@/types/user/user.types";
+import { useSearchUser } from "@/hooks/conversation/useSearchUser";
 
-interface SearchContactProps {
+interface SearchContactsProps {
   onSelectUser: (user: IUser) => void;
+  // onSearch: (query: string) => Promise<IUser[]>;
 }
-
-export default function SearchContact() {
-  const { currentUser } = useAppSelector(state => state.user);
+export default function SearchContacts({ onSelectUser }: SearchContactsProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<IUser[]>([]);
-  const [loading, setLoading] = useState(false);
+  
+  const { searchUser, loading, error } = useSearchUser();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -26,20 +27,13 @@ export default function SearchContact() {
         setSearchResults([]);
         return;
       }
-      try {
-        setLoading(true);
-        const { data } = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/user/search?query=${searchQuery}`
-        );
-        setSearchResults(data?.data?.users || []);
-      } catch (error) {
-        console.error("Error searching users", error);
-      } finally {
-        setLoading(false);
+      const result = await searchUser(searchQuery);
+      if(result?.success){
+        setSearchResults(result.data.users)
       }
     };
 
-    const delayDebounce = setTimeout(fetchUsers, 400);
+    const delayDebounce = setTimeout(fetchUsers, 1000);
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
 
@@ -61,14 +55,14 @@ export default function SearchContact() {
 
       {searchResults.length > 0 && (
         <Card className="mt-2 shadow-lg border">
-          <ScrollArea className="max-h-60">
+          <ScrollArea className="h-screen scroll-auto z-10">
             <CardContent className="p-2">
               {searchResults.map((user) => (
                 <div
                   key={user._id}
                   className="flex items-center gap-3 px-2 py-2 rounded-md hover:bg-muted cursor-pointer"
                   onClick={() => {
-                    // onSelectUser(user);
+                    onSelectUser(user);
                     setSearchQuery("");
                     setSearchResults([]);
                   }}

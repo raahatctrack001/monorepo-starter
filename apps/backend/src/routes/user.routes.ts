@@ -28,7 +28,8 @@ import {
   addStoryHighlight,
   removeStoryHighlight,
   getStoryHighlights,
-  getAllUserProfile
+  getAllUserProfile,
+  searchUsers
 } from '../controllers/user.controller';
 import { isUserLoggedIn } from '../middlewares/auth.middleware';
 
@@ -58,7 +59,7 @@ router.put('/profile', isAuthenticated, updateUserProfile);
 router.get('/profile/:userId', isUserLoggedIn, getUserProfile);
 router.get('/profiles/:userId', isUserLoggedIn, getAllUserProfile);
 router.get('/check-username/:username', checkUsernameAvailability);
-
+router.get('/search-user', isUserLoggedIn, searchUsers)
 /* Followers / Following */
 router.get('/:userId/followers/count', getFollowersCount);
 router.get('/:userId/followings/count', getFollowingCount);

@@ -18,7 +18,7 @@ export const userApi = {
   updateUserProfile: () => withPrefix('/profile'),
   getUserProfile: (userId: string) => withPrefix(`/profile/${userId}`),
   getAllUserProfile: (userId: string) => withPrefix(`/profiles/${userId}`),
-  checkUsernameAvailability: (username: string) => withPrefix(`/check-username/${username}`),
+  searchUsers: (searchTerm: string) => withPrefix(`/search-user?searchTerm=${searchTerm}`),
 
   // 👥 Followers / Following
   getFollowersCount: (userId: string) => withPrefix(`/${userId}/followers/count`),

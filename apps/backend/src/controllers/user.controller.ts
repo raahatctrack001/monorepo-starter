@@ -99,6 +99,40 @@ export const checkUsernameAvailability = asyncHandler(async (req: Request, res: 
   res.status(200).json({ available: isAvailable });
 });
 
+export const searchUsers = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const searchTerm  = req.query.searchTerm as string;
+
+    if (!searchTerm) {
+      throw new ApiError(400, "Search term is required");
+    }
+
+    const regex = new RegExp(searchTerm , "i"); // case-insensitive partial match
+
+    const users = await User.find({
+      $or: [
+        { fullName: regex },
+        { username: regex },
+        { email: regex },
+        { phoneNumber: regex },
+        { bio: { $elemMatch: { $regex: regex } } },
+        { "location.country": regex },
+        { "location.state": regex },
+        { "location.city": regex },
+      ],
+      status: "active",  // Optional: only fetch active users
+    })
+    .select("_id fullName username avatar premiumStatus location email")  // Only send necessary fields
+    // .limit(20);
+
+    return res.status(200).json(new ApiResponse(200, "Users fetched successfully", {users, length: users.length}));
+
+  } catch (error) {
+    next(error);
+  }
+});
+
+
 // Followers Count
 export const getFollowersCount = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json({ followersCount: 210 });

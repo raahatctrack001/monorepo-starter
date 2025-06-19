@@ -145,6 +145,7 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
       messagesCount: 0,
       attachmentsCount: 0,
       customNickname,
+      // lastMessage:`${req.user?.fullName} ${isGroup ? "Added you to this group ": "Initiated the conversation with you"}`,
       conversationImage: isGroup
         ? process.env.FALLBACK_GROUP_IMAGE_URL || "/fallback-cover.jpg"
         : partner?.avatar?.at(-1) || process.env.FALLBACK_IMAGE_URL || "/fallback-cover.jpg"
