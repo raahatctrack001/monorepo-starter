@@ -31,6 +31,7 @@ import ApiError from "../../utils/apiError";
 import crypto, { generateKeyPairSync } from 'crypto'
 import { Conversation, User } from "@repo/database";
 import ApiResponse from "../../utils/apiResponse";
+import mongoose from "mongoose";
 
 async function generatePublicKey() {
   const { publicKey } = generateKeyPairSync('rsa', {
@@ -86,6 +87,7 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
     }
 
     const { participants } = req.body;
+
     if(participants?.length === 0){
       throw new ApiError(404, "Please select at least 1 user to create group.")
     }
@@ -97,8 +99,17 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
         const partner = await User.findById(participants[0]);
         conversationName = partner?.fullName || "social-user"
     }
-    participants.push(creatorId);
 
+    participants.push(creatorId);
+     // Validate all IDs are valid ObjectIds
+    const invalidIds = participants.filter(
+      (participantId: string) => !mongoose.Types.ObjectId.isValid(participantId)
+    );
+
+    if (invalidIds.length > 0) {
+      throw new ApiError(403, `Invalid participant IDs: ${invalidIds.join(', ')}`);
+    }
+    
     const payload = {
       createdBy: creatorId,
       conversationName,
@@ -121,7 +132,6 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
       conversationType: isGroup ? "group" : "personal",
       messagesCount: 0,
       attachmentsCount: 0,
-      isEncrypted: true,
     })
     
     if(!conversation){
@@ -135,7 +145,27 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
 
 // 2️⃣ Get all conversations for a user
 export const getAllConversations = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).json({ message: "Fetched all conversations for user" });
+  try {    
+    const { userId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw new ApiError(400, "Invalid userId")
+    }
+
+    const conversations =  await Conversation.find({
+      $or: [
+        { creatorId: userId },
+        { participants: userId },
+      ],
+    })
+    console.log(conversations)
+    if(conversations?.length === 0){
+      throw new ApiError(404, "No conversation found! please initiate conversation.")
+    }
+
+    res.status(200).json(new ApiResponse(200, "fetched all converations", {conversations, length: conversations.length}));
+  } catch (error) {
+    next(error);
+  }
 });
 
 // 3️⃣ Get a single conversation by ID

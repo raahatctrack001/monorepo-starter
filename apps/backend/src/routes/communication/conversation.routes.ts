@@ -37,7 +37,7 @@ const router = express.Router();
 
 // 1️⃣ Conversations collection routes
 router.route("/create-conversation/:creatorId").post(isUserLoggedIn, createConversation);
-router.route("/get-all-conversation/:userId").get(getAllConversations);
+router.route("/get-all-conversation/:userId").get(isUserLoggedIn, getAllConversations);
 
 // 2️⃣ Single conversation by ID
 router
