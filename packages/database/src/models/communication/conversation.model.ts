@@ -7,8 +7,8 @@ export interface IConversation extends Document {
     isGroup: boolean;
     groupId?: Types.ObjectId;
     conversationName?: string;
-    groupImage?: string;
-    groupDescription?: string;
+    conversationImage?: string;
+    conversationDescription?: string;
     createdBy: Types.ObjectId;
     lastMessage?: Types.ObjectId;
     lastMessageAt?: Date;
@@ -52,8 +52,8 @@ export interface IConversation extends Document {
     isGroup: { type: Boolean, required: true, default: false },
     groupId: { type: Schema.Types.ObjectId, ref: "Group" },
     conversationName: { type: String },
-    groupImage: { type: String },
-    groupDescription: { type: String },
+    conversationImage: { type: String },
+    conversationDescription: { type: String },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
