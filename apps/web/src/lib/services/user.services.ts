@@ -18,3 +18,20 @@ export const getUserProfile = async (userId: string) => {
 
     return result;  
 };
+
+export const getAllUserProfile = async (userId: string) => {
+    const apiData: ApiConnectorParams = {
+      url: userApi.getAllUserProfile(userId),
+      method: "GET",
+      credentials: "include"
+    };
+    
+    const response = await apiConnector<ApiResponse>(apiData);
+    const result = response.data;
+  
+    if (!result.success) {
+      throw new Error(result.message || "Get Users Fetching failed!");
+    }  
+
+    return result;  
+};

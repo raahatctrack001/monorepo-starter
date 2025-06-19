@@ -25,7 +25,7 @@ export default function Sidebar() {
     { label: "Search", icon: Search, href: "/search" },
     { label: "Explore", icon: Compass, href: "/explore" },
     { label: "Reels", icon: Video, href: "/reels" },
-    { label: "Messages", icon: Send, href: "/messages" },
+    { label: "Conversation", icon: Send, href: "/conversation" },
     { label: "Notifications", icon: Heart, href: "/notifications" },
     { label: "Create", icon: PlusSquare, href: "/create" },
     { label: "Profile", icon: User, href: `/profile/${currentUser?._id}` },
