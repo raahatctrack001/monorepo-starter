@@ -151,6 +151,10 @@ export const getAllConversations = asyncHandler(async (req: Request, res: Respon
       throw new ApiError(400, "Invalid userId")
     }
 
+    if(req.user?._id !== userId){
+      throw new ApiError(401, "Unauthorized Attempt!")
+    }
+
     const conversations =  await Conversation.find({
       $or: [
         { creatorId: userId },
