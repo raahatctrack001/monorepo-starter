@@ -44,3 +44,7 @@ export interface IConversation {
     createdAt: Date;
     updatedAt: Date;
   }  
+
+  export interface ConversationSliceStateSchema {
+    conversations: IConversation[],
+  }

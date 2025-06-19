@@ -7,6 +7,7 @@ import postReducer from './slices/post.slice'
 import reelReducer from './slices/reel.slice'
 import messageReducer from './slices/message.slice'
 import themeReducer from './slices/theme.slice'
+import conversationReducer from './slices/conversation.slice'
 
 // Combine reducers first
 const rootReducer = combineReducers({
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   reel: reelReducer,
   message: messageReducer,
   theme: themeReducer,
+  conversation: conversationReducer,
 })
 
 // Redux Persist config

@@ -1,11 +1,12 @@
 "use client";
 import Image from "next/image";
-import { useAppSelector } from "@/lib/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { useEffect, useState } from "react";
 import { useGetAllConversations } from "@/hooks/conversation/userGetAllConversation";
 import { IConversation } from "@/types/conversations/conversation.types";
 import RedAlert from "../RedAlert";
 import LocalLoader from "../LocalLoader";
+import { storeConverstaions } from "@/lib/store/slices/conversation.slice";
 
 
 interface ChatListProps {
@@ -17,13 +18,15 @@ const ConversationList: React.FC<ChatListProps> = ({ onSelectUser }: ChatListPro
   const [conversations, setConversations] = useState<IConversation[]>([])
 
   const { getAllConversations, loading, error } = useGetAllConversations(); 
-  
+  const dispatch = useAppDispatch();
+
   useEffect(()=>{
     (async ()=>{
       const result = await getAllConversations(currentUser?._id as string);
       console.log(result)
       if(result?.success){
         setConversations(result.data.conversations)
+        dispatch(storeConverstaions(result.data.conversations))
       }
     })()
   }, [])
