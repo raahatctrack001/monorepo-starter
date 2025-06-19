@@ -9,7 +9,7 @@ export const conversationApi = {
   getAllConversations: (userId: string) => withPrefix(`/get-all-conversation/${userId}`),
 
   // 3️⃣ Single conversation by ID
-  getConversationById: (id: string) => withPrefix(`/${id}`),
+  getConversationById: (conversationId: string) => withPrefix(`/${conversationId}`),
   updateConversation: (id: string) => withPrefix(`/${id}`),
   deleteConversation: (id: string) => withPrefix(`/${id}`),
 

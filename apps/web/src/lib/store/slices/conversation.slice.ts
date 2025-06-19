@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 const initialState: ConversationSliceStateSchema = {
   conversations: [],
+  activeConversation: null,
 };
 
 const conversationSlice = createSlice({
@@ -12,6 +13,9 @@ const conversationSlice = createSlice({
     storeConverstaions: (state, action: PayloadAction<IConversation[]>) => {
       state.conversations = action.payload;
     },
+    activateConverstaion: (state, action: PayloadAction<IConversation>) => {
+      state.activeConversation = action.payload;
+    },
     deleteConversations: (state)=>{
         state.conversations = []
     }
@@ -20,7 +24,8 @@ const conversationSlice = createSlice({
 
 export const {
   storeConverstaions,
-  deleteConversations
+  deleteConversations,
+  activateConverstaion
 } = conversationSlice.actions;
 
 export default conversationSlice.reducer;

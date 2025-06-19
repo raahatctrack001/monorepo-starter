@@ -14,7 +14,7 @@ const ChatPage: React.FC = () => {
     <div className="flex h-screen">
       <ConversationList />
       <div className="flex flex-col flex-1">
-        <ChatWindow selectedUser={selectedUser} currentUserId={currentUserId} />
+        <ChatWindow />
         {selectedUser && <MessageInput />}
       </div>
     </div>

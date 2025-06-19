@@ -33,10 +33,22 @@ export const getAllConversation = async (creatorId: string) => {
     if (!result.success) {
       throw new Error(result.message || "Failed to get conversation...");
     }  
-
     return result;  
 };
 
-export const handleSelectedConversation = (conversation: IConversation) => {
+export const handleSelectedConversation = async (conversation: IConversation) => {
   console.log("conversation selected", conversation)
+  const apiData: ApiConnectorParams = {
+      url: conversationApi.getConversationById(conversation?._id as string), //created by this user or is a participants
+      method: "GET",
+      credentials: "include"
+    };
+    
+    const response = await apiConnector<ApiResponse>(apiData);
+    const result = response.data;
+  
+    if (!result.success) {
+      throw new Error(result.message || "Failed to get conversation...");
+    }  
+    return result;
 }

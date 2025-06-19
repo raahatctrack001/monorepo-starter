@@ -6,12 +6,11 @@ import { useGetAllConversations } from "@/hooks/conversation/userGetAllConversat
 import { IConversation } from "@/types/conversations/conversation.types";
 import RedAlert from "../../../../src/components/common/RedAlert";
 import LocalLoader from "../../../../src/components/common/LocalLoader";
-import { storeConverstaions } from "@/lib/store/slices/conversation.slice";
+import { activateConverstaion, storeConverstaions } from "@/lib/store/slices/conversation.slice";
 import SearchContact from "./SearchContact";
 import { IUser } from "@/types/user/user.types";
 import { SelectContent } from "@radix-ui/react-select";
 import ShowConversationList from "./ShowConversationList";
-import { handleSelectedConversation } from "@/lib/services/converstion.service";
 import { handleClickOnSearchedUser } from "@/lib/services/user.services";
 
 
@@ -22,7 +21,6 @@ interface ChatListProps {
 const ConversationList: React.FC = () => {
   const { currentUser } = useAppSelector(state=>state.user);
   const [conversations, setConversations] = useState<IConversation[]>([])
-  const [contact, setContact] = useState<IUser[]>([])
   const { getAllConversations, loading, error } = useGetAllConversations(); 
   const dispatch = useAppDispatch();
 
@@ -36,6 +34,10 @@ const ConversationList: React.FC = () => {
       }
     })()
   }, [])
+
+  const handleSelectedConversation = (conversation: IConversation) => {
+      dispatch(activateConverstaion(conversation));
+  }
   return (
     <div className="w-72 border-r h-screen max-h-3/4 p-4 overflow-auto mt-15">
       <h2 className="text-xl font-bold mb-4 fixed z-1 top-5">Chats</h2>

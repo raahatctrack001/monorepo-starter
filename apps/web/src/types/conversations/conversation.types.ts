@@ -45,4 +45,5 @@ export interface IConversation {
 
   export interface ConversationSliceStateSchema {
     conversations: IConversation[],
+    activeConversation: IConversation|null,
   }

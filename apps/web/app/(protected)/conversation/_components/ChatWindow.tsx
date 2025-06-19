@@ -1,13 +1,18 @@
+import { IUser } from "@/types/user/user.types";
 import MessageBubble from "./MessageBubble";
-import { Message, messages, User } from "@/lib/mockData";
+import { Message, messages } from "@/lib/mockData";
+import { useAppSelector } from "@/lib/store/hooks";
+import ChatHeader from "./ChatHeader.tsx";
 
 interface ChatWindowProps {
-  selectedUser: User | null;
+  selectedUser: IUser | null;
   currentUserId: string;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ selectedUser, currentUserId }) => {
-  if (!selectedUser) {
+const ChatWindow: React.FC = () => {
+  const { activeConversation } = useAppSelector(state=>state.conversation);
+  const { currentUser } = useAppSelector(state=>state.user);
+  if (!activeConversation) {
     return (
       <div className="flex-1 flex items-center justify-center text-gray-500">
         Select a chat
@@ -17,8 +22,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedUser, currentUserId }) 
 
   return (
     <div className="flex flex-col flex-1 h-screen">
-      <div className="border-b p-4 font-semibold text-lg">{selectedUser.name}</div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+      <ChatHeader activeConversation={activeConversation} />
+      {/* <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {messages.map((msg: Message) => (
           <MessageBubble
             key={msg.id}
@@ -26,7 +31,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ selectedUser, currentUserId }) 
             isOwn={msg.senderId === currentUserId}
           />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };
