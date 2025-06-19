@@ -10,7 +10,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn }) => {
     <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-2`}>
       <div
         className={`p-3 rounded-xl max-w-xs ${
-          isOwn ? "bg-blue-600 text-white" : "bg-gray-200"
+          isOwn ? "" : "bg-g"
         }`}
       >
         {message.content}

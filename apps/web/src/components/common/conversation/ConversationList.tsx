@@ -1,18 +1,18 @@
 "use client";
 import Image from "next/image";
-import { User, users } from "@/lib/mockData";
 import { useAppSelector } from "@/lib/store/hooks";
 import { useEffect, useState } from "react";
 import { useGetAllConversations } from "@/hooks/conversation/userGetAllConversation";
 import { IConversation } from "@/types/conversations/conversation.types";
 import RedAlert from "../RedAlert";
+import LocalLoader from "../LocalLoader";
 
 
 interface ChatListProps {
-  onSelectUser: (user: User) => void;
+  onSelectUser: (user: IConversation) => void;
 }
 
-const ConversationList: React.FC<ChatListProps> = ({ onSelectUser }) => {
+const ConversationList: React.FC<ChatListProps> = ({ onSelectUser }: ChatListProps) => {
   const { currentUser } = useAppSelector(state=>state.user);
   const [conversations, setConversations] = useState<IConversation[]>([])
 
@@ -30,10 +30,11 @@ const ConversationList: React.FC<ChatListProps> = ({ onSelectUser }) => {
   return (
     <div className="w-72 border-r h-screen max-h-3/4 p-4 overflow-auto mt-15">
       <h2 className="text-xl font-bold mb-4 fixed z-1 top-5">Chats</h2>
+      {loading && <LocalLoader description="Loading conversations"/>}
       {conversations?.length > 0 ? conversations?.map((conversation) => (
         <div
           key={conversation._id}
-          className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded cursor-pointer"
+          className="flex items-center gap-3 p-2 rounded cursor-pointer"
           onClick={() => onSelectUser(conversation)}
         >
           <div className="relative">
