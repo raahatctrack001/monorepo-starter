@@ -28,22 +28,38 @@
 import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
 import ApiError from "../../utils/apiError";
+import crypto from 'crypto'
+import { User } from "@repo/database";
+
 
 // 1️⃣ Create a new conversation
 export const createConversation = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { senderId, receiverId } = req.params;    
-    if(!senderId){
-      throw new ApiError(404, "SenderId is missing!");
-    }
-
-    if(req.user?._id !== senderId){
-      throw new ApiError(401, "Unauthorized to initiate conversation");
-    }
-
-
-
+    /***To Do's
+     * 1. extract senderId from params
+     * 2. validate and see if sender is loggedIn and authorized to create conversatoin
+     * 3. extract participants from body
+     * 4. if participants.length > 1 => its group
+     * 5. check if conversation with this signature alreay present? if conversationType: secret then create new else return old
+     * 7. extract {groupName}
+    *  8. mendatory details:
+          * createdBy 
+          * participants, 
+          * groupName; if group
+          * createdBy, 
+          * conversationType, 
+          * messageCount, 
+          * attachmentCount, 
+          * allowedMessageTypes, 
+          * isEncrypted, e
+          * ncryptionKey 
+     */
     
+    console.log(req.params);
+    console.log(req.body);
+    console.log(req.user);
+
+  
   } catch (error) {
     next(error)
   }

@@ -27,6 +27,7 @@ import {
   updateLastMessage,
   updateTypingStatus
 } from "../../controllers/communication/conversation.controllers";
+import { isUserLoggedIn } from "../../middlewares/auth.middleware";
 const protect = ()=>{}
 
 
@@ -35,7 +36,7 @@ const router = express.Router();
 // Routes using .route() chain syntax
 
 // 1️⃣ Conversations collection routes
-router.route("/create-conversation/:senderId/:receiverId").post(createConversation);
+router.route("/create-conversation/:creatorId").post(isUserLoggedIn, createConversation);
 router.route("/get-all-conversation/:userId").get(getAllConversations);
 
 // 2️⃣ Single conversation by ID

@@ -24,7 +24,7 @@ export interface IConversation extends Document {
     allowedMessageTypes?: string;
     lastTypingStatus?: Record<string, Date>;
     isEncrypted: boolean;
-    encryptionKey?: string;
+    encryptedKeys?: Record<string, string>;
     customTheme?: {
       user: {
         color: string;
@@ -76,7 +76,10 @@ export interface IConversation extends Document {
     allowedMessageTypes: { type: String },
     lastTypingStatus: { type: Schema.Types.Mixed, default: {} },
     isEncrypted: { type: Boolean, default: false },
-    encryptionKey: { type: String },
+    encryptedKeys: {
+      type: Map,
+      of: String // base64 encrypted AES keys
+    },
     customTheme: [
       {
         user: {
