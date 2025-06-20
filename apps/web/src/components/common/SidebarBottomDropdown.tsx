@@ -63,12 +63,7 @@ export default function SidebarBottomDropdown() {
           <BookOpen className="w-4 h-4 mr-3" />
           Saved
         </DropdownMenuItem>
-
-        <DropdownMenuItem>
-          <Palette className="w-4 h-4 mr-3" />
-          Change Theme
-        </DropdownMenuItem>
-
+      
         <DropdownMenuItem>
           <Flag className="w-4 h-4 mr-3" />
           Report a Problem

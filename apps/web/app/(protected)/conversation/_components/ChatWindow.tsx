@@ -1,7 +1,7 @@
 import { IUser } from "@/types/user/user.types";
 import { useAppSelector } from "@/lib/store/hooks";
 import { IMessage } from "@/types/conversations/message.types";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGetMessageByConversation } from "@/hooks/conversation/message/useGetMessageByConversation";
 import { IConversation } from "@/types/conversations/conversation.types";
 import RedAlert from "@/components/common/RedAlert";
@@ -16,6 +16,8 @@ import {
 import { format, isSameDay } from "date-fns";
 import { ImageViewer } from "@/components/common/ImageViewer";
 import { MessagePreviewModal } from "./messageScreen/MessagePreviewModal";
+import { Button } from "@/components/ui/button";
+import { ArrowDown } from "lucide-react";
 
 interface Props {
   activeConversation: IConversation | null;
@@ -26,6 +28,13 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
   const { getAllMessageByConversation, loading, error } = useGetMessageByConversation();
   const [previewChat, setPreviewChat] = useState<IMessage|null>(null)
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+
   useEffect(() => {
     (async () => {
       if (!activeConversation || !currentUser?._id) return;
@@ -46,9 +55,9 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
     );
   }
 
-  if(previewChat){
-    return <MessagePreviewModal message={previewChat} onClose={()=>setPreviewChat(null)} />
-  }
+  // if(previewChat){
+  //   return <MessagePreviewModal message={previewChat} onClose={()=>setPreviewChat(null)} />
+  // }
   if (error || loading) {
     return (
       <div className="w-full h-full flex justify-center items-center mx-auto">
@@ -83,6 +92,7 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
 
     return (
       <div className={`flex ${isSender ? "justify-end" : "justify-start"}`} key={message._id}>
+        {previewChat && <MessagePreviewModal message={previewChat} onClose={()=>setPreviewChat(null)} />}
         <div 
           onClick={()=>message.messageType === "image" && setPreviewChat(message)}
           className={`max-w-[75%] ${isSender ? "bg-blue-100" : "bg-gray-100"} rounded-lg p-2 relative`}>
@@ -106,6 +116,14 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
                 );
             }
           })()}
+          <div ref={messagesEndRef} />
+          <Button
+            onClick={scrollToBottom}
+            className="fixed bottom-44 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition"
+          >
+            <ArrowDown size={20} />
+          </Button>
+
           <div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
             <span>{format(new Date(message.sentAt || new Date()), "hh:mm a")}</span>
             {isSender && <span>• {status}</span>}

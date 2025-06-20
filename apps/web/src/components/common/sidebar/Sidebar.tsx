@@ -16,6 +16,7 @@ import {
 import SidebarBottomDropdown from "../SidebarBottomDropdown";
 import { useAppSelector } from "@/lib/store/hooks";
 
+
 export default function Sidebar() {
   const pathname = usePathname();
   const { currentUser } = useAppSelector(state=>state.user);
@@ -34,7 +35,7 @@ export default function Sidebar() {
   return (
     <aside className="h-screen border-r w-20 md:w-64 p-4 flex flex-col justify-between">
       <div>
-        <h1 className="text-lg md:text-3xl font-bold mb-6 px-2 flex items-start">Social Media</h1>
+        <h1 className="text-lg md:text-3xl font-bold mb-6 px-2 flex items-start">Social Desk</h1>
         <nav className="space-y-2 flex flex-col items-center md:items-start ">
           {navItems.map(({ label, icon: Icon, href }) => (
             <Link
@@ -47,7 +48,7 @@ export default function Sidebar() {
               }`}
             >
               <Icon className="w-6 h-6" name={label}/>
-              <span className="text-base hidden lg:inline">{label}</span>
+              <span className="text-base hidden md:inline">{label}</span>
             </Link>
           ))}
         </nav>

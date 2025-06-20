@@ -2,37 +2,126 @@
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Paperclip, Image, Mic, MapPin, BarChart3, Contact, PhoneCall, Calendar } from "lucide-react";
+import {
+  Paperclip,
+  Image,
+  Mic,
+  MapPin,
+  BarChart3,
+  Contact,
+  PhoneCall,
+  Calendar,
+} from "lucide-react";
+import { useRef, useState } from "react";
+import { VoiceNoteRecorder } from "./VoiceNoteRecorder";
 
 export default function AttachmentMenu() {
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Paperclip size={18} />
-        </Button>
-      </PopoverTrigger>
+  const mediaInputRef = useRef<HTMLInputElement>(null!);
+  const voiceNoteInputRef = useRef<HTMLInputElement>(null!);
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState<boolean>(false);
 
-      <PopoverContent className="w-48 p-2 flex flex-col gap-1">
-        {[
-          { label: "Media", icon: Image },
-          { label: "Voice Note", icon: Mic },
-          { label: "Location", icon: MapPin },
-          { label: "Poll", icon: BarChart3 },
-          { label: "Contact", icon: Contact },
-          { label: "Call Log", icon: PhoneCall },
-          { label: "Event", icon: Calendar },
-        ].map((item) => (
-          <Button
-            key={item.label}
-            variant="ghost"
-            className="flex items-center gap-2 w-full justify-start text-sm"
-          >
-            <item.icon size={18} />
-            {item.label}
+  
+
+  const handleOtherAttachment = (label: string) => {
+    console.log("Trigger action for:", label);
+    // implement modals, pickers etc for location, poll, contact etc.
+  };
+
+  const attachmentOptions = [
+    {
+      label: "Media",
+      icon: Image,
+      onClick: () => mediaInputRef.current.click(),
+    },
+    {
+      label: "Voice Note",
+      icon: Mic,
+      onClick: () => setShowVoiceRecorder(true),
+    },
+    {
+      label: "Location",
+      icon: MapPin,
+      onClick: () => handleOtherAttachment("Location"),
+    },
+    {
+      label: "Poll",
+      icon: BarChart3,
+      onClick: () => handleOtherAttachment("Poll"),
+    },
+    {
+      label: "Contact",
+      icon: Contact,
+      onClick: () => handleOtherAttachment("Contact"),
+    },
+    {
+      label: "Call Log",
+      icon: PhoneCall,
+      onClick: () => handleOtherAttachment("Call Log"),
+    },
+    {
+      label: "Event",
+      icon: Calendar,
+      onClick: () => handleOtherAttachment("Event"),
+    },
+  ];
+
+  return (
+    <>
+      {/* Popover Trigger */}
+      <Popover>
+        {
+          showVoiceRecorder && 
+            <VoiceNoteRecorder
+              open={showVoiceRecorder}
+              onClose={() => setShowVoiceRecorder(false)}
+              onSend={(audioFile) => {
+                console.log("Voice note to upload", audioFile);
+                // call your upload handler or API here
+              }}
+            />
+        }
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="icon" className="rounded-full">
+            <Paperclip size={18} />
           </Button>
-        ))}
-      </PopoverContent>
-    </Popover>
+        </PopoverTrigger>
+
+        <PopoverContent className="w-48 p-2 flex flex-col gap-1">
+          {attachmentOptions.map((item) => (
+            <Button
+              key={item.label}
+              variant="ghost"
+              className="flex items-center gap-2 w-full justify-start text-sm"
+              onClick={item.onClick}
+            >
+              <item.icon size={18} />
+              {item.label}
+            </Button>
+          ))}
+        </PopoverContent>
+      </Popover>
+
+      {/* Hidden Inputs for Media and Voice Note */}
+      <input
+        type="file"
+        ref={mediaInputRef}
+        className="hidden"
+        accept="image/*,video/*,application/pdf"
+        multiple
+        onChange={(e) => {
+          console.log("Selected media files:", e.target.files);
+        }}
+      />
+
+      <input
+        type="file"
+        ref={voiceNoteInputRef}
+        className="hidden"
+        accept="audio/*"
+        onChange={(e) => {
+          console.log("Selected voice note:", e.target.files);
+        }}
+      />
+    </>
   );
 }
