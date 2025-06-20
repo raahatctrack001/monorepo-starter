@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
 
 export interface IFile {
-  fieldname: string,
-  originalname: string,
+  fieldname?: string,
+  originalname?: string,
   size: number,
   filename?: string,
   encoding?: string,
@@ -10,6 +10,7 @@ export interface IFile {
   destination?: string,
   path?: string,
 }
+
 // "fieldname": "profilePicture",
 //         "originalname": "download (2).png",
 //         "encoding": "7bit",
@@ -18,6 +19,7 @@ export interface IFile {
 //         "filename": "download (2).png",
 //         "path": "C:\\Users\\ROG\\Desktop\\monorepo\\apps\\backend\\src\\middlewares\\public\\download (2).png",
 //         "size": 583226
+
 export interface IMessage {
   _id: string,
   conversationId: Types.ObjectId;

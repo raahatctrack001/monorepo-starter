@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Mic, StopCircle, Redo, SendHorizontal, Download } from "lucide-react";
+import { IFile } from "@/types/conversations/message.types";
 
 interface Props {
   open: boolean;
@@ -11,7 +12,7 @@ interface Props {
   onSend: (audioFile: File) => void;
 }
 
-export const VoiceNoteRecorder: React.FC<Props> = ({ open, onClose, onSend }) => {
+export const VoiceNoteRecorder: React.FC<Props> = ({ open, onClose, onSend }: Props) => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -23,6 +24,7 @@ export const VoiceNoteRecorder: React.FC<Props> = ({ open, onClose, onSend }) =>
   const [timer, setTimer] = useState(0);
   const [audioDuration, setAudioDuration] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+
 
   // Cleanup function
   const cleanup = useCallback(() => {

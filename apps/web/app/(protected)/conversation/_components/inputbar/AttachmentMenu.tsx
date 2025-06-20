@@ -14,13 +14,16 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { VoiceNoteRecorder } from "./VoiceNoteRecorder";
+import { IFile, IMessage } from "@/types/conversations/message.types";
+import { useCreateMessage } from "@/hooks/conversation/message/useCreateMessage";
+import { useAppSelector } from "@/lib/store/hooks";
 
-export default function AttachmentMenu() {
+export default function AttachmentMenu({conversationId}: {conversationId: string}) {
   const mediaInputRef = useRef<HTMLInputElement>(null!);
   const voiceNoteInputRef = useRef<HTMLInputElement>(null!);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState<boolean>(false);
 
-  
+  const { currentUser } = useAppSelector(state=>state.user);
 
   const handleOtherAttachment = (label: string) => {
     console.log("Trigger action for:", label);
@@ -65,6 +68,42 @@ export default function AttachmentMenu() {
     },
   ];
 
+  const { sendMessage, loading, error } = useCreateMessage();
+
+
+// Alternative version with loading state handling
+  const sendVoiceMessage = async (audioFile: File) => {
+    try {
+      // Validate required data
+      if (!audioFile || !conversationId || !currentUser?._id) {
+        throw new Error("Missing required data for sending voice message");
+      }
+
+      console.log("Sending voice message:", {
+        fileName: audioFile.name,
+        fileSize: audioFile.size,
+        fileType: audioFile.type
+      });
+
+      const formData = new FormData();
+      formData.append("audio", audioFile);
+      formData.append("messageType", "voice");
+      
+      const result = await sendMessage(formData, conversationId, currentUser._id);
+      
+      if (result?.success) {
+        console.log("Voice message sent successfully");
+        return result;
+      } else {
+        throw new Error(result?.message || "Failed to send voice message");
+      }
+      
+    } catch (err) {
+      console.error("Error sending voice message:", err);
+      // You might want to show a toast notification here
+      throw err;
+    }
+  };
   return (
     <>
       {/* Popover Trigger */}
@@ -74,10 +113,7 @@ export default function AttachmentMenu() {
             <VoiceNoteRecorder
               open={showVoiceRecorder}
               onClose={() => setShowVoiceRecorder(false)}
-              onSend={(audioFile) => {
-                console.log("Voice note to upload", audioFile);
-                // call your upload handler or API here
-              }}
+              onSend={(audioFile: File) => sendVoiceMessage(audioFile)}
             />
         }
         <PopoverTrigger asChild>

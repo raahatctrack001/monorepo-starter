@@ -11,6 +11,10 @@ import { createMessages } from "./messageSupporter/createMessage";
 
 // 1️⃣ Create Message
 export const createMessage = asyncHandler(async (req: Request, res: Response) => {
+  console.log(req.params)
+  console.log(req.body)
+  console.log(req.files)
+  console.log(req.file)
   const { conversationId, creatorId } = req.params;
 
   if(!mongoose.Types.ObjectId.isValid(creatorId) || !mongoose.Types.ObjectId.isValid(conversationId)){
@@ -74,7 +78,7 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
     res.json({message: "system message has been sent"})
   }
   
-  if(textContent.length > 0){ 
+  if(textContent && textContent?.length > 0){ 
     messagePayload.push({
       messageType: "text",
       textContent,
@@ -86,13 +90,13 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
         ...message, 
         conversationId: conversation?._id,
         senderId: creatorId,
-        receiverIds: filteredReceivers.map(userId=>new mongoose.Types.ObjectId(userId)),
+        receiverIds: filteredReceivers?.map(userId=>new mongoose.Types.ObjectId(userId)),
         sentAt: Date.now(),
       }
       return payload;
   });
   
-  if(tailoredMessages.length === 0){
+  if(tailoredMessages && Array.isArray(tailoredMessages) && tailoredMessages?.length === 0){
     throw new ApiError(404, "No message to send");
   }
   const messages = await createMessages(tailoredMessages);

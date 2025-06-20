@@ -7,6 +7,7 @@ import TextInput from "./inputbar/TextInput";
 import SendButton from "./inputbar/SendButton";
 import FilePreviewDialog from "./inputbar/FilePreviewDialogue";
 import { IConversation } from "@/types/conversations/conversation.types";
+import { activateConverstaion } from "@/lib/store/slices/conversation.slice";
 
 
 export default function MessageInputBar({conversationId}: {conversationId: string}) {
@@ -46,7 +47,7 @@ export default function MessageInputBar({conversationId}: {conversationId: strin
   return (
     <>
       <div className="w-full border-t px-4 py-3 flex items-center gap-2 bg-background">
-        <AttachmentMenu />
+        <AttachmentMenu conversationId={conversationId} />
         <EmojiPicker onSelect={handleEmojiSelect} />
 
         <input

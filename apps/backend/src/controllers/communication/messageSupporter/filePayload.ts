@@ -5,7 +5,7 @@ import { getMessageTypeFromMime } from "../../../utils/messageType";
 
 export const getFilesPayload = async (files: IFile[]) => {
     return Promise.all(
-      files.map(async (file) => {
+      files?.map(async (file) => {
         //TODO: handle file size constaint bases on mimetype limit size for picture video documents and other format
         const uploadResponse = await uploadOnCloudinary(file?.path as string);
         if (!uploadResponse) {
