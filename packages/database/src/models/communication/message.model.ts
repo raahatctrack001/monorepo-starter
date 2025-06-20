@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 export interface IFile {
   fieldname: string,
   originalname: string,
-  size: string,
+  size: number,
   filename?: string,
   encoding?: string,
   mimetype?: string,
@@ -59,7 +59,7 @@ export interface IMessage extends Document {
 const FileSchema = new Schema<IFile> ({
   fieldname: {type: String, required: true},
   originalname: {type: String, required: true},
-  size: {type: String, required: true},
+  size: {type: Number, required: true},
   filename: {type: String},
   encoding: {type: String},
   mimetype: {type: String},
