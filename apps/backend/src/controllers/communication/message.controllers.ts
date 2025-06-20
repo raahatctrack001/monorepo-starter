@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 import ApiError from "../../utils/apiError";
 import { Conversation, IMessage, Message} from "@repo/database";
 import ApiResponse from "../../utils/apiResponse";
-import { uploadOnCloudinary } from "../../services/cloudinary/cloudinary.config";
-import { getMessageTypeFromMime } from "../../utils/messageType";
 import { getFilesPayload } from "./messageSupporter/filePayload";
 import { IFile } from "@repo/database/dist/models/communication/message.model";
+import { createMessages } from "./messageSupporter/createMessage";
 
 
 // 1️⃣ Create Message
@@ -94,17 +93,7 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
       return payload;
   });
   
-  const messages = await Promise.all(
-    tailoredMessages.map(async (payload: IMessage) => {
-      const message = await Message.create(payload);
-      if(!message){
-        throw new ApiError(500, "Failed to send messages!")
-      };
-      console.log(message)
-      return message
-    })
-  );
-
+  const messages = createMessages(tailoredMessages);
   res.status(200).json(new ApiResponse(200, "Messages created successfully", messages));
 });
 
