@@ -112,6 +112,10 @@ export const getMessagesByConversation = asyncHandler(async (req: Request, res: 
     throw new ApiError(403, "ConversationId or UserId is not valid")
   }
 
+  if( req.user?._id !== userId ){
+    throw new ApiError(404,  "Unauthorized Attempt. Please login again.")
+  }
+
   const messages = await Message.find({
     conversationId: new mongoose.Types.ObjectId(conversationId)
   })
@@ -119,7 +123,7 @@ export const getMessagesByConversation = asyncHandler(async (req: Request, res: 
   .limit(20);
 
 
-  return res.status(201).json(new ApiResponse(201, "Message Sent!", messages));
+  return res.status(201).json(new ApiResponse(201, "Messages Fetched", messages));
 });
 
 // 4️⃣ Delete Message

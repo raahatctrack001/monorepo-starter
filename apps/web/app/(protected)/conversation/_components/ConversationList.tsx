@@ -14,7 +14,7 @@ interface ChatListProps {
   onSelectUser: (user: IConversation) => void;
 }
 
-const ConversationList: React.FC = () => {
+const ConversationList: React.FC<ChatListProps> = ({ onSelectUser } : ChatListProps) => {
   const { currentUser } = useAppSelector(state=>state.user);
   const [conversations, setConversations] = useState<IConversation[]>([])
   const { getAllConversations, loading, error } = useGetAllConversations(); 
@@ -33,6 +33,7 @@ const ConversationList: React.FC = () => {
 
   const handleSelectedConversation = (conversation: IConversation) => {
       dispatch(activateConverstaion(conversation));
+      onSelectUser(conversation);
   }
   return (
     <div className="w-72 border-r h-screen max-h-3/4 p-4 overflow-auto mt-15">
@@ -41,7 +42,11 @@ const ConversationList: React.FC = () => {
         <SearchContact onSelectUser={(user)=>handleClickOnSearchedUser(user)} />
       </div>
       {loading && <LocalLoader description="Loading conversations"/>}
-      <ShowConversationList conversations={conversations} error={error} onSelectConversation={(conv)=>handleSelectedConversation(conv)} />
+      <ShowConversationList 
+        conversations={conversations} 
+        error={error} 
+        onSelectConversation={(conv)=>handleSelectedConversation(conv)} 
+      />
     </div>
   );
 };

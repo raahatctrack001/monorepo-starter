@@ -1,11 +1,12 @@
 import { Message } from "@/lib/mockData";
+import { IMessage } from "@/types/conversations/message.types";
 
 interface MessageBubbleProps {
-  message: Message;
+  message: IMessage;
   isOwn: boolean;
 }
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn }) => {
+const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn }: MessageBubbleProps) => {
   return (
     <div className={`flex ${isOwn ? "justify-end" : "justify-start"} mb-2`}>
       <div
@@ -13,9 +14,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, isOwn }) => {
           isOwn ? "" : "bg-g"
         }`}
       >
-        {message.content}
+        {message?.textContent}
         <div className="text-xs text-right opacity-70 mt-1">
-          {message.timestamp}
+          {"sent at: "}
         </div>
       </div>
     </div>

@@ -9,16 +9,12 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 interface ChatHeaderProps {
-  activeConversation: IConversation;
+  activeConversation: IConversation|null;
   // onSearchMessage: (query: string) => void;
 }
 
-export default function ChatHeader({
-  activeConversation,
-  // onSearchMessage,
-}: ChatHeaderProps) {
+export default function ChatHeader({activeConversation}:ChatHeaderProps){
   const { currentUser } = useAppSelector((state) => state.user);
-
   return (
     <div className="border-b px-4 py-3 flex items-center justify-between gap-3 bg-background">
       {/* Conversation Name */}
@@ -37,9 +33,9 @@ export default function ChatHeader({
         <div>
 
         <div className="font-semibold text-lg truncate">
-          {activeConversation.isGroup
-            ? activeConversation.conversationName
-            : activeConversation.customNickname?.[currentUser?._id as string] ||
+          {activeConversation?.isGroup
+            ? activeConversation?.conversationName
+            : activeConversation?.customNickname?.[currentUser?._id as string] ||
             "social media"}
         </div>
         <p className="text-muted-foreground"> 
