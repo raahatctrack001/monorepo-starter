@@ -1,6 +1,7 @@
 import express from "express";
 import * as messageController from "../../controllers/communication/message.controllers";
 import { isUserLoggedIn } from "../../middlewares/auth.middleware";
+import { upload } from "../../middlewares/multer.middleware";
 
 const protect = ()=>{}
 
@@ -9,7 +10,7 @@ const router = express.Router();
 // 1️⃣ Create Message, Get Messages by Conversation
 router
   .route("/create-message/:conversationId/:creatorId")
-  .post(isUserLoggedIn, messageController.createMessage);
+  .post(isUserLoggedIn, upload.any(), messageController.createMessage);
 
 router
   .route("/conversation/:conversationId")

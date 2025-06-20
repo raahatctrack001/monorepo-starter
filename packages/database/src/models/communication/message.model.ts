@@ -23,9 +23,9 @@ export interface IMessage extends Document {
   senderId: Types.ObjectId;
   receiverIds: Types.ObjectId[];
   groupId?: Types.ObjectId;
-  messageType: "text" | "image" | "video" | "audio" | "file" | "contact" | "location" | "poll" | "sticker" | "reply" | "forward" | "callLog" | "event" | "system" | string,
+  messageType: "text" | "image" | "video" | "audio" | "document" | "contact" | "location" | "poll" | "sticker" | "reply" | "forward" | "callLog" | "event" | "system" | string,
   textContent?: string;
-  mediaUrl?: Types.ObjectId; //photo or videos or pdf || photos or videos or pdf maxLimit: 5 photo and  1 video at a time
+  mediaUrl?: string; //could have been objectId //photo or videos or pdf || photos or videos or pdf maxLimit: 5 photo and  1 video at a time
   fileDetail?: IFile, //documents
   thumbnailUrl?: string;
   contactDetails?: Record<string, any>;
@@ -38,20 +38,20 @@ export interface IMessage extends Document {
   forwardedFrom?: Types.ObjectId;
   forwardedFromUser?: Types.ObjectId;
   isDeletedFor?: Types.ObjectId[];
-  isEdited: boolean;
+  isEdited?: boolean;
   editedAt?: Date;
-  isPinned: boolean;
+  isPinned?: boolean;
   reactions?: Record<string, Types.ObjectId[]>;
   scheduledAt?: Date;
-  sentAt: Date;
+  sentAt?: Date;
   deliveredTo?: Types.ObjectId[];
   seenBy?: Types.ObjectId[];
   systemEventType?: string;
   systemEventData?: Record<string, any>;
-  isEncrypted: boolean;
+  isEncrypted?: boolean;
   encryptionKey?: string;
   extraMetadata?: Record<string, any>;
-  deletedByAdmin: boolean;
+  deletedByAdmin?: boolean;
   priorityLevel?: string;
   attachmentsCount?: number;
 }
@@ -75,11 +75,12 @@ const MessageSchema = new Schema<IMessage>(
     groupId: { type: Schema.Types.ObjectId, ref: "Group" },
     messageType: { 
       type: String, 
-      enum: ["text", "image", "video", "audio", "file", "contact", "location", "poll", "sticker", "reply", "forward", "callLog", "event", "system"], 
+      enum: ["text", "image", "video", "audio", "document", "contact", "location", "poll", "sticker", "reply", "forward", "callLog", "event", "system"], 
+      default: "text",
       required: true 
     },
     textContent: { type: String },
-    mediaUrl: { type: Schema.Types.ObjectId, ref: "MediaURL" },
+    mediaUrl: { type: String,},
     thumbnailUrl: { type: String },
     fileDetail: FileSchema,
     contactDetails: { type: Schema.Types.Mixed },

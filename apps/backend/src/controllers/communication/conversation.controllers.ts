@@ -118,6 +118,8 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
       if (existingConversation) {
         return res.status(200).json(new ApiResponse(200, "Conversation already exists", existingConversation));
       }
+
+      
         
     } else {
       const existingConversation = await Conversation.findOne({

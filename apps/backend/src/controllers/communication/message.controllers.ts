@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 import ApiError from "../../utils/apiError";
-import { Conversation } from "@repo/database";
+import { Conversation, IMessage, Message} from "@repo/database";
 import ApiResponse from "../../utils/apiResponse";
-
+import { uploadOnCloudinary } from "../../services/cloudinary/cloudinary.config";
+import { getMessageTypeFromMime } from "../../utils/messageType";
 
 
 // 1️⃣ Create Message
@@ -19,7 +20,7 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
   }
 
   const conversation = await Conversation.findById(conversationId);
-  console.log(conversation);
+  // console.log(conversation);
   if(!conversation){
     throw new ApiError(404, "Conversation with this user doen't exist, please initiate one and try again!")
   }
@@ -28,15 +29,161 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
   /***
    * conversationId
    * senderId
-   * receivers: //extract from conversation
-   * groupId: //if isGroup == true
+   * receivers: //extract frPom conversation
+   * groupId: //if isGroup == true front conversation
    * messageType: //string, poll, media, location, contact, call logs, events
    * ********* one message at a time and message is atomic i.e. only one attachment be it image or video if 
    * ********* multiple attachments are there then break them into single multiple messsages *******
    */
 
-  res.status(200).json(new ApiResponse(200, "Conversation fetched", conversation));
+  const { messageType, textContent } = req.body;
+  const receivers = conversation?.participants || [];
+  
+  const filteredReceivers = receivers.filter(
+    (participantId) => participantId.toString() !== creatorId.toString()
+  );
+
+  // let messagePayload = {
+  //   conversationId: new mongoose.Types.ObjectId(conversation._id),
+  //   senderId: new mongoose.Types.ObjectId(creatorId),
+  //   receiverIds: filteredReceivers.map(userId => new mongoose.Types.ObjectId(userId)),
+  //   groupId: 1 ? new mongoose.Types.ObjectId("02482039fds3") : undefined,    
+  //   messageType,
+  //   textContent,
+  //   sentAt: new Date(),
+  // }
+  // res.json({payload: messagePayload})
+
+  let messagePayload: any = [];  
+  if(req.files && Array.isArray(req.files) && req.files.length > 0){
+    if (req.files.length > 5) {
+      throw new ApiError(403, "You cannot attach more than 5 attachments.");
+    }
+
+    const files = req.files;
+    // Map and await uploads
+    const filePayloads = await Promise.all(
+      files.map(async (file) => {
+        /********
+         * 
+         * 
+         * 
+         * 
+         * handle size contraint here
+         * i.e. file.size > 5mb for pictures not allowed
+         * file.size > 100mb for video etc etc etc 
+         * 
+         * 
+         * 
+         */
+        const uploadResponse = await uploadOnCloudinary(file?.path);
+        if (!uploadResponse) {
+          throw new ApiError(500, "Failed to upload attachment.");
+        }
+
+        const payload = {
+          messageType: getMessageTypeFromMime(file.mimetype),
+          mediaUrl: uploadResponse.url,
+          fileDetail: file,
+        };
+
+        return payload;
+      })
+    );
+
+    // Now push all filePayloads into messagePayload array
+    messagePayload.push(...filePayloads);
+  }
+  else if(messageType === "poll"){
+    res.json({message: "poll message has been sent"})
+  }
+  else if(messageType === "contact"){
+    res.json({message: "contact message has been sent"})
+  }
+  else if(messageType === "location"){
+    res.json({message: "location message has been sent"})
+  }
+  else if(messageType === "sticker"){
+    res.json({message: "sticker message has been sent"})
+
+  }
+  else if(messageType === "reply"){
+    res.json({message: "reply message has been sent"})
+  }
+  else if(messageType === "forward"){
+    res.json({message: "forward message has been sent"})
+  }
+  else if(messageType === "callog"){
+    res.json({message: "calllog message has been sent"})
+  }
+  else if(messageType === "event"){
+    res.json({message: "event message has been sent"})
+  }
+  else if(messageType === "system"){
+    res.json({message: "system message has been sent"})
+  }
+  // console.log(messagePayload);
+  if(textContent.length > 0){
+    const payload = {
+      messageType: "text",
+      textContent,
+    }
+    messagePayload.push(payload);
+  }
+
+  const tailoredMessages: IMessage[] = messagePayload.map((message: any) => {
+    const payload = {
+        ...message, 
+        conversationId: conversation?._id,
+        senderId: creatorId,
+        receiverIds: filteredReceivers.map(userId=>new mongoose.Types.ObjectId(userId)),
+        sentAt: Date.now(),
+      }
+      return payload;
+  });
+  
+  const messages = await Promise.all(
+    tailoredMessages.map(async (payload: IMessage) => {
+      const message = await Message.create(payload);
+      if(!message){
+        throw new ApiError(500, "Failed to send messages!")
+      };
+      console.log(message)
+      return message
+    })
+  );
+
+  console.log(messages);
+  res.status(200).json(new ApiResponse(200, "Messages created successfully", messages));
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // 2️⃣ Get Message by ID
 export const getMessageById = asyncHandler(async (req: Request, res: Response) => {
