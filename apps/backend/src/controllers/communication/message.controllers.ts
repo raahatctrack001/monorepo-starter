@@ -122,7 +122,7 @@ export const getMessagesByConversation = asyncHandler(async (req: Request, res: 
   const messages = await Message.find({
     conversationId: new mongoose.Types.ObjectId(conversationId)
   })
-  .sort({createdAt: -1})
+  // .sort({createdAt: -1})
   // .limit(20);
 
   if(messages.length === 0){
