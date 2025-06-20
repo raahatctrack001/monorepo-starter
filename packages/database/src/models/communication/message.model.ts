@@ -23,11 +23,11 @@ export interface IMessage extends Document {
   senderId: Types.ObjectId;
   receiverIds: Types.ObjectId[];
   groupId?: Types.ObjectId;
-  messageType: string;
+  messageType: "text" | "image" | "video" | "audio" | "file" | "contact" | "location" | "poll" | "sticker" | "reply" | "forward" | "callLog" | "event" | "system" | string,
   textContent?: string;
-  mediaUrl?: Types.ObjectId; //photo or video || photos or videos maxLimit: 5 photo and  1 video at a time
+  mediaUrl?: Types.ObjectId; //photo or videos or pdf || photos or videos or pdf maxLimit: 5 photo and  1 video at a time
+  fileDetail?: IFile, //documents
   thumbnailUrl?: string;
-  fileDetail: IFile, //documents
   contactDetails?: Record<string, any>;
   location?: Record<string, any>;
   pollDetails?: Types.ObjectId;
