@@ -6,13 +6,21 @@ import ApiResponse from "../utils/apiResponse";
 
 
 // Upload Profile Picture
-export const uploadProfilePicture = asyncHandler(async (req: Request, res: Response) => {
-  res.status(201).json({ message: "Profile picture uploaded successfully." });
+export const uploadPicture = asyncHandler(async (req: Request, res: Response) => {
+  console.log('Form Data:', req.body);       // other form fields
+  console.log('Uploaded File:', req.file);   // uploaded file info
+
+  res.json({
+    message: 'Profile picture uploaded successfully!',
+    file: req.file,
+    formData: req.body,
+    files: req.files,
+  });
 });
 
 // Update Profile Picture
 export const updateProfilePicture = asyncHandler(async (req: Request, res: Response) => {
-  res.status(200).json({ message: "Profile picture updated successfully." });
+  res.status(200).json({ message: "Profile picture updated successfully.", data: req.body });
 });
 
 // Remove Profile Picture

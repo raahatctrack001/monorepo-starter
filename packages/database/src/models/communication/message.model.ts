@@ -1,10 +1,23 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IFile {
-  fileName: string,
-  fileSize: string,
+  fieldname: string,
+  originalname: string,
+  size: string,
+  filename?: string,
+  encoding?: string,
+  mimetype?: string,
+  destination?: string,
+  path?: string,
 }
-
+// "fieldname": "profilePicture",
+//         "originalname": "download (2).png",
+//         "encoding": "7bit",
+//         "mimetype": "image/png",
+//         "destination": "C:\\Users\\ROG\\Desktop\\monorepo\\apps\\backend\\src\\middlewares\\public",
+//         "filename": "download (2).png",
+//         "path": "C:\\Users\\ROG\\Desktop\\monorepo\\apps\\backend\\src\\middlewares\\public\\download (2).png",
+//         "size": 583226
 export interface IMessage extends Document {
   conversationId: Types.ObjectId;
   senderId: Types.ObjectId;
@@ -14,7 +27,7 @@ export interface IMessage extends Document {
   textContent?: string;
   mediaUrl?: Types.ObjectId; //photo or video || photos or videos maxLimit: 5 photo and  1 video at a time
   thumbnailUrl?: string;
-  fileDetail: IFile,
+  fileDetail: IFile, //documents
   contactDetails?: Record<string, any>;
   location?: Record<string, any>;
   pollDetails?: Types.ObjectId;
@@ -44,8 +57,14 @@ export interface IMessage extends Document {
 }
 
 const FileSchema = new Schema<IFile> ({
-  fileName: { type: String, required: true },
-  fileSize: { type: String, required: true }
+  fieldname: {type: String, required: true},
+  originalname: {type: String, required: true},
+  size: {type: String, required: true},
+  filename: {type: String},
+  encoding: {type: String},
+  mimetype: {type: String},
+  destination: {type: String},
+  path: {type: String},
 }, { _id: false })
 
 const MessageSchema = new Schema<IMessage>(

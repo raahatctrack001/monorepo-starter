@@ -1,6 +1,5 @@
 import express from 'express';
 import {
-  uploadProfilePicture,
   updateProfilePicture,
   removeProfilePicture,
   getProfilePicture,
@@ -29,9 +28,11 @@ import {
   removeStoryHighlight,
   getStoryHighlights,
   getAllUserProfile,
-  searchUsers
+  searchUsers,
+  uploadPicture
 } from '../controllers/user.controller';
 import { isUserLoggedIn } from '../middlewares/auth.middleware';
+import { upload } from '../middlewares/multer.middleware';
 
 const isAuthenticated = ()=>{
 
@@ -43,7 +44,13 @@ const isAdmin = ()=>{
 const router = express.Router();
 
 /* Profile Picture */
-router.post('/profile-picture', isAuthenticated, uploadProfilePicture);
+router.route(
+  '/profile-picture').post(
+  isUserLoggedIn,
+  upload.array("pictures"),
+  uploadPicture
+);
+router.post('/upload-picture', isUserLoggedIn, uploadPicture);
 router.put('/profile-picture', isAuthenticated, updateProfilePicture);
 router.delete('/profile-picture', isAuthenticated, removeProfilePicture);
 router.get('/:userId/profile-picture', getProfilePicture);
