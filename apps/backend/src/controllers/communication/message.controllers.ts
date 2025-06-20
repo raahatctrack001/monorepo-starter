@@ -92,6 +92,9 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
       return payload;
   });
   
+  if(tailoredMessages.length === 0){
+    throw new ApiError(404, "No message to send");
+  }
   const messages = await createMessages(tailoredMessages);
   return res.status(201).json(new ApiResponse(201, "Messages created successfully", messages));
 });
@@ -120,9 +123,12 @@ export const getMessagesByConversation = asyncHandler(async (req: Request, res: 
     conversationId: new mongoose.Types.ObjectId(conversationId)
   })
   .sort({createdAt: -1})
-  .limit(20);
+  // .limit(20);
 
-
+  if(messages.length === 0){
+    throw new ApiError(404, "You do not have existing conversation. Please send message to start chatting.");
+  }
+  
   return res.status(201).json(new ApiResponse(201, "Messages Fetched", messages));
 });
 

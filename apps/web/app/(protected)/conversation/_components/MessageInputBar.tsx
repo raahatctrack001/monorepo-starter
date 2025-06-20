@@ -6,9 +6,11 @@ import EmojiPicker from "./inputbar/EmojiPicker";
 import TextInput from "./inputbar/TextInput";
 import SendButton from "./inputbar/SendButton";
 import FilePreviewDialog from "./inputbar/FilePreviewDialogue";
+import { IConversation } from "@/types/conversations/conversation.types";
 
 
-export default function MessageInputBar() {
+export default function MessageInputBar({conversationId}: {conversationId: string}) {
+  console.log("input bar conversationId", conversationId);
   const [message, setMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);

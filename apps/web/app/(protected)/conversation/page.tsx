@@ -17,13 +17,13 @@ const ChatPage: React.FC = () => {
       <div className="hidden lg:inline">
         <ConversationList onSelectUser={(conversation)=>setActiveConversation(conversation)} />
       </div>
-      <div className="flex flex-col w-full">
+      {activeConversation && <div className="flex flex-col w-full">
         <div className="flex flex-col flex-1 h-full">
-          {activeConversation && <ChatHeader activeConversation={activeConversation} />}
-          {activeConversation && <ChatWindow activeConversation={activeConversation} />}
-          {activeConversation && <MessageInputBar />}
+          <ChatHeader activeConversation={activeConversation} />
+          <ChatWindow activeConversation={activeConversation} />
+          <MessageInputBar conversationId={activeConversation?._id as string} />
         </div>
-      </div>
+      </div>}
     </div>
   );
 };

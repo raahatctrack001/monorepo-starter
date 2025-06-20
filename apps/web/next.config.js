@@ -5,7 +5,8 @@ const nextConfig = {
         'www.shutterstock.com', 
         "images.unsplash.com", 
         "randomuser.me", 
-        "static.vecteezy.com"
+        "static.vecteezy.com",
+        "res.cloudinary.com",
       ],
     },
 };
