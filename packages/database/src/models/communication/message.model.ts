@@ -1,5 +1,10 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
+export interface IFile {
+  fileName: string,
+  fileSize: string,
+}
+
 export interface IMessage extends Document {
   conversationId: Types.ObjectId;
   senderId: Types.ObjectId;
@@ -7,10 +12,9 @@ export interface IMessage extends Document {
   groupId?: Types.ObjectId;
   messageType: string;
   textContent?: string;
-  mediaUrl?: Types.ObjectId;
+  mediaUrl?: Types.ObjectId; //photo or video || photos or videos maxLimit: 5 photo and  1 video at a time
   thumbnailUrl?: string;
-  fileName?: string;
-  fileSize?: number;
+  fileDetail: IFile,
   contactDetails?: Record<string, any>;
   location?: Record<string, any>;
   pollDetails?: Types.ObjectId;
@@ -39,18 +43,26 @@ export interface IMessage extends Document {
   attachmentsCount?: number;
 }
 
+const FileSchema = new Schema<IFile> ({
+  fileName: { type: String, required: true },
+  fileSize: { type: String, required: true }
+}, { _id: false })
+
 const MessageSchema = new Schema<IMessage>(
   {
     conversationId: { type: Schema.Types.ObjectId, ref: "Conversation", required: true },
     senderId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     receiverIds: [{ type: Schema.Types.ObjectId, ref: "User" }],
     groupId: { type: Schema.Types.ObjectId, ref: "Group" },
-    messageType: { type: String, required: true },
+    messageType: { 
+      type: String, 
+      enum: ["text", "image", "video", "audio", "file", "contact", "location", "poll", "sticker", "reply", "forward", "callLog", "event", "system"], 
+      required: true 
+    },
     textContent: { type: String },
     mediaUrl: { type: Schema.Types.ObjectId, ref: "MediaURL" },
     thumbnailUrl: { type: String },
-    fileName: { type: String },
-    fileSize: { type: Number },
+    fileDetail: FileSchema,
     contactDetails: { type: Schema.Types.Mixed },
     location: { type: Schema.Types.Mixed },
     pollDetails: { type: Schema.Types.ObjectId, ref: "Poll" },

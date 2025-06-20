@@ -36,6 +36,7 @@ import otpRouter from './routes/otp.route';
 import conversationRouter from './routes/communication/conversation.routes';
 import groupRouter from './routes/communication/group.routes';
 import messageRouter from './routes/communication/message.routes';
+
 app
     .use('/api/v1/auth', authRouter)
     .use('/api/v1/user', userRouter)

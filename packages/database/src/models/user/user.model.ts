@@ -114,7 +114,7 @@ const statusUpdateSchema = new mongoose.Schema({
   reason: String,
   timestamp: Date,
   device: { type: Schema.Types.ObjectId, ref: "deviceSchema"}
-})
+}, { _id: false })
 
 const UserSchema = new Schema<IUser>(
   {

@@ -7,7 +7,11 @@ dotenv.config({
 export const databaseConnection = async (): Promise<Connection | void> => {
     // console.log("mongodb connection url from mongodb.connection.ts", process.env.MONGODB_CONNECTION_STRING)
     try {
-        const connectionInstance = await mongoose.connect(process.env.MONGODB_CONNECTION_STRING as string);
+        const remoteConnectionString = process.env.MONGODB_CONNECTION_STRING;
+        const localConnectionString = process.env.MONGODB_CONNECTION_STRING_DOCKER;
+        const connectionString = process.env.NODE_ENV !== 'production' ? remoteConnectionString : localConnectionString
+        console.log(connectionString)
+        const connectionInstance = await mongoose.connect(connectionString as string);
         return connectionInstance.connection;
     } catch (error) {
         console.error("MongoDB connection error:", error);

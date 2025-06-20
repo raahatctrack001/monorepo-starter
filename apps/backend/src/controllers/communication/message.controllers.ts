@@ -1,10 +1,41 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
+import mongoose from "mongoose";
+import ApiError from "../../utils/apiError";
+import { Conversation } from "@repo/database";
+import ApiResponse from "../../utils/apiResponse";
+
 
 
 // 1️⃣ Create Message
 export const createMessage = asyncHandler(async (req: Request, res: Response) => {
-  res.status(201).json({ message: "Create message" });
+  const { conversationId, creatorId } = req.params;
+  if(!mongoose.Types.ObjectId.isValid(creatorId) || !mongoose.Types.ObjectId.isValid(conversationId)){
+    throw new ApiError(403, "ConversationId or CreatorId is not a valid id");
+  }
+
+  if(req.user?._id !== creatorId){
+    throw new ApiError(403, "Unauthorized attempt!, You can login then initiate conversation.")
+  }
+
+  const conversation = await Conversation.findById(conversationId);
+  console.log(conversation);
+  if(!conversation){
+    throw new ApiError(404, "Conversation with this user doen't exist, please initiate one and try again!")
+  }
+
+  //mendatory details
+  /***
+   * conversationId
+   * senderId
+   * receivers: //extract from conversation
+   * groupId: //if isGroup == true
+   * messageType: //string, poll, media, location, contact, call logs, events
+   * ********* one message at a time and message is atomic i.e. only one attachment be it image or video if 
+   * ********* multiple attachments are there then break them into single multiple messsages *******
+   */
+
+  res.status(200).json(new ApiResponse(200, "Conversation fetched", conversation));
 });
 
 // 2️⃣ Get Message by ID

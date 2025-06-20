@@ -47,7 +47,7 @@ return (
     loading ? (
       <GlobalLoader heading="Please wait" description="We are fetching data from server." />
     ) : user ? (
-      <div className="flex flex-col gap-6 max-w-8xl mx-auto py-8">
+      <div className="flex flex-col gap-6 w-full mx-10 h-screen mt-10">
         <UserProfileHeader user={user} />
         <UserStats user={user} />
         <Card className="shadow-xl border rounded-2xl">

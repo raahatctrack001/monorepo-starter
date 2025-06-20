@@ -47,7 +47,7 @@ export default function Sidebar() {
               }`}
             >
               <Icon className="w-6 h-6" name={label}/>
-              <span className="text-base hidden md:inline">{label}</span>
+              <span className="text-base hidden lg:inline">{label}</span>
             </Link>
           ))}
         </nav>
