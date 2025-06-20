@@ -74,12 +74,11 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
     res.json({message: "system message has been sent"})
   }
   
-  if(textContent.length > 0){
-    const payload = {
+  if(textContent.length > 0){ 
+    messagePayload.push({
       messageType: "text",
       textContent,
-    }
-    messagePayload.push(payload);
+    });
   }
 
   const tailoredMessages: IMessage[] = messagePayload.map((message: any) => {
@@ -93,37 +92,9 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
       return payload;
   });
   
-  const messages = createMessages(tailoredMessages);
-  res.status(200).json(new ApiResponse(200, "Messages created successfully", messages));
+  const messages = await createMessages(tailoredMessages);
+  return res.status(201).json(new ApiResponse(201, "Messages created successfully", messages));
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // 2️⃣ Get Message by ID
 export const getMessageById = asyncHandler(async (req: Request, res: Response) => {
@@ -132,7 +103,23 @@ export const getMessageById = asyncHandler(async (req: Request, res: Response) =
 
 // 3️⃣ Get Messages by Conversation
 export const getMessagesByConversation = asyncHandler(async (req: Request, res: Response) => {
-  res.json({ message: "Get messages by conversation" });
+  const { conversationId, userId } = req.params;
+  if(!conversationId || !userId){
+    throw new ApiError(404, "Conversation or user Id is missing.")
+  }
+
+  if([conversationId, userId].some(id=>!mongoose.Types.ObjectId.isValid(id))){
+    throw new ApiError(403, "ConversationId or UserId is not valid")
+  }
+
+  const messages = await Message.find({
+    conversationId: new mongoose.Types.ObjectId(conversationId)
+  })
+  .sort({createdAt: -1})
+  .limit(20);
+
+
+  return res.status(201).json(new ApiResponse(201, "Message Sent!", messages));
 });
 
 // 4️⃣ Delete Message
