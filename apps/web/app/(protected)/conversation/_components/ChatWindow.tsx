@@ -14,6 +14,8 @@ import {
   DocumentMessage,
 } from "./messageScreen/MessageComponents";
 import { format, isSameDay } from "date-fns";
+import { ImageViewer } from "@/components/common/ImageViewer";
+import { MessagePreviewModal } from "./messageScreen/MessagePreviewModal";
 
 interface Props {
   activeConversation: IConversation | null;
@@ -23,7 +25,7 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
   const { currentUser } = useAppSelector((state) => state.user);
   const [messages, setMessages] = useState<IMessage[]>([]);
   const { getAllMessageByConversation, loading, error } = useGetMessageByConversation();
-
+  const [previewChat, setPreviewChat] = useState<IMessage|null>(null)
   useEffect(() => {
     (async () => {
       if (!activeConversation || !currentUser?._id) return;
@@ -44,6 +46,9 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
     );
   }
 
+  if(previewChat){
+    return <MessagePreviewModal message={previewChat} onClose={()=>setPreviewChat(null)} />
+  }
   if (error || loading) {
     return (
       <div className="w-full h-full flex justify-center items-center mx-auto">
@@ -78,7 +83,9 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
 
     return (
       <div className={`flex ${isSender ? "justify-end" : "justify-start"}`} key={message._id}>
-        <div className={`max-w-[75%] ${isSender ? "bg-blue-100" : "bg-gray-100"} rounded-lg p-2 relative`}>
+        <div 
+          onClick={()=>message.messageType === "image" && setPreviewChat(message)}
+          className={`max-w-[75%] ${isSender ? "bg-blue-100" : "bg-gray-100"} rounded-lg p-2 relative`}>
           {(() => {
             switch (message.messageType) {
               case "text":
@@ -113,13 +120,13 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
   return (
     <div className="flex flex-col flex-1 h-screen max-h-3/4">
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {messages.map((message) => {
+        {messages && messages?.length && messages.map((message) => {
           const messageDate = format(new Date(message.sentAt || new Date()), "yyyy-MM-dd");
           const showDateSeparator = messageDate !== lastMessageDate;
           lastMessageDate = messageDate;
 
           return (
-            <div key={message._id}>
+            <div key={message._id} >
               {showDateSeparator && (
                 <div className="flex justify-center my-4">
                   <div className="text-gray-500 text-xs px-3 py-1 bg-gray-200 rounded-full">
