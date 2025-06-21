@@ -15,6 +15,7 @@ export default function MessageInputBar({conversationId}: {conversationId: strin
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [error, setError] = useState<string|null> (null); //error on sending message;
 
   const handleSend = () => {
     if (message.trim()) {
@@ -47,7 +48,11 @@ export default function MessageInputBar({conversationId}: {conversationId: strin
   return (
     <>
       <div className="w-full border-t px-4 py-3 flex items-center gap-2 bg-background">
-        <AttachmentMenu conversationId={conversationId} onSendMessage={(loading) => setSendingMessage(loading)} />
+        <AttachmentMenu 
+          conversationId={conversationId} 
+          onSendMessage={(loading) => setSendingMessage(loading)} 
+          onError={(err)=>setError(err)}
+        />
         <EmojiPicker onSelect={handleEmojiSelect} />
 
         <input
@@ -67,10 +72,13 @@ export default function MessageInputBar({conversationId}: {conversationId: strin
           onKeyPress={handleKeyPress}
         />
 
-        {!sendingMessage ? <SendButton onClick={handleSend} disable={message?.trim()?.length === 0} /> :
-         <div className="relative">     
-            <LocalLoader heading="sending" />         
-         </div> }
+        {
+          sendingMessage ? 
+             <div className="relative">     
+                <LocalLoader heading="sending" />         
+             </div>: 
+            <SendButton onClick={handleSend} disable={message?.trim()?.length === 0} /> 
+        }
       </div>
 
       <FilePreviewDialog

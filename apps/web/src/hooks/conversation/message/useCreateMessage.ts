@@ -11,6 +11,10 @@ export const useCreateMessage = () => {
     setError(null)
 
     try {
+      if(!conversationId || !senderId){
+        throw new Error("conversationId or senderId is missing")
+      }
+      
       const result = await createMessage(body, conversationId?.toString(), senderId?.toString())
       return result
     

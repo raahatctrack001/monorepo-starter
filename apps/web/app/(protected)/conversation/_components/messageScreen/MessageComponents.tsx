@@ -79,7 +79,12 @@ export const DocumentMessage: React.FC<MessageProps> = ({ message }) => (
       <FileText className="" />
       <div>
         <p className="font-medium ">{message.fileDetail?.originalname}</p>
-        <p className="text-sm ">{(Number(message.fileDetail?.size) / 1024).toFixed(2)} KB</p>
+        <p className="text-sm">
+          {(Number(message.fileDetail?.size) / (1024 * 1024)) > 1 ? 
+            `${(Number(message.fileDetail?.size) / (1024 * 1024)).toFixed(2)} MB` : 
+            `${(Number(message.fileDetail?.size) / 1024).toFixed(2)} KB`
+          }
+      </p>
       </div>
     </div>
     <Button variant="outline" size="icon">

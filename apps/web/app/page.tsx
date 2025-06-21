@@ -1,17 +1,23 @@
-"use client"
-import LandingPage from "@/components/common/LandingPage";
-import Sidebar from "@/components/common/sidebar/Sidebar";
-import { Button } from "@/components/ui/button";
-import { useAppSelector } from "@/lib/store/hooks";
+"use client";
 
+import LandingPage from "@/components/common/LandingPage";
+import { useAppSelector } from "@/lib/store/hooks";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
-  const { currentUser } = useAppSelector(state=>state.user)
+  const { currentUser } = useAppSelector((state) => state.user);
   const router = useRouter();
-  if(!currentUser)
-      return <LandingPage />
-  else
-    router.push(`/homepage/${currentUser?._id}`)
-  return <></>
+
+  useEffect(() => {
+    if (currentUser) {
+      router.push(`/homepage/${currentUser._id}`);
+    }
+  }, [currentUser, router]);
+
+  // while useEffect waits to run — show LandingPage if no user
+  if (!currentUser) return <LandingPage />;
+
+  // optionally a fallback loader while redirect happens
+  return null;
 }

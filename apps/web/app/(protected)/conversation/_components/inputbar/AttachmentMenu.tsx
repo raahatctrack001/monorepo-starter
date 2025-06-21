@@ -12,24 +12,39 @@ import {
   PhoneCall,
   Calendar,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { VoiceNoteRecorder } from "./VoiceNoteRecorder";
 import { useCreateMessage } from "@/hooks/conversation/message/useCreateMessage";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { addMessageToConversation } from "@/lib/store/slices/message.slice";
+import ErrorPopup from "@/components/common/ErrorPopup";
 
 interface AttachmentMenuProps {
   conversationId: string
   onSendMessage: (loading: boolean) => void
+  onError?: (err: string|null) => void
 }
 
-export default function AttachmentMenu({conversationId, onSendMessage}: AttachmentMenuProps) {
+export default function AttachmentMenu({conversationId, onSendMessage }: AttachmentMenuProps) {
   const mediaInputRef = useRef<HTMLInputElement>(null!);
   const voiceNoteInputRef = useRef<HTMLInputElement>(null!);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState<boolean>(false);
+  const [localError, setLocalError] = useState<string|null>(null);
+
   const dispatch = useAppDispatch();
 
   const { currentUser } = useAppSelector(state=>state.user);
+
+  const { sendMessage, loading, error: hookError } = useCreateMessage();
+
+  // Handle loading and error states from hook
+  useEffect(() => {
+    onSendMessage(loading);
+  }, [loading, onSendMessage]);
+
+  useEffect(() => {
+    setLocalError(hookError);
+  }, [hookError]);
 
   const handleOtherAttachment = (label: string) => {
     console.log("Trigger action for:", label);
@@ -74,14 +89,17 @@ export default function AttachmentMenu({conversationId, onSendMessage}: Attachme
     },
   ];
 
-  const { sendMessage, loading, error } = useCreateMessage();
-  onSendMessage(loading);
-// Alternative version with loading state handling
   const sendVoiceMessage = async (audioFile: File) => {
+    setLocalError(null)
     try {
+      // Clear any previous local errors
+      setLocalError(null);
+
       // Validate required data
       if (!audioFile || !conversationId || !currentUser?._id) {
-        throw new Error("Missing required data for sending voice message");
+        const errorMsg = "Missing required data for sending voice message";
+        setLocalError(errorMsg);
+        return;
       }
 
       console.log("Sending voice message:", {
@@ -95,41 +113,99 @@ export default function AttachmentMenu({conversationId, onSendMessage}: Attachme
       formData.append("messageType", "voice");
       
       const result = await sendMessage(formData, conversationId, currentUser._id);
-      
-      if (result?.success) {
-        console.log("Voice message sent successfully", result);
-        const { data } = result;
-        if (data && Array.isArray(data) && data.length > 0) {
-          dispatch(addMessageToConversation({
-            conversationId, // or wherever your conversation id is
-            messages: data,
-          }));
-          
-        }
+      console.log(result)
+      // Check if result is null (error occurred in hook)
+      if (!result) {
+        // Error is already handled by the hook and will be passed via useEffect
+        return;
       }
- else {
-        throw new Error(result?.message || "Failed to send voice message");
+
+      // Success case - update store
+      console.log("Voice message sent successfully", result);
+      const { data } = result;
+      if (data && Array.isArray(data) && data.length > 0) {
+        dispatch(addMessageToConversation({
+          conversationId,
+          messages: data,
+        }));
       }
       
     } catch (err) {
       console.error("Error sending voice message:", err);
-      // You might want to show a toast notification here
-      throw err;
+      const errorMessage = err instanceof Error ? err.message : "Failed to send voice message";
+      setLocalError(errorMessage);
     }
   };
+ 
+  const sendMediaMessage = async (files: FileList | null) => {
+    try {
+      // Clear any previous local errors
+      setLocalError(null);
+
+      if (!files || files.length === 0) return;
+
+      // Validate required data first
+      if (!conversationId || !currentUser?._id) {
+        const errorMsg = "Missing required data for sending media message";
+        setLocalError(errorMsg);
+        return;
+      }
+
+      const fileArray = Array.from(files);
+      console.log("initiating file array upload");
+
+      const formData = new FormData();
+      fileArray.forEach((file) => {
+        formData.append("media", file);
+      });
+
+      const result = await sendMessage(formData, conversationId, currentUser._id);
+      
+      // Check if result is null (error occurred in hook)
+      if (!result) {
+        // Error is already handled by the hook and will be passed via useEffect
+        return;
+      }
+
+      // Success case - update store
+      console.log("Photo or video message sent successfully", result);
+      const { data } = result;
+      if (data && Array.isArray(data) && data.length > 0) {
+        dispatch(addMessageToConversation({
+          conversationId,
+          messages: data,
+        }));
+      }
+
+    } catch (err) {
+      console.error("Error sending media message:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to send media message";
+      setLocalError(errorMessage);
+    }
+  };
+
   return (
     <>
+      {/* Local Error Popup */}
+      {localError && (
+        <ErrorPopup 
+          heading="Failed to send message!"
+          message={localError} 
+          onClose={() => setLocalError(null)} 
+        />
+      )}
+
+      {/* Voice Recorder Modal */}
+      {showVoiceRecorder && (
+        <VoiceNoteRecorder
+          open={showVoiceRecorder}
+          onClose={() => setShowVoiceRecorder(false)}
+          onSend={(audioFile: File) => sendVoiceMessage(audioFile)}
+        />
+      )}
+
       {/* Popover Trigger */}
       <Popover>
-        {
-          showVoiceRecorder && 
-            <VoiceNoteRecorder
-              open={showVoiceRecorder}
-              onClose={() => setShowVoiceRecorder(false)}
-              onSend={(audioFile: File) => sendVoiceMessage(audioFile)}
-            />
-        }
-
         <PopoverTrigger asChild>
           <Button variant="ghost" size="icon" className="rounded-full">
             <Paperclip size={18} />
@@ -158,9 +234,7 @@ export default function AttachmentMenu({conversationId, onSendMessage}: Attachme
         className="hidden"
         accept="image/*,video/*,application/pdf"
         multiple
-        onChange={(e) => {
-          console.log("Selected media files:", e.target.files);
-        }}
+        onChange={(e) => sendMediaMessage(e.target.files)}
       />
 
       <input
@@ -168,9 +242,7 @@ export default function AttachmentMenu({conversationId, onSendMessage}: Attachme
         ref={voiceNoteInputRef}
         className="hidden"
         accept="audio/*"
-        onChange={(e) => {
-          console.log("Selected voice note:", e.target.files);
-        }}
+        onChange={(e) => console.log(e.target.files)}
       />
     </>
   );
