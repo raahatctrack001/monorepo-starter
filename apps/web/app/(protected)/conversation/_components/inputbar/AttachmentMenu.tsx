@@ -18,7 +18,12 @@ import { useCreateMessage } from "@/hooks/conversation/message/useCreateMessage"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { addMessageToConversation } from "@/lib/store/slices/message.slice";
 
-export default function AttachmentMenu({conversationId}: {conversationId: string}) {
+interface AttachmentMenuProps {
+  conversationId: string
+  onSendMessage: (loading: boolean) => void
+}
+
+export default function AttachmentMenu({conversationId, onSendMessage}: AttachmentMenuProps) {
   const mediaInputRef = useRef<HTMLInputElement>(null!);
   const voiceNoteInputRef = useRef<HTMLInputElement>(null!);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState<boolean>(false);
@@ -70,6 +75,7 @@ export default function AttachmentMenu({conversationId}: {conversationId: string
   ];
 
   const { sendMessage, loading, error } = useCreateMessage();
+  onSendMessage(loading);
 // Alternative version with loading state handling
   const sendVoiceMessage = async (audioFile: File) => {
     try {
@@ -98,6 +104,7 @@ export default function AttachmentMenu({conversationId}: {conversationId: string
             conversationId, // or wherever your conversation id is
             messages: data,
           }));
+          
         }
       }
  else {
@@ -122,6 +129,7 @@ export default function AttachmentMenu({conversationId}: {conversationId: string
               onSend={(audioFile: File) => sendVoiceMessage(audioFile)}
             />
         }
+
         <PopoverTrigger asChild>
           <Button variant="ghost" size="icon" className="rounded-full">
             <Paperclip size={18} />

@@ -13,7 +13,7 @@ const messageSlice = createSlice({
       state, 
       action: PayloadAction<{conversationId: string, messages: IMessage[]}>
     ) => {
-      console.log(action.payload)  
+      console.log("conversation added", action.payload)  
       state.conversations[action.payload.conversationId] = action.payload.messages; 
     },
     addMessageToConversation: (
@@ -21,9 +21,13 @@ const messageSlice = createSlice({
       action: PayloadAction<{ conversationId: string; messages: IMessage | IMessage[] }>
     ) => {
       const { conversationId, messages } = action.payload;
+      if(!conversationId || !messages){
+        return;
+      }
 
       if (!state.conversations[conversationId]) {
         state.conversations[conversationId] = [];
+        return;
       }
 
       if (Array.isArray(messages)) {
@@ -53,7 +57,6 @@ const messageSlice = createSlice({
         (message) => !idsToRemove.includes(message._id)
       );
     },
-
 
   }
 })

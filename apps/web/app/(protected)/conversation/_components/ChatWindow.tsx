@@ -34,6 +34,12 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
   const [previewChat, setPreviewChat] = useState<IMessage|null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useAppDispatch();
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottomOnSendMessage = () => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -66,20 +72,28 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
   //   return <MessagePreviewModal message={previewChat} onClose={()=>setPreviewChat(null)} />
   // }
   console.log("messages fetched from redux", messages);
-  if (error || loading) {
+  if (error || loading || messages && messages.length === 0 ) {
     return (
       <div className="w-full h-full flex justify-center items-center mx-auto">
         <div className="max-w-md">
           {error && (
             <RedAlert
               heading="No Message Found!"
-              description={error + " Please start a conversation to display messages."}
+              description={error ||  "Please start a conversation to display messages."}
             />
           )}
+
           {loading && (
             <GlobalLoader
               heading="Loading Conversation"
               description={"Please wait while we load your messages."}
+            />
+          )}
+
+          {messages && messages.length === 0 && (
+            <RedAlert
+              heading="No Message Found!"
+              description={"Please start a conversation to display messages."}
             />
           )}
         </div>
@@ -88,6 +102,7 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
   }
 
   const renderMessage = (message: IMessage) => {
+    scrollToBottomOnSendMessage();
     const isSender = message.senderId.toString() === currentUser?._id;
 
     const status = isSender
@@ -164,6 +179,7 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
             </div>
           );
         })}
+        <div ref={bottomRef} />
       </div>
     </div>
   );

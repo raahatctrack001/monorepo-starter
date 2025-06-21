@@ -129,9 +129,9 @@ export const getMessagesByConversation = asyncHandler(async (req: Request, res: 
   // .sort({createdAt: -1})
   // .limit(20);
 
-  if(messages.length === 0){
-    throw new ApiError(404, "You do not have existing conversation. Please send message to start chatting.");
-  }
+  // if(messages.length === 0){
+  //   throw new ApiError(404, "Please send message to start chatting.");
+  // }
   
   return res.status(201).json(new ApiResponse(201, "Messages Fetched", messages));
 });
