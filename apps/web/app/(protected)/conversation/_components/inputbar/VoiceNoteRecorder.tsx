@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Mic, StopCircle, Redo, SendHorizontal, Download } from "lucide-react";
-import { IFile } from "@/types/conversations/message.types";
 
 interface Props {
   open: boolean;

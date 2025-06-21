@@ -2,8 +2,6 @@ import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
 import Providers from './Provider'
-import Sidebar from '@/components/common/sidebar/Sidebar'
-import ProtectedRoute from './ProtectedRouter'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',

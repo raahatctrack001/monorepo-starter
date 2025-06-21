@@ -1,5 +1,5 @@
 import { IUser } from "@/types/user/user.types";
-import { useAppSelector } from "@/lib/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { IMessage } from "@/types/conversations/message.types";
 import { useEffect, useRef, useState } from "react";
 import { useGetMessageByConversation } from "@/hooks/conversation/message/useGetMessageByConversation";
@@ -18,6 +18,7 @@ import { ImageViewer } from "@/components/common/ImageViewer";
 import { MessagePreviewModal } from "./messageScreen/MessagePreviewModal";
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
+import { addConversationMessages } from "@/lib/store/slices/message.slice";
 
 interface Props {
   activeConversation: IConversation | null;
@@ -29,11 +30,10 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
   const { getAllMessageByConversation, loading, error } = useGetMessageByConversation();
   const [previewChat, setPreviewChat] = useState<IMessage|null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-
+  const dispatch = useAppDispatch();
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
 
   useEffect(() => {
     (async () => {
@@ -41,6 +41,10 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
       const result = await getAllMessageByConversation(activeConversation._id, currentUser._id);
       if (result?.success) {
         setMessages(result.data);
+        dispatch(addConversationMessages({
+          conversationId: activeConversation?._id, 
+          messages: result?.data,
+        }))
       } else {
         setMessages([]);
       }

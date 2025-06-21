@@ -5,25 +5,26 @@ import { persistReducer, persistStore } from 'redux-persist'
 import userReducer from './slices/user.slice'
 import postReducer from './slices/post.slice'
 import reelReducer from './slices/reel.slice'
-import messageReducer from './slices/message.slice'
 import themeReducer from './slices/theme.slice'
 import conversationReducer from './slices/conversation.slice'
+import messageReducer from './slices/message.slice'
+
 
 // Combine reducers first
 const rootReducer = combineReducers({
   user: userReducer,
   post: postReducer,
   reel: reelReducer,
-  message: messageReducer,
   theme: themeReducer,
   conversation: conversationReducer,
+  message: messageReducer
 })
 
 // Redux Persist config
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['user', 'reel', 'message'], // persist slices you want — omit post if not needed
+  whitelist: ['user', 'reel', 'conversation',  "message"], // persist slices you want — omit post if not needed
 }
 
 // Wrap reducers with persistReducer

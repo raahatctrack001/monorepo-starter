@@ -1,75 +1,66 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { IMessage, MessageSliceSchema } from "@/types/conversations/message.types";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState = {
-  currentUser: null,
-  error: null,
-  loading: false,
-};
+const initialState: MessageSliceSchema = {
+  conversations: {},
+}
 
 const messageSlice = createSlice({
-  name: 'user',
+  name: "message",
   initialState,
   reducers: {
-    signInStart: (state) => {
-      state.loading = true;
-      state.error = null;
+    addConversationMessages: (
+      state, 
+      action: PayloadAction<{conversationId: string, messages: IMessage[]}>
+    ) => {
+      console.log(action.payload)  
+      state.conversations[action.payload.conversationId] = action.payload.messages; 
     },
-    signInSuccess: (state, action) => {
-      state.currentUser = action.payload;
-      state.loading = false;
-      state.error = null;
+    addMessageToConversation: (
+      state,
+      action: PayloadAction<{ conversationId: string; messages: IMessage | IMessage[] }>
+    ) => {
+      const { conversationId, messages } = action.payload;
+
+      if (!state.conversations[conversationId]) {
+        state.conversations[conversationId] = [];
+      }
+
+      if (Array.isArray(messages)) {
+        if (messages.length > 0) {
+          state.conversations[conversationId].push(...messages);
+        }
+      } else if (messages) {
+        state.conversations[conversationId].push(messages);
+      }
     },
-    signInFailure: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
+    removeMessagesFromConversation: (
+      state,
+      action: PayloadAction<{ conversationId: string; messageIds: string | string[] }>
+    ) => {
+      const { conversationId, messageIds } = action.payload;
+
+      if (!state.conversations[conversationId]) {
+        // No conversation found, nothing to remove
+        return;
+      }
+
+      // Convert single id to array for consistency
+      const idsToRemove = Array.isArray(messageIds) ? messageIds : [messageIds];
+
+      // Filter out messages with matching IDs
+      state.conversations[conversationId] = state.conversations[conversationId].filter(
+        (message) => !idsToRemove.includes(message._id)
+      );
     },
-    updateStart: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    updateSuccess: (state, action) => {
-      state.currentUser = action.payload;
-      state.loading = false;
-      state.error = null;
-      // console.log("state: ", state);
-      // console.log("action: ", action);
-    },
-    updateFailure: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-    deleteUserStart: (state) => {
-      state.loading = true;
-      state.error = null;
-    },
-    deleteUserSuccess: (state) => {
-      state.currentUser = null;
-      state.loading = false;
-      state.error = null;
-    },
-    deleteUserFailure: (state, action) => {
-      state.loading = false;
-      state.error = action.payload;
-    },
-    signoutSuccess: (state) => {
-      state.currentUser = null;
-      state.error = null;
-      state.loading = false;
-    },
-  },
-});
+
+
+  }
+})
 
 export const {
-  signInStart,
-  signInSuccess,
-  signInFailure,
-  updateStart,
-  updateSuccess,
-  updateFailure,
-  deleteUserStart,
-  deleteUserSuccess,
-  deleteUserFailure,
-  signoutSuccess,
+  addConversationMessages,
+  addMessageToConversation
 } = messageSlice.actions;
 
 export default messageSlice.reducer;

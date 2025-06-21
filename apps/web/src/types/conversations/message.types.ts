@@ -58,3 +58,7 @@ export interface IMessage {
   priorityLevel?: string;
   attachmentsCount?: number;
 }
+
+export interface MessageSliceSchema {
+  conversations: Record<string, IMessage[]>;
+}

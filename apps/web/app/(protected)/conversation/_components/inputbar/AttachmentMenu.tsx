@@ -16,12 +16,14 @@ import { useRef, useState } from "react";
 import { VoiceNoteRecorder } from "./VoiceNoteRecorder";
 import { IFile, IMessage } from "@/types/conversations/message.types";
 import { useCreateMessage } from "@/hooks/conversation/message/useCreateMessage";
-import { useAppSelector } from "@/lib/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+// import { updateConversationMessages } from "@/lib/store/slices/messages.slice";
 
 export default function AttachmentMenu({conversationId}: {conversationId: string}) {
   const mediaInputRef = useRef<HTMLInputElement>(null!);
   const voiceNoteInputRef = useRef<HTMLInputElement>(null!);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState<boolean>(false);
+  const dispatch = useAppDispatch();
 
   const { currentUser } = useAppSelector(state=>state.user);
 
@@ -69,8 +71,6 @@ export default function AttachmentMenu({conversationId}: {conversationId: string
   ];
 
   const { sendMessage, loading, error } = useCreateMessage();
-
-
 // Alternative version with loading state handling
   const sendVoiceMessage = async (audioFile: File) => {
     try {
@@ -92,9 +92,16 @@ export default function AttachmentMenu({conversationId}: {conversationId: string
       const result = await sendMessage(formData, conversationId, currentUser._id);
       
       if (result?.success) {
-        console.log("Voice message sent successfully");
-        return result;
-      } else {
+        console.log("Voice message sent successfully", result);
+        const { data } = result;
+        if (data && Array.isArray(data) && data.length > 0) {
+          // dispatch(updateConversationMessages({
+          //   conversationId, // or wherever your conversation id is
+          //   messages: data,
+          // }));
+        }
+      }
+ else {
         throw new Error(result?.message || "Failed to send voice message");
       }
       

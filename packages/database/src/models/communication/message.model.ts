@@ -19,6 +19,7 @@ export interface IFile {
 //         "path": "C:\\Users\\ROG\\Desktop\\monorepo\\apps\\backend\\src\\middlewares\\public\\download (2).png",
 //         "size": 583226
 export interface IMessage extends Document {
+  _id: Types.ObjectId,
   conversationId: Types.ObjectId;
   senderId: Types.ObjectId;
   receiverIds: Types.ObjectId[];
