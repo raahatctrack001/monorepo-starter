@@ -13,10 +13,10 @@ export interface IPoll extends Document {
     createdBy: Types.ObjectId;
     question: string;
     options: string[];
+    answers?: Record<string, string>; //question: answer // could type further if structured
     conversationId?: Types.ObjectId,
     messageId?: Types.ObjectId,
     votesHistory?: IVoteHistory[];
-    answers?: Record<string, string>; //question: answer // could type further if structured
     createdAt?: Date;
     visibility?: PollVisibility;
     isAnonymous?: boolean;
@@ -44,11 +44,13 @@ const voteHistorySchema = new Schema({
 });
 
 const pollSchema = new Schema<IPoll>({
-    userId: { type: Types.ObjectId, ref: "User", required: true },
-    createdBy: { type: Types.ObjectId, ref: "User", required: true },
+    _id: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    createdBy: { type: Schema.Types.ObjectId },
     question: { type: String, required: true },
     options: { type: [String], required: true },
     answers: { type: Map, of: String, default: {} },
+    conversationId: {type: Schema.Types.ObjectId, ref: "Conversation"},
+    messageId: {type: Schema.Types.ObjectId, ref: "Message"},
     createdAt: { type: Date, default: Date.now },
     visibility: { type: String, enum: ["public", "private", "restricted"], default: "public" },
     isAnonymous: { type: Boolean, default: false },
@@ -57,7 +59,7 @@ const pollSchema = new Schema<IPoll>({
     totalVotes: { type: Number, default: 0 },
     resultVisible: { type: Boolean, default: true },
     hasCommentSection: { type: Boolean, default: false },
-    comments: [{ type: Types.ObjectId, ref: "PollComment" }],
+    comments: [{ type:  Schema.Types.ObjectId, ref: "PollComment" }],
     pollType: { type: String, enum: ["standard", "quiz", "feedback"], default: "standard" },
     isPublic: { type: Boolean, default: true },
     votesHistory: [voteHistorySchema],
