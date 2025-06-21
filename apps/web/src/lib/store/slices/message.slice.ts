@@ -20,6 +20,7 @@ const messageSlice = createSlice({
       state,
       action: PayloadAction<{ conversationId: string; messages: IMessage | IMessage[] }>
     ) => {
+      console.log("action.paylaod", action.payload)
       const { conversationId, messages } = action.payload;
       if(!conversationId || !messages){
         return;

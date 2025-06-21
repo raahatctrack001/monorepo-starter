@@ -7,14 +7,24 @@ import { IConversation } from "@/types/conversations/conversation.types";
 import { useAppSelector } from "@/lib/store/hooks";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 interface ChatHeaderProps {
   activeConversation: IConversation|null;
   // onSearchMessage: (query: string) => void;
 }
 
-export default function ChatHeader({activeConversation}:ChatHeaderProps){
+export default function ChatHeader(){
   const { currentUser } = useAppSelector((state) => state.user);
+  const [conversation, setConversation] = useState<IConversation|null>(null);
+
+  const { activeConversation } = useAppSelector(state=>state.conversation);
+  useEffect(()=> {
+    setConversation(activeConversation)
+  }, [activeConversation])
+  
+  if(!conversation)
+      return;
   return (
     <div className="border-b px-4 py-3 flex items-center justify-between gap-3 bg-background">
       {/* Conversation Name */}

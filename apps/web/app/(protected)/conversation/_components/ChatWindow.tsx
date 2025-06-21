@@ -1,7 +1,7 @@
 import { IUser } from "@/types/user/user.types";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { IMessage } from "@/types/conversations/message.types";
-import { DependencyList, useEffect, useRef, useState } from "react";
+import { DependencyList, useEffect, useRef, useState, useCallback } from "react";
 import { useGetMessageByConversation } from "@/hooks/conversation/message/useGetMessageByConversation";
 import { IConversation } from "@/types/conversations/conversation.types";
 import RedAlert from "@/components/common/RedAlert";
@@ -20,71 +20,52 @@ import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
 import { addConversationMessages } from "@/lib/store/slices/message.slice";
 
-interface Props {
-  activeConversation: IConversation | null;
-}
-
-const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
+const ChatWindow: React.FC = () => {
   const { currentUser } = useAppSelector((state) => state.user);
-  const conversationId = activeConversation?._id as string;
-  const messagesFromRedux = useAppSelector(state => 
-    state.message.conversations[conversationId] || []
-  );
+  const { activeConversation } = useAppSelector(state => state.conversation);
+  
+  // Get messages directly from Redux using the activeConversation ID
+  const messagesFromRedux = useAppSelector(state => {
+    const conversationId = activeConversation?._id;
+    return conversationId ? state.message.conversations[conversationId] || [] : [];
+  });
+  
   const dispatch = useAppDispatch();
-
-const [messages, setMessages] = useState<IMessage[]>(messagesFromRedux);
-const [previewChat, setPreviewChat] = useState<IMessage|null>(null)
-
-const messagesEndRef = useRef<HTMLDivElement | null>(null);
-const bottomRef = useRef<HTMLDivElement | null>(null);
-
-const { getAllMessageByConversation, loading, error } = useGetMessageByConversation();
-
-
-// Initialize from Redux when conversationId changes
-  useEffect(() => {
-    setMessages(messagesFromRedux);
-  }, [conversationId, messagesFromRedux]);
-
-  const scrollToBottomOnSendMessage = () => {
+  
+  const [previewChat, setPreviewChat] = useState<IMessage | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+  
+  const { getAllMessageByConversation, loading, error } = useGetMessageByConversation();
+  
+  const scrollToBottomOnSendMessage = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
 
-  const getMessages = async () => {
-      if (!activeConversation || !currentUser?._id) return;
-      const result = await getAllMessageByConversation(activeConversation._id, currentUser._id);
-      if (result?.success) {
-      console.log("data fetched");
-        dispatch(addConversationMessages({
-          conversationId: activeConversation?._id, 
-          messages: result?.data,
-        }))
-      } else {
-        // setMessages([]);
-      }
+  const getMessages = useCallback(async () => {
+    if (!activeConversation || !currentUser?._id) return;
+    
+    const result = await getAllMessageByConversation(activeConversation._id, currentUser._id);
+    if (result?.success) {
+      console.log("data fetched", result);
+      dispatch(addConversationMessages({
+        conversationId: activeConversation?._id,
+        messages: result?.data
+      }));
     }
-    useEffect(()=>{
-      (async ()=>{
-        getMessages()
-      })()
-    }, [])
+  }, [activeConversation?._id]);
 
-  //   const useDebounce = (
-  //     callback: () => void, 
-  //     delay: number, 
-  //     dependencies: DependencyList
-  //   ): void => {
-  //     useEffect(() => {
-  //       const timeout = setInterval(callback, delay);
-  //       return () => clearInterval(timeout);
-  //     }, [...dependencies]);
-  //   };
-
-  // useDebounce(getMessages, 3000, [activeConversation, currentUser]);
+  // Fetch messages when conversation changes
+  useEffect(() => {
+    if (activeConversation?._id) {
+      console.log("getting message")
+      getMessages();
+    }
+  }, [activeConversation?._id]);
 
   if (!activeConversation) {
     return (
@@ -94,41 +75,47 @@ const { getAllMessageByConversation, loading, error } = useGetMessageByConversat
     );
   }
 
-  // if(previewChat){
-  //   return <MessagePreviewModal message={previewChat} onClose={()=>setPreviewChat(null)} />
-  // }
-  console.log("messages fetched from redux", messages);
-  if (error || loading || messages && messages.length === 0 ) {
+  // Check for no messages - use messagesFromRedux directly
+  if (messagesFromRedux.length === 0 && !loading) {
     return (
       <div className="w-full h-full flex justify-center items-center mx-auto">
         <div className="max-w-md">
-          {error && (
-            <RedAlert
-              heading="No Message Found!"
-              description={error ||  "Please start a conversation to display messages."}
-            />
-          )}
+          <RedAlert 
+            heading="No Messages" 
+            description="Please send a message to start conversation" 
+          />
+        </div>
+      </div>
+    );
+  }
 
-          {/* {loading && (
-            <GlobalLoader
-              heading="Loading Conversation"
-              description={"Please wait while we load your messages."}
-            />
-          )} */}
+  if (error) {
+    return (
+      <div className="w-full h-full flex justify-center items-center mx-auto">
+        <div className="max-w-md">
+          <RedAlert
+            heading="Error Loading Messages"
+            description={error || "Failed to load messages. Please try again."}
+          />
+        </div>
+      </div>
+    );
+  }
 
-          {messages && messages.length === 0 && (
-            <RedAlert
-              heading="No Message Found!"
-              description={"Please start a conversation to display messages."}
-            />
-          )}
+  if (loading) {
+    return (
+      <div className="w-full h-full flex justify-center items-center mx-auto">
+        <div className="max-w-md">
+          <GlobalLoader
+            heading="Loading Messages"
+            description="Please wait while we load your messages."
+          />
         </div>
       </div>
     );
   }
 
   const renderMessage = (message: IMessage) => {
-    scrollToBottomOnSendMessage();
     const isSender = message.senderId.toString() === currentUser?._id;
 
     const status = isSender
@@ -141,10 +128,10 @@ const { getAllMessageByConversation, loading, error } = useGetMessageByConversat
 
     return (
       <div className={`flex ${isSender ? "justify-end" : "justify-start"}`} key={message._id}>
-        {previewChat && <MessagePreviewModal message={previewChat} onClose={()=>setPreviewChat(null)} />}
         <div 
-          onClick={()=>message.messageType === "image" && setPreviewChat(message)}
-          className={`max-w-[75%] ${isSender ? "bg-blue-100" : "bg-gray-100"} rounded-lg p-2 relative`}>
+          onClick={() => message.messageType === "image" && setPreviewChat(message)}
+          className={`max-w-[75%] ${isSender ? "bg-blue-100" : "bg-gray-100"} rounded-lg p-2 relative cursor-pointer`}
+        >
           {(() => {
             switch (message.messageType) {
               case "text":
@@ -165,13 +152,6 @@ const { getAllMessageByConversation, loading, error } = useGetMessageByConversat
                 );
             }
           })()}
-          <div ref={messagesEndRef} />
-          <Button
-            onClick={scrollToBottom}
-            className="fixed bottom-44 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition"
-          >
-            <ArrowDown size={20} />
-          </Button>
 
           <div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
             <span>{format(new Date(message.sentAt || new Date()), "hh:mm a")}</span>
@@ -186,14 +166,22 @@ const { getAllMessageByConversation, loading, error } = useGetMessageByConversat
 
   return (
     <div className="flex flex-col flex-1 h-screen max-h-3/4">
+      {/* Modal outside the main content */}
+      {previewChat && (
+        <MessagePreviewModal 
+          message={previewChat} 
+          onClose={() => setPreviewChat(null)} 
+        />
+      )}
+      
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {messages && messages?.length && messages.map((message) => {
+        {messagesFromRedux.map((message) => {
           const messageDate = format(new Date(message.sentAt || new Date()), "yyyy-MM-dd");
           const showDateSeparator = messageDate !== lastMessageDate;
           lastMessageDate = messageDate;
 
           return (
-            <div key={message._id} >
+            <div key={message._id}>
               {showDateSeparator && (
                 <div className="flex justify-center my-4">
                   <div className="text-gray-500 text-xs px-3 py-1 bg-gray-200 rounded-full">
@@ -206,7 +194,16 @@ const { getAllMessageByConversation, loading, error } = useGetMessageByConversat
           );
         })}
         <div ref={bottomRef} />
+        <div ref={messagesEndRef} />
       </div>
+
+      {/* Scroll to bottom button - outside the message container */}
+      <Button
+        onClick={scrollToBottom}
+        className="fixed bottom-44 right-6 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition z-50"
+      >
+        <ArrowDown size={20} />
+      </Button>
     </div>
   );
 };

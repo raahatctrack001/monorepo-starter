@@ -10,6 +10,7 @@ import LocalLoader from "@/components/common/LocalLoader";
 import { useCreateMessage } from "@/hooks/conversation/message/useCreateMessage";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { addMessageToConversation } from "@/lib/store/slices/message.slice";
+import { updateConversation } from "@/lib/store/slices/conversation.slice";
 
 
 export default function MessageInputBar({conversationId}: {conversationId: string}) {
@@ -33,11 +34,12 @@ export default function MessageInputBar({conversationId}: {conversationId: strin
     formData.append("messageType", "text");
     const result = await sendMessage(formData, conversationId, currentUser?._id as string);
     if(result?.success){
+      dispatch(updateConversation(result.data?.conversation))
       dispatch(addMessageToConversation({
-        conversationId,
-        messages: result.data
+        conversationId: result.data?.conversation?._id,
+        messages: result.data?.messages
       }))
-      console.log("message sent", result.message)
+      console.log("message sent", result.data?.message)
       setMessage("");
     }
     console.log("message sent resposne", result);   

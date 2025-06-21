@@ -100,7 +100,22 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
     throw new ApiError(404, "No message to send");
   }
   const messages = await createMessages(tailoredMessages);
-  return res.status(201).json(new ApiResponse(201, "Messages created successfully", messages));
+   const updatedConversation = await Conversation.findByIdAndUpdate(conversationId, {
+     $set: {
+      lastMessage: messages?.at(-1)?._id || messages?.[messages.length - 1]?._id, // Store ID, not full object
+      lastMessageAt: new Date(), // Add timestamp
+    }
+  }, { new: true}).populate("lastMessage");
+  
+  return res
+    .status(201)
+    .json(
+      new ApiResponse(201, "Messages created successfully", 
+        {
+          conversation: updatedConversation,
+          messages
+        })
+      );
 });
 
 // 2️⃣ Get Message by ID

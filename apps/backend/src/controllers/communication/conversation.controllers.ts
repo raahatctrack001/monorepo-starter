@@ -27,9 +27,9 @@
 
 import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
-import ApiError from "../../utils/apiError";
+import ApiError, { apiErrorFunction } from "../../utils/apiError";
 import crypto, { generateKeyPairSync } from 'crypto'
-import { Conversation, User } from "@repo/database";
+import { Conversation, IConversation, Message, User } from "@repo/database";
 import ApiResponse from "../../utils/apiResponse";
 import mongoose from "mongoose";
 
@@ -138,7 +138,7 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
       [participants[0]]: isGroup ? conversationName: req.user?.fullName || "social-user"
     };
 
-    const conversation = await Conversation.create({
+    const conversation: IConversation = await Conversation.create({
       createdBy: creatorId,
       conversationName,
       participants,
@@ -157,7 +157,30 @@ export const createConversation = asyncHandler(async (req: Request, res: Respons
       throw new ApiError(404, "Failed to initiate conversation");
     }
 
-    return res.status(201).json(new ApiResponse(201, "Conversation Initiated!", { conversation }));
+    const lastMessage = await Message.create({
+      conversationId: conversation?._id,
+      senderId: creatorId,
+      receiversId: conversation.participants,
+      messageType: "text",
+      textContent: `${req.user?.fullName} initiated the conversation!`,
+    })
+
+    if(!lastMessage){
+      throw new ApiError(400, "Failed to create last message");
+    }
+
+    const updatedConversation = await Conversation.findByIdAndUpdate(conversation?._id, {
+      $set: {
+        lastMessage,
+        // lastMessageAt: new Date.now(),
+      }
+    }, {new: true})
+
+    if(!updatedConversation){
+      throw new ApiError(500, "Failed to updated conversation with last message")
+    }
+
+    return res.status(201).json(new ApiResponse(201, "Conversation Initiated!", updatedConversation));
   } catch (error) {
     next(error);
   }
@@ -182,6 +205,9 @@ export const getAllConversations = asyncHandler(async (req: Request, res: Respon
         { participants: userId },
       ],
     })
+    .populate("lastMessage")
+    .sort({updatedAt: -1});
+
     console.log(conversations)
     if(conversations?.length === 0){
       throw new ApiError(404, "No conversation found! please initiate conversation.")

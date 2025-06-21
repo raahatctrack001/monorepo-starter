@@ -18,6 +18,9 @@ import { useCreateMessage } from "@/hooks/conversation/message/useCreateMessage"
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { addMessageToConversation } from "@/lib/store/slices/message.slice";
 import ErrorPopup from "@/components/common/ErrorPopup";
+import { IMessage } from "@/types/conversations/message.types";
+import { IConversation } from "@/types/conversations/conversation.types";
+import { updateConversation } from "@/lib/store/slices/conversation.slice";
 
 interface AttachmentMenuProps {
   conversationId: string
@@ -122,12 +125,14 @@ export default function AttachmentMenu({conversationId, onSendMessage }: Attachm
 
       // Success case - update store
       console.log("Voice message sent successfully", result);
-      const { data } = result;
-      if (data && Array.isArray(data) && data.length > 0) {
+      if(result?.success){
+        dispatch(updateConversation(result.data?.conversation))
         dispatch(addMessageToConversation({
-          conversationId,
-          messages: data,
-        }));
+          conversationId: result.data?.conversation?._id,
+          messages: result.data?.messages
+        }))
+        console.log("audio message sent", result.data?.message)
+      
       }
       
     } catch (err) {
@@ -169,12 +174,14 @@ export default function AttachmentMenu({conversationId, onSendMessage }: Attachm
 
       // Success case - update store
       console.log("Photo or video message sent successfully", result);
-      const { data } = result;
-      if (data && Array.isArray(data) && data.length > 0) {
+      if(result?.success){
+        dispatch(updateConversation(result.data?.conversation))
         dispatch(addMessageToConversation({
-          conversationId,
-          messages: data,
-        }));
+          conversationId: result.data?.conversation?._id,
+          messages: result.data?.messages
+        }))
+        console.log("message sent", result.data?.message)
+      
       }
 
     } catch (err) {

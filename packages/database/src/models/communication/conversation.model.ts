@@ -56,7 +56,7 @@ export interface IConversation extends Document {
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     lastMessage: { type: Schema.Types.ObjectId, ref: "Message" },
-    lastMessageAt: { type: Date },
+    lastMessageAt: {type: Date, default: Date.now},
     unreadCount: {
       type: Map,
       of: Number,

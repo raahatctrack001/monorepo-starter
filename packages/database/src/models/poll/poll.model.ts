@@ -2,6 +2,7 @@ import mongoose, { Types, Document, Schema } from "mongoose";
 
 export type PollVisibility = "public" | "private" | "restricted";
 export type PollType = "standard" | "quiz" | "feedback";
+export type PollIn = "conversation" | "poll" | "general";
 
 export interface IVoteHistory {
   user: Types.ObjectId;
@@ -14,8 +15,9 @@ export interface IPoll extends Document {
     question: string;
     options: string[];
     answers?: Record<string, string>; //question: answer // could type further if structured
+    pollIn?: PollIn,
     conversationId?: Types.ObjectId,
-    messageId?: Types.ObjectId,
+    postId?: Types.ObjectId,
     votesHistory?: IVoteHistory[];
     createdAt?: Date;
     visibility?: PollVisibility;
@@ -49,8 +51,9 @@ const pollSchema = new Schema<IPoll>({
     question: { type: String, required: true },
     options: { type: [String], required: true },
     answers: { type: Map, of: String, default: {} },
+    pollIn: {type: String, enum: ["post", "conversation", "general"]},
     conversationId: {type: Schema.Types.ObjectId, ref: "Conversation"},
-    messageId: {type: Schema.Types.ObjectId, ref: "Message"},
+    postId: {type: Schema.Types.ObjectId, ref: "Post"},
     createdAt: { type: Date, default: Date.now },
     visibility: { type: String, enum: ["public", "private", "restricted"], default: "public" },
     isAnonymous: { type: Boolean, default: false },
