@@ -26,7 +26,10 @@ interface Props {
 
 const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
   const { currentUser } = useAppSelector((state) => state.user);
-  const [messages, setMessages] = useState<IMessage[]>([]);
+  const conversationId = activeConversation?._id as string;
+  const messages = useAppSelector(state => state.message.conversations[conversationId])
+  
+  // const [messages, setMessages] = useState<IMessage[]>([]);
   const { getAllMessageByConversation, loading, error } = useGetMessageByConversation();
   const [previewChat, setPreviewChat] = useState<IMessage|null>(null)
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -40,13 +43,13 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
       if (!activeConversation || !currentUser?._id) return;
       const result = await getAllMessageByConversation(activeConversation._id, currentUser._id);
       if (result?.success) {
-        setMessages(result.data);
+      console.log("data fetched");
         dispatch(addConversationMessages({
           conversationId: activeConversation?._id, 
           messages: result?.data,
         }))
       } else {
-        setMessages([]);
+        // setMessages([]);
       }
     })();
   }, [activeConversation, currentUser]);
@@ -62,6 +65,7 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
   // if(previewChat){
   //   return <MessagePreviewModal message={previewChat} onClose={()=>setPreviewChat(null)} />
   // }
+  console.log("messages fetched from redux", messages);
   if (error || loading) {
     return (
       <div className="w-full h-full flex justify-center items-center mx-auto">

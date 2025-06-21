@@ -14,10 +14,9 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { VoiceNoteRecorder } from "./VoiceNoteRecorder";
-import { IFile, IMessage } from "@/types/conversations/message.types";
 import { useCreateMessage } from "@/hooks/conversation/message/useCreateMessage";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-// import { updateConversationMessages } from "@/lib/store/slices/messages.slice";
+import { addMessageToConversation } from "@/lib/store/slices/message.slice";
 
 export default function AttachmentMenu({conversationId}: {conversationId: string}) {
   const mediaInputRef = useRef<HTMLInputElement>(null!);
@@ -95,10 +94,10 @@ export default function AttachmentMenu({conversationId}: {conversationId: string
         console.log("Voice message sent successfully", result);
         const { data } = result;
         if (data && Array.isArray(data) && data.length > 0) {
-          // dispatch(updateConversationMessages({
-          //   conversationId, // or wherever your conversation id is
-          //   messages: data,
-          // }));
+          dispatch(addMessageToConversation({
+            conversationId, // or wherever your conversation id is
+            messages: data,
+          }));
         }
       }
  else {
