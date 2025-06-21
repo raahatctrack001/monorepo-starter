@@ -1,7 +1,7 @@
 import { IUser } from "@/types/user/user.types";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { IMessage } from "@/types/conversations/message.types";
-import { useEffect, useRef, useState } from "react";
+import { DependencyList, useEffect, useRef, useState } from "react";
 import { useGetMessageByConversation } from "@/hooks/conversation/message/useGetMessageByConversation";
 import { IConversation } from "@/types/conversations/conversation.types";
 import RedAlert from "@/components/common/RedAlert";
@@ -27,14 +27,24 @@ interface Props {
 const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
   const { currentUser } = useAppSelector((state) => state.user);
   const conversationId = activeConversation?._id as string;
-  const messages = useAppSelector(state => state.message.conversations[conversationId])
-  
-  // const [messages, setMessages] = useState<IMessage[]>([]);
-  const { getAllMessageByConversation, loading, error } = useGetMessageByConversation();
-  const [previewChat, setPreviewChat] = useState<IMessage|null>(null)
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messagesFromRedux = useAppSelector(state => 
+    state.message.conversations[conversationId] || []
+  );
   const dispatch = useAppDispatch();
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+const [messages, setMessages] = useState<IMessage[]>(messagesFromRedux);
+const [previewChat, setPreviewChat] = useState<IMessage|null>(null)
+
+const messagesEndRef = useRef<HTMLDivElement | null>(null);
+const bottomRef = useRef<HTMLDivElement | null>(null);
+
+const { getAllMessageByConversation, loading, error } = useGetMessageByConversation();
+
+
+// Initialize from Redux when conversationId changes
+  useEffect(() => {
+    setMessages(messagesFromRedux);
+  }, [conversationId, messagesFromRedux]);
 
   const scrollToBottomOnSendMessage = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -44,8 +54,7 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(() => {
-    (async () => {
+  const getMessages = async () => {
       if (!activeConversation || !currentUser?._id) return;
       const result = await getAllMessageByConversation(activeConversation._id, currentUser._id);
       if (result?.success) {
@@ -57,8 +66,25 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
       } else {
         // setMessages([]);
       }
-    })();
-  }, [activeConversation, currentUser]);
+    }
+    useEffect(()=>{
+      (async ()=>{
+        getMessages()
+      })()
+    }, [])
+
+  //   const useDebounce = (
+  //     callback: () => void, 
+  //     delay: number, 
+  //     dependencies: DependencyList
+  //   ): void => {
+  //     useEffect(() => {
+  //       const timeout = setInterval(callback, delay);
+  //       return () => clearInterval(timeout);
+  //     }, [...dependencies]);
+  //   };
+
+  // useDebounce(getMessages, 3000, [activeConversation, currentUser]);
 
   if (!activeConversation) {
     return (
@@ -83,12 +109,12 @@ const ChatWindow: React.FC<Props> = ({ activeConversation }: Props) => {
             />
           )}
 
-          {loading && (
+          {/* {loading && (
             <GlobalLoader
               heading="Loading Conversation"
               description={"Please wait while we load your messages."}
             />
-          )}
+          )} */}
 
           {messages && messages.length === 0 && (
             <RedAlert

@@ -7,26 +7,41 @@ import TextInput from "./inputbar/TextInput";
 import SendButton from "./inputbar/SendButton";
 import FilePreviewDialog from "./inputbar/FilePreviewDialogue";
 import LocalLoader from "@/components/common/LocalLoader";
+import { useCreateMessage } from "@/hooks/conversation/message/useCreateMessage";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { addMessageToConversation } from "@/lib/store/slices/message.slice";
 
 
 export default function MessageInputBar({conversationId}: {conversationId: string}) {
   console.log("input bar conversationId", conversationId);
   const [message, setMessage] = useState("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [error, setError] = useState<string|null> (null); //error on sending message;
+  const { currentUser } = useAppSelector(state=>state.user);
+  const dispatch = useAppDispatch();
+  
+  const { sendMessage, loading, error:hookError } = useCreateMessage();
+  const handleSend = async () => {
+    setError(null);
+    if (!message.trim()) {
+      setError("Type something to send.")
+      return;
+    }
 
-  const handleSend = () => {
-    if (message.trim()) {
-      console.log("Send message:", message);
+    const formData = new FormData();
+    formData.append("textContent", message);
+    formData.append("messageType", "text");
+    const result = await sendMessage(formData, conversationId, currentUser?._id as string);
+    if(result?.success){
+      dispatch(addMessageToConversation({
+        conversationId,
+        messages: result.data
+      }))
+      console.log("message sent", result.message)
       setMessage("");
     }
-    if (selectedFile) {
-      console.log("Send file:", selectedFile.name);
-      setSelectedFile(null);
-      setPreviewOpen(false);
-    }
+    console.log("message sent resposne", result);   
+
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -35,14 +50,6 @@ export default function MessageInputBar({conversationId}: {conversationId: strin
 
   const handleEmojiSelect = (emoji: string) => {
     setMessage((prev) => prev + emoji);
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setPreviewOpen(true);
-    }
   };
 
   return (
@@ -54,17 +61,6 @@ export default function MessageInputBar({conversationId}: {conversationId: strin
           onError={(err)=>setError(err)}
         />
         <EmojiPicker onSelect={handleEmojiSelect} />
-
-        <input
-          type="file"
-          accept="image/*,video/*,.pdf,.doc,.mp4"
-          onChange={handleFileSelect}
-          className="hidden"
-          id="file-input"
-        />
-        <label htmlFor="file-input">
-          <button type="button" title="Upload file" className="text-muted-foreground text-sm">📎</button>
-        </label>
 
         <TextInput
           message={message}
@@ -80,16 +76,6 @@ export default function MessageInputBar({conversationId}: {conversationId: strin
             <SendButton onClick={handleSend} disable={message?.trim()?.length === 0} /> 
         }
       </div>
-
-      <FilePreviewDialog
-        open={previewOpen}
-        onClose={() => {
-          setPreviewOpen(false);
-          setSelectedFile(null);
-        }}
-        file={selectedFile}
-        onSend={handleSend}
-      />
     </>
   );
 }
