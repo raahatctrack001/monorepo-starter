@@ -2,6 +2,11 @@ import { ZodError, ZodIssue, ZodSchema } from "zod";
 import ApiError from "./apiError";
 import ApiResponse from "./apiResponse";
 
+/**
+ * 
+ * @param schema zod schema to be passed through which data have to be validated
+ * @param data data object that needs to be passed inside safeParse
+ */
 export const validateData = async (schema: ZodSchema, data: unknown) => {
   const result = schema.safeParse(data);
   if (!result.success) {
