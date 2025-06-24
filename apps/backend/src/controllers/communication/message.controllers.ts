@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
 import mongoose from "mongoose";
 import ApiError from "../../utils/apiError";
@@ -122,6 +122,7 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
         ...message, 
         conversationId: conversation?._id,
         senderId: creatorId,
+        // deliveredTo: [creatorId],
         receiverIds: filteredReceivers?.map(userId=>new mongoose.Types.ObjectId(userId)),
         sentAt: Date.now(),
       }
@@ -187,6 +188,97 @@ export const getMessagesByConversation = asyncHandler(async (req: Request, res: 
   return res.status(201).json(new ApiResponse(201, "Messages Fetched", messages));
 });
 
+export const markMessageAsDelivered = asyncHandler(async (req:Request, res:Response, next:NextFunction) => {
+  console.log("marking message as delivered", {params: req.params, body: req.body, query: req.query});
+  try {
+    const { conversationId, messageId, userId } = req.params;
+    const ids = [conversationId, messageId, userId];
+    console.log(ids)
+    // Check for missing IDs
+    if (ids.some(id => !id)) {
+      throw new ApiError(403, "Conversation ID, Message ID, or User ID is missing");
+    }
+
+    if(req.user?._id !== userId){
+      throw new ApiError(401, "Unauthorized attempt! You can edit only your own message");
+    }
+
+    // Check for invalid ObjectIds
+    const invalid = ids.find(id => !mongoose.Types.ObjectId.isValid(id));
+    if (invalid) {
+      throw new ApiError(403, `${invalid} is not a valid ID`);
+    }
+    
+    const message: IMessage|null = await Message.findOne({ 
+      _id: messageId, 
+      // senderId: userId, 
+      conversationId 
+    });
+
+    if (!message) {
+      throw new ApiError(404, "Message with this id doesn't exist");
+    }
+
+    //check if object exist inside delivered to or not
+    if(!message?.deliveredTo?.includes(new mongoose.Types.ObjectId(userId))){
+      message.deliveredTo?.push(new mongoose.Types.ObjectId(userId));
+      await message.save();
+    }
+    
+    res.status(200).json(
+      new ApiResponse(200, "Message delivered", message)
+    ) 
+  
+  } catch (error) {
+    next(error);
+  }
+})
+
+export const markMessageAsRead = asyncHandler(async (req:Request, res:Response, next:NextFunction) => {
+  console.log("marking message as delivered", {params: req.params, body: req.body, query: req.query});
+  try {
+    const { conversationId, messageId, userId } = req.params;
+    const ids = [conversationId, messageId, userId];
+    console.log(ids)
+    // Check for missing IDs
+    if (ids.some(id => !id)) {
+      throw new ApiError(403, "Conversation ID, Message ID, or User ID is missing");
+    }
+
+    if(req.user?._id !== userId){
+      throw new ApiError(401, "Unauthorized attempt! You can edit only your own message");
+    }
+
+    // Check for invalid ObjectIds
+    const invalid = ids.find(id => !mongoose.Types.ObjectId.isValid(id));
+    if (invalid) {
+      throw new ApiError(403, `${invalid} is not a valid ID`);
+    }
+    
+    const message: IMessage|null = await Message.findOne({ 
+      _id: messageId, 
+      // senderId: userId, 
+      conversationId 
+    });
+
+    if (!message) {
+      throw new ApiError(404, "Message with this id doesn't exist");
+    }
+
+    //check if object exist inside delivered to or not
+    if(!message?.seenBy?.includes(new mongoose.Types.ObjectId(userId))){
+      message.seenBy?.push(new mongoose.Types.ObjectId(userId));
+      await message.save();
+    }
+    
+    res.status(200).json(
+      new ApiResponse(200, "Message seen", message)
+    ) 
+  
+  } catch (error) {
+    next(error);
+  }
+})
 // 4️⃣ Delete Message
 export const deleteMessage = asyncHandler(async (req: Request, res: Response) => {
   res.json({ message: "Delete message" });
@@ -218,9 +310,9 @@ export const removeReaction = asyncHandler(async (req: Request, res: Response) =
 });
 
 // 🔟 Mark as Delivered
-export const markMessageAsDelivered = asyncHandler(async (req: Request, res: Response) => {
-  res.json({ message: "Mark message as delivered" });
-});
+// export const markMessageAsDelivered = asyncHandler(async (req: Request, res: Response) => {
+//   res.json({ message: "Mark message as delivered" });
+// });
 
 // 1️⃣1️⃣ Mark as Seen
 export const markMessageAsSeen = asyncHandler(async (req: Request, res: Response) => {

@@ -46,7 +46,7 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
             messages: [message?.message]
           }))
         }
-        console.log("dispatched but from socket context")
+        // console.log("dispatched but from socket context")
         break;
         case 'status': 
         if(data.isOnline)
@@ -62,9 +62,10 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
           dispatch(stopTyping({ conversationId: data.conversationId, userId: data.userId }));
           break;
 
-        // case "delivered":
-      //   dispatch(markDelivered(data.messageId));
-      //   break;
+        case "delivered":
+          console.log("message delivered", data)
+          // dispatch(markDelivered(data.messageId));
+        break;
       // case "read":
       //   dispatch(markRead(data.messageId));
       //   break;

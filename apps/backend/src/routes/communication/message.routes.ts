@@ -14,6 +14,10 @@ router
   .route("/conversation/:conversationId/:userId")
   .get(isUserLoggedIn, messageController.getMessagesByConversation);
 
+router
+  .route("/mark-delivered/:conversationId/:messageId/:userId")
+  .patch( isUserLoggedIn, messageController.markMessageAsDelivered);
+
 // 2️⃣ Single Message by ID — Get, Edit, Delete
 router
   .route("/:id")

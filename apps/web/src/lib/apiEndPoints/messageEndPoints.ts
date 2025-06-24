@@ -10,6 +10,8 @@ export const messageApi = {
   getMessagesByConversation: (conversationId: string, userId: string) =>
     withPrefix(`/conversation/${conversationId}/${userId}`),
 
+  markMessageAsDelivered: (conversationId: string, messageId: string, userId: string) =>
+    withPrefix(`/mark-delivered/${conversationId}/${messageId}/${userId}`),
   // 3️⃣ Single Message — Get, Edit, Delete
   getMessageById: (id: string) => withPrefix(`/${id}`),
   editMessage: (id: string) => withPrefix(`/${id}`),
