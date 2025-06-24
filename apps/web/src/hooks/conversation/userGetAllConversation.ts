@@ -16,7 +16,7 @@ export const useGetAllConversations = () => {
     } catch (error: any) {    
       console.log("error in getting all conversations", error)
       console.log("error deteced @userGetAllConversations Hook", error?.response?.data?.message)
-      setError(error?.response?.data?.message || "Failed! @useGetAllConversation")
+      setError(error?.response?.data?.message || error.message || "Failed! @useGetAllConversation")
       
       return null
     } finally {

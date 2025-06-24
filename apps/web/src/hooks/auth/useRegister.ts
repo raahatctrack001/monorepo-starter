@@ -17,7 +17,7 @@ export const useRegisterUser = () => {
 
     } catch (error: any) {    
       console.log("error deteced @userRegisterUser Hook", error.response.data.message)
-      setError(error.response.data.message || "Registration Failed! @useRegisterUserHook")
+      setError(error.response.data.message || error.message || "Registration Failed! @useRegisterUserHook")
       
       return null
     } finally {

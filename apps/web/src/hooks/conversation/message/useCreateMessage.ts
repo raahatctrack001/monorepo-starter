@@ -21,7 +21,7 @@ export const useCreateMessage = () => {
     } catch (error: any) {    
       console.log("error in create message hook", error)
       console.log("error deteced @useCreateMessage Hook", error?.response?.data?.message)
-      setError(error?.response?.data?.message || "Create Message Failed! @useCreateMessage")
+      setError(error?.response?.data?.message || error.message || "Create Message Failed! @useCreateMessage")
       
       return null
     } finally {

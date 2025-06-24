@@ -18,7 +18,7 @@ export const useLogoutUser = () => {
     } catch (error: any) {    
       console.log("error in logout", error)
       console.log("error deteced @userLogoutUser Hook", error.response.data.message)
-      setError(error.response.data.message || "LogoutFailed! @useLoginUserHook")
+      setError(error.response.data.message || error.message || "LogoutFailed! @useLoginUserHook")
       
       return null
     } finally {

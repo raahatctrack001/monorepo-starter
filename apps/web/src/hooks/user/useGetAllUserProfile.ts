@@ -18,7 +18,7 @@ export const useGetAllUserProfile = () => {
     } catch (error: any) {    
       console.log("error in get all user profile in", error)
       console.log("error deteced @useAllGetUserProfile Hook", error?.response?.data?.message)
-      setError(error?.response?.data?.message || "Get All User Profile Failed! @useLoginUserHook")
+      setError(error?.response?.data?.message || error.message || "Get All User Profile Failed! @useLoginUserHook")
       
       return null
     } finally {

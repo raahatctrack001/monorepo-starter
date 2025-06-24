@@ -18,7 +18,7 @@ export const useLoginUser = () => {
     } catch (error: any) {    
       console.log("error in loggin in", error)
       console.log("error deteced @userLoginUser Hook", error.response.data.message)
-      setError(error.response.data.message || "Login Failed! @useLoginUserHook")
+      setError(error.response.data.message || error.message || "Login Failed! @useLoginUserHook")
       
       return null
     } finally {

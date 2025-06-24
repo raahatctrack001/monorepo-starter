@@ -23,12 +23,12 @@ export default function Sidebar() {
 
   const navItems = [
     { label: "Home", icon: Home, href: "/" },
-    { label: "Search", icon: Search, href: "/search" },
-    { label: "Explore", icon: Compass, href: "/explore" },
-    { label: "Reels", icon: Video, href: "/reels" },
+    { label: "Search", icon: Search, href: "/under-development" },
+    { label: "Explore", icon: Compass, href: "/under-development" },
+    { label: "Reels", icon: Video, href: "/under-development" },
     { label: "Conversation", icon: Send, href: "/conversation" },
-    { label: "Notifications", icon: Heart, href: "/notifications" },
-    { label: "Create", icon: PlusSquare, href: "/create" },
+    { label: "Notifications", icon: Heart, href: "/under-development" },
+    { label: "Create", icon: PlusSquare, href: "/under-development" },
     { label: "Profile", icon: User, href: `/profile/${currentUser?._id}` },
   ];
 
