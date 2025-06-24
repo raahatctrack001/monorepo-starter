@@ -22,6 +22,9 @@ router
 .route("/mark-seen/:conversationId/:messageId/:userId")
 .patch( isUserLoggedIn, messageController.markMessageAsSeen);
 
+router
+  .route("/unseen-undelivered/:conversationId/:userId")
+  .get(isUserLoggedIn, messageController.getUnseenOrUndeliveredMessages);
 // 2️⃣ Single Message by ID — Get, Edit, Delete
 router
   .route("/:id")

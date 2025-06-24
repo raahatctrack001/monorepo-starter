@@ -5,7 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { IUser } from "@/types/user/user.types";
 import { Button } from "@/components/ui/button";
-import { Edit, Settings, ThumbsUp } from "lucide-react";
+import { Edit, MessageCircle, Settings, ThumbsUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/lib/store/hooks";
 
@@ -53,13 +53,26 @@ export const UserProfileHeader = ({ user }: {user: IUser|null}) => {
                 </div>
 
                 <div className="space-x-2">
-                    {currentUser?._id !== user?._id && <Button className="cursor-pointer" > <ThumbsUp name="like"/> <span className="hidden sm:inline"> Like </span> </Button>}
                     {
-                    currentUser?._id === user?._id  && 
-                    <>
-                      <Button className="cursor-pointer" onClick={()=>router.push(`/edit-profile/${user?._id}`)} > <Edit /> <span className="hidden sm:inline"> Edit Profile </span>  </Button>
-                      <Button className="cursor-pointer"> <Settings /> <span className="hidden sm:inline"> Settings </span> </Button>
-                    </>
+                      currentUser?._id !== user?._id && 
+                        <>
+                          <Button className="cursor-pointer" > 
+                            <ThumbsUp name="like"/> 
+                            <span className="hidden sm:inline"> Like </span> 
+                          </Button>
+                          <Button className="cursor-pointer" > 
+                            <MessageCircle name="like"/> 
+                            <span className="hidden sm:inline"> Message </span> 
+                          </Button>
+                          
+                        </>
+                    }
+                    {
+                      currentUser?._id === user?._id  && 
+                      <>
+                        <Button className="cursor-pointer" onClick={()=>router.push(`/edit-profile/${user?._id}`)} > <Edit /> <span className="hidden sm:inline"> Edit Profile </span>  </Button>
+                        <Button className="cursor-pointer"> <Settings /> <span className="hidden sm:inline"> Settings </span> </Button>
+                      </>
                     }
                 </div>
             </div>

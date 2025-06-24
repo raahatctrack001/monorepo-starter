@@ -12,7 +12,8 @@ import { useGetAllConversations } from "@/hooks/conversation/userGetAllConversat
 import LocalLoader from "@/components/common/LocalLoader";
 import { useWebSocket } from "@/lib/context/WebSocketContext";
 import { safeSend } from "@/lib/context/safeSend";
-
+import { useRouter } from "next/navigation";
+;
 // interface ConversationListProps {
 //   conversations: IConversation[];
 //   error?: string | null;
@@ -20,7 +21,7 @@ import { safeSend } from "@/lib/context/safeSend";
 // }
 
 export default function ShowConversationList() {
-  const ws = useWebSocket();
+  const router = useRouter();
   const { currentUser } = useAppSelector((state) => state.user);
   const { conversations: convs } = useAppSelector(state => state.conversation);
 
@@ -48,6 +49,7 @@ export default function ShowConversationList() {
 
   const handleConversationClick = (conversation: IConversation) => {
     dispatch(activateConverstaion(conversation))
+    // router.push(`/conversation?active=${conversation?._id}`)
   }
   return (
     <div className="w-72 border-r h-screen p-4">

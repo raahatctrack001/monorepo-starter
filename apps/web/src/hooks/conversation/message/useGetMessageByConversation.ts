@@ -18,7 +18,7 @@ export const useGetMessageByConversation = () => {
     } catch (error: any) {    
       console.log("error in get all message by conversation in", error)
       console.log("error deteced @useGetAllMessageByConversation Hook", error?.response?.data?.message)
-      setError(error?.response?.data?.message || "Get All Message by conversation Failed! @useGetAllMessageByConversationHook")
+      setError(error?.response?.data?.message || error.message ||  "Get All Message by conversation Failed! @useGetAllMessageByConversationHook")
       
       return null
     } finally {

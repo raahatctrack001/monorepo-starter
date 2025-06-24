@@ -178,7 +178,7 @@ export const getMessagesByConversation = asyncHandler(async (req: Request, res: 
   const messages = await Message.find({
     conversationId: new mongoose.Types.ObjectId(conversationId)
   })
-  // .sort({createdAt: -1})
+  // .sort({createdAt: 1})
   // .limit(20);
 
   // if(messages.length === 0){
@@ -297,6 +297,38 @@ export const deleteMessage = asyncHandler(async (req: Request, res: Response) =>
   res.json({ message: "Delete message" });
 });
 
+export const getUnseenOrUndeliveredMessages = asyncHandler(async (req: Request, res: Response) => {
+  const { conversationId, userId } = req.params;
+  console.log(req.params)
+  if(!conversationId || !userId){
+    throw new ApiError(404, "Conversation or user Id is missing.")
+  }
+
+  if([conversationId, userId].some(id=>!mongoose.Types.ObjectId.isValid(id))){
+    throw new ApiError(403, "ConversationId or UserId is not valid")
+  }
+
+  if( req.user?._id !== userId ){
+    throw new ApiError(404,  "Unauthorized Attempt. Please login again.")
+  }
+
+  const pendingMessages = await Message.find({
+    conversationId: conversationId,
+    $or: [
+      { deliveredTo: { $ne: userId } },
+      { seenBy: { $ne: userId } }
+    ]
+  }).sort({ createdAt: 1 });
+
+  // .sort({createdAt: -1})
+  // .limit(20);
+
+  // if(messages.length === 0){
+  //   throw new ApiError(404, "Please send message to start chatting.");
+  // }
+  
+  return res.status(201).json(new ApiResponse(201, "Messages Fetched", pendingMessages));
+});
 // 5️⃣ Edit Message
 export const editMessage = asyncHandler(async (req: Request, res: Response) => {
   res.json({ message: "Edit message" });
