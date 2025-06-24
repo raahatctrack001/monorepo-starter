@@ -201,4 +201,13 @@ export class ConversationWebSocketServer {
     // console.log(conversationId, outboundMessage, message)
     this.roomManager.broadcast(conversationId, outboundMessage);
   }  
+
+  public broadcastDeliveredToRoom(conversationId: string, message: any) {
+    const data = JSON.parse(message);
+    console.log("data delivered wala", data);
+    
+    const outboundMessage = JSON.stringify(data);
+    // console.log(conversationId, outboundMessage, message)
+    this.roomManager.broadcast(conversationId, message);
+  }  
 }

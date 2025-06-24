@@ -193,7 +193,8 @@ export const markMessageAsDelivered = asyncHandler(async (req:Request, res:Respo
   try {
     const { conversationId, messageId, userId } = req.params;
     const ids = [conversationId, messageId, userId];
-    console.log(ids)
+    // console.log(ids)
+    // console.log({middleware: req.user, userId})
     // Check for missing IDs
     if (ids.some(id => !id)) {
       throw new ApiError(403, "Conversation ID, Message ID, or User ID is missing");
@@ -224,8 +225,20 @@ export const markMessageAsDelivered = asyncHandler(async (req:Request, res:Respo
       message.deliveredTo?.push(new mongoose.Types.ObjectId(userId));
       await message.save();
     }
+
+    // Example broadcast payload
+    const deliveryNotification = JSON.stringify({
+      type: "delivered",
+      conversationId,
+      message,
+      deliveredTo: userId,
+      timestamp: new Date().toISOString()
+    });
+
+    ConversationWebSocketServer.instance.broadcastDeliveredToRoom(conversationId, deliveryNotification);
+
     
-    res.status(200).json(
+    return res.status(200).json(
       new ApiResponse(200, "Message delivered", message)
     ) 
   

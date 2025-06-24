@@ -38,3 +38,37 @@ export const getMessageByConversation = async (conversationId: string, userId: s
 
     return result;  
 };
+
+export const markMessageAsDelivered = async (conversationId: string, messageId: string, userId: string) => {
+    const apiData: ApiConnectorParams = {
+      url: messageApi.markMessageAsDelivered(conversationId, messageId, userId),
+      method: "PATCH",
+      credentials: "include"
+    };
+    
+    const response = await apiConnector<ApiResponse>(apiData);
+    const result = response.data;
+    console.log("result from mark as delivered service", result);
+    if (!result.success) {
+      throw new Error(result.message || "Failed to mark messaage as delivered...");
+    }  
+
+    return result;  
+};
+
+export const markMessageAsSeen = async (conversationId: string, messageId: string, userId: string) => {
+    const apiData: ApiConnectorParams = {
+      url: messageApi.markMessageAsDelivered(conversationId, messageId, userId),
+      method: "PATCH",
+      credentials: "include"
+    };
+    
+    const response = await apiConnector<ApiResponse>(apiData);
+    const result = response.data;
+    console.log("result from mark as read service", result);
+    if (!result.success) {
+      throw new Error(result.message || "Failed to mark messaage as read...");
+    }  
+
+    return result;  
+};

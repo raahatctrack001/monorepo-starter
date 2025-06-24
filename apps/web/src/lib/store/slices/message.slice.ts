@@ -60,9 +60,9 @@ const messageSlice = createSlice({
     },
     markMessageAsDeliveredOrRead: (state, action: PayloadAction<{conversationId: string, message: IMessage}>) => {
       const { conversationId, message: newMessage } = action.payload;
-
+    
       state.conversations[conversationId] = state.conversations[conversationId]?.map(message =>
-        message._id === newMessage._id ? newMessage : message
+        message._id === newMessage._id as string ? newMessage : message
       ) || [];
     }
 
@@ -72,7 +72,8 @@ const messageSlice = createSlice({
 
 export const {
   addConversationMessages,
-  addMessageToConversation
+  addMessageToConversation,
+  markMessageAsDeliveredOrRead
 } = messageSlice.actions;
 
 export default messageSlice.reducer;

@@ -12,7 +12,12 @@ export const messageApi = {
 
   markMessageAsDelivered: (conversationId: string, messageId: string, userId: string) =>
     withPrefix(`/mark-delivered/${conversationId}/${messageId}/${userId}`),
+
+  markMessageAsSeen: (conversationId: string, messageId: string, userId: string) =>
+    withPrefix(`/mark-seen/${conversationId}/${messageId}/${userId}`),
+
   // 3️⃣ Single Message — Get, Edit, Delete
+
   getMessageById: (id: string) => withPrefix(`/${id}`),
   editMessage: (id: string) => withPrefix(`/${id}`),
   deleteMessage: (id: string) => withPrefix(`/${id}`),
@@ -26,7 +31,7 @@ export const messageApi = {
   removeReaction: (id: string) => withPrefix(`/${id}/remove-reaction`),
 
   // 6️⃣ Delivery / Seen Status
-  markDelivered: (id: string) => withPrefix(`/${id}/delivered`),
+  // markDelivered: (id: string) => withPrefix(`/${id}/delivered`),
   getDeliveredStatus: (id: string) => withPrefix(`/${id}/delivered`),
   markSeen: (id: string) => withPrefix(`/${id}/seen`),
   getSeenStatus: (id: string) => withPrefix(`/${id}/seen`),

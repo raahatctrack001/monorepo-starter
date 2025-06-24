@@ -23,6 +23,7 @@ import { addConversationMessages, addMessageToConversation } from "@/lib/store/s
 import { useWebSocket } from "@/lib/context/WebSocketContext";
 import { safeSend } from "@/lib/context/safeSend";
 import { updateConversation } from "@/lib/store/slices/conversation.slice";
+import { markMessageAsSeen } from "@/lib/services/message.service";
 
 const ChatWindow: React.FC = () => {
   const ws = useWebSocket();
@@ -199,11 +200,11 @@ const ChatWindow: React.FC = () => {
       )}
       
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {messagesFromRedux.map((message) => {
+        {messagesFromRedux && messagesFromRedux.map((message:IMessage) => {
           const messageDate = format(new Date(message.sentAt || new Date()), "yyyy-MM-dd");
           const showDateSeparator = messageDate !== lastMessageDate;
           lastMessageDate = messageDate;
-
+          
           return (
             <div key={message._id}>
               {showDateSeparator && (
