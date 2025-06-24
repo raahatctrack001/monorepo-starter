@@ -18,6 +18,10 @@ router
   .route("/mark-delivered/:conversationId/:messageId/:userId")
   .patch( isUserLoggedIn, messageController.markMessageAsDelivered);
 
+router
+.route("/mark-seen/:conversationId/:messageId/:userId")
+.patch( isUserLoggedIn, messageController.markMessageAsSeen);
+
 // 2️⃣ Single Message by ID — Get, Edit, Delete
 router
   .route("/:id")

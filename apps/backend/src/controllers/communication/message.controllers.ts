@@ -234,7 +234,7 @@ export const markMessageAsDelivered = asyncHandler(async (req:Request, res:Respo
   }
 })
 
-export const markMessageAsRead = asyncHandler(async (req:Request, res:Response, next:NextFunction) => {
+export const markMessageAsSeen = asyncHandler(async (req:Request, res:Response, next:NextFunction) => {
   console.log("marking message as delivered", {params: req.params, body: req.body, query: req.query});
   try {
     const { conversationId, messageId, userId } = req.params;
@@ -314,10 +314,10 @@ export const removeReaction = asyncHandler(async (req: Request, res: Response) =
 //   res.json({ message: "Mark message as delivered" });
 // });
 
-// 1️⃣1️⃣ Mark as Seen
-export const markMessageAsSeen = asyncHandler(async (req: Request, res: Response) => {
-  res.json({ message: "Mark message as seen" });
-});
+// // 1️⃣1️⃣ Mark as Seen
+// export const markMessageAsSeen = asyncHandler(async (req: Request, res: Response) => {
+//   res.json({ message: "Mark message as seen" });
+// });
 
 // 1️⃣2️⃣ Get Delivered Status
 export const getDeliveredStatus = asyncHandler(async (req: Request, res: Response) => {
