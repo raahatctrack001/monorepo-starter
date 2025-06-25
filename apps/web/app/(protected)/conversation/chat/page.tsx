@@ -1,6 +1,6 @@
 "use client";
-import ChatWindow from "app/(protected)/conversation/_components/ChatWindow";
-import ConversationList from "app/(protected)/conversation/_components/ConversationList";
+import ChatWindow from "app/(protected)/conversation/chat/_components/ChatWindow";
+import ConversationList from "app/(protected)/conversation/chat/_components/ConversationList";
 import { useEffect, useState } from "react";
 import MessageInputBar from "./_components/MessageInputBar";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
