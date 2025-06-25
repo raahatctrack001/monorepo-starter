@@ -7,11 +7,13 @@ export class ConversationWebSocketServer {
   private static _instance: ConversationWebSocketServer;
   private wss: WebSocketServer;
   private roomManager: RoomManager;
+  private clients: Map<string, Client>;
 
   //private to avoid direct instantiation
   private constructor(server: HttpServer) { 
     this.wss = new WebSocketServer({ server });
     this.roomManager = new RoomManager();
+    this.clients = new Map<string, Client>;
     this.initialize(); //instance method not the static one.
     console.log('🚀 WebSocket Server is running (attached to HTTP server)');
   }
@@ -45,6 +47,8 @@ export class ConversationWebSocketServer {
   private initialize() { //only triggers first time when a user comes into chatWindow not after that
     this.wss.on('connection', (ws: WebSocket) => { //ws => client that is connection from frontend
       console.log('New client connected.');
+      const id = crypto.randomUUID();
+      this.clients.set(id, ws);
 
       ws.on('message', (data) => {
         try {

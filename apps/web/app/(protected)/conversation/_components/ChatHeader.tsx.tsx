@@ -9,12 +9,15 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ChatHeader() {
   const { currentUser } = useAppSelector((state) => state.user);
   const { activeConversation } = useAppSelector((state) => state.conversation);
   const { users: onlineUsers } = useAppSelector((state) => state.status);
   const typingStatus = useAppSelector((state) => state.status.typingStatus);
+
+  const  router = useRouter()
 
   console.log(typingStatus);
   const [onlineStatus, setOnlineStatus] = useState<{ isOnline: boolean; lastSeen: Date | null }>();
@@ -116,6 +119,7 @@ export default function ChatHeader() {
           className="rounded-full" 
           title="Voice Call"
           aria-label="Start voice call"
+          onClick={()=>router.push(`conversation?call=${otherParticipantId}`)}
         >
           <Phone size={18} />
         </Button>
@@ -126,6 +130,7 @@ export default function ChatHeader() {
           className="rounded-full" 
           title="Video Call"
           aria-label="Start video call"
+          onClick={()=>router.push(`conversation?call=${otherParticipantId}`)}
         >
           <Video size={20} />
         </Button>
