@@ -9,7 +9,7 @@
     "lint": "eslint . --max-warnings 0",
     "generate:component": "turbo gen react-component",
     "check-types": "tsc --noEmit",
-    "start": "echo starting ui packages"
+    "start": "echo starting ui packages what changes to expect i don't know"
 
   },
   "devDependencies": {
