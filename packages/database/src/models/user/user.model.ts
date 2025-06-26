@@ -17,6 +17,12 @@ export interface IStatusUpdateDetails {
   timestamp: Date,
   device: IDevice,
 }
+
+export interface INotificationPreference {
+  whatsapp: boolean,
+  email: boolean,
+  sms: boolean,
+}
 export interface IUser extends Document {
   //basic details
   fullName: string;
@@ -33,10 +39,12 @@ export interface IUser extends Document {
   birthday?: Date;
   themePreference: 'light' | 'dark' | 'system';
   website?: { name: string; desc: string; url: string }[];
+  notificaionPreference: INotificationPreference,
 
   //device details
   location?: {country: string, state: string, city: string}[];
   status: 'active' | 'banned' | 'deleted' | 'deactivated';
+  accountType?: 'public' | 'private' | 'business',
   statusUpdateDetails?: IStatusUpdateDetails[]
   role: 'User' | 'Moderator' | 'Admin';
   language?: string;
@@ -116,6 +124,12 @@ const statusUpdateSchema = new mongoose.Schema({
   device: { type: Schema.Types.ObjectId, ref: "deviceSchema"}
 }, { _id: false })
 
+const notificationPrefernceSchema = new mongoose.Schema({
+  whatsapp: {type: Boolean, default: false},
+  email: {type: Boolean, default: true},
+  sms: {type: Boolean, default: false,}
+}, {_id: false});
+
 const UserSchema = new Schema<IUser>(
   {
     fullName: { type: String, required: true },
@@ -144,9 +158,11 @@ const UserSchema = new Schema<IUser>(
         url: String,
       },
     ],
+    notificaionPreference: notificationPrefernceSchema,
     gender: { type: String, enum: ['male', 'female', 'other'] },
     birthday: Date,
     status: { type: String, enum: ['active', 'banned', 'deactivated', 'deleted'], default: 'active' },
+    accountType: { type: String, enum: ['public', 'private', 'business'], default: 'public'},
     statusUpdateDetails: [statusUpdateSchema],
     role: { type: String, enum: ['User', 'Moderator', 'Admin'], default: 'User' },
     themePreference: { type: String, enum: ['light', 'dark', 'system'], default: 'system' },
