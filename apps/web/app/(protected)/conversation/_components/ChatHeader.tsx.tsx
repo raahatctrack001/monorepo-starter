@@ -3,7 +3,6 @@
 import { Video, Phone, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { IConversation } from "@/types/conversations/conversation.types";
 import { useAppSelector } from "@/lib/store/hooks";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -119,7 +118,7 @@ export default function ChatHeader() {
           className="rounded-full" 
           title="Voice Call"
           aria-label="Start voice call"
-          onClick={()=>router.push(`conversation?call=${otherParticipantId}`)}
+          onClick={()=>router.push(`conversation/call/${activeConversation?._id}`)}
         >
           <Phone size={18} />
         </Button>
@@ -130,7 +129,7 @@ export default function ChatHeader() {
           className="rounded-full" 
           title="Video Call"
           aria-label="Start video call"
-          onClick={()=>router.push(`conversation?call=${otherParticipantId}`)}
+          onClick={()=>router.push(`conversation?call/${activeConversation?._id}`)}
         >
           <Video size={20} />
         </Button>

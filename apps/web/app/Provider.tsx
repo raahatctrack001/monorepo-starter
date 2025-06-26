@@ -5,6 +5,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { store, persistor } from '@/lib/store/store'
 import { ThemeProvider } from '@/components/theme-provider'
 import { WebSocketProvider } from '@/lib/context/WebSocketContext'
+import { WebRTCProvider } from '@/lib/context/WebRTCContext'
 
 type Props = {
   children: React.ReactNode
@@ -20,9 +21,11 @@ export default function Providers({ children }: Props) {
           enableSystem
           disableTransitionOnChange
         >
-          <WebSocketProvider >
-          { children }         
-          </WebSocketProvider>
+          <WebRTCProvider>
+            <WebSocketProvider >
+                { children }         
+            </WebSocketProvider>
+          </WebRTCProvider>
         </ThemeProvider>
       </PersistGate>
     </Provider>

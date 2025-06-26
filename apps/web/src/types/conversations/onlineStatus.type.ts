@@ -3,5 +3,6 @@ export interface IOnlineStatus{
         isOnline: boolean,
         lastSeen: Date|null,
     }>,
-    typingStatus: Record<string, Record<string, boolean>> //record<conversationId, <userid, true>>
+    typingStatus: Record<string, Record<string, boolean>>, //record<conversationId, <userid, true>>
+    isConnected: boolean
 }

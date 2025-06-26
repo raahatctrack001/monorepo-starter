@@ -31,12 +31,16 @@ export class RoomManager {
   }
 
   broadcast(conversationId: string, message: string, senderClient?: Client) {
+    console.log("message broadcasting!")
     const clients = this.rooms.get(conversationId);
     if (!clients) return;
+    console.log("gotthe client!")
+
     clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN && client !== senderClient) {
         client.send(message);
       }
+      console.log("sent")
     });
   }
 

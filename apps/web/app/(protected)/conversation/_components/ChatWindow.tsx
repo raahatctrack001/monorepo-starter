@@ -56,7 +56,7 @@ const ChatWindow: React.FC = () => {
       safeSend(ws, { type: "offline", userId: currentUser?._id });
     }
     
-  }, [ws, currentUser, dispatch, activeConversation?._id]);
+  }, [ws, currentUser, activeConversation?._id]);
 
 
   const { getAllMessageByConversation, loading, error } = useGetMessageByConversation();

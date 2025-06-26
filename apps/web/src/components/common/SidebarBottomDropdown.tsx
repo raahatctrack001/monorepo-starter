@@ -15,23 +15,27 @@ import { useAppDispatch } from "@/lib/store/hooks";
 import { logOutSuccess } from "@/lib/store/slices/user.slice";
 import { useRouter } from "next/navigation";
 import GlobalLoader from "./GlobalLoader";
+// import { clearAllAppState } from "@/lib/store/actions/clean.action";
+import { AppDispatch } from "@/lib/store/store";
 
 export default function SidebarBottomDropdown() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { logoutUser, loading, error } = useLogoutUser();
   const handleLogout = async () => {
-    try {
-        const { token } = await getDeviceInfo();
-        const result = await logoutUser({token});
-        if(result?.success){
-          dispatch(logOutSuccess());
-          router.push('/login')
-        }
-    } catch (error) {
-      console.log(error);
+  try {
+    const { token } = await getDeviceInfo();
+    const result = await logoutUser({ token });
+    if (result?.success) {
+      dispatch(logOutSuccess());
+      // dispatch(clearAllAppState());
+      router.push("/login");
     }
+  } catch (error) {
+    console.log(error);
   }
+};
+
 
   if(loading){
     return <GlobalLoader heading="Please Wait..." description="Logout in process!" />

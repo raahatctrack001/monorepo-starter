@@ -52,8 +52,8 @@ export class ConversationWebSocketServer {
 
       ws.on('message', (data) => {
         try {
-          // console.log("Inside initialze and on message")
           const message = JSON.parse(data.toString());  
+          console.log("Inside initialze and on message", message)
           this.handleMessage(ws, message);
         } catch (err) {
           console.error('Error parsing message:', err);
@@ -82,7 +82,7 @@ export class ConversationWebSocketServer {
    * @param payload: message payload sent from client side
    */
   private handleMessage(ws: WebSocket, payload: MessagePayload) {
-  console.log("inside handleMessage: payload is:", payload);
+  // console.log("inside handleMessage: payload is:", payload);
 
   switch (payload.type) {
     case 'join':
@@ -187,6 +187,42 @@ export class ConversationWebSocketServer {
         this.roomManager.broadcast(payload.conversationId!, removalNotification);
       }
       break;
+    case 'call:offer':
+      // console.log("call:offer case is going to be handled really soon", payload)
+      // console.log(payload.callInfo.conversationId)
+      if(payload && payload.callInfo && payload.callInfo.conversationId ){
+        const callOffer = JSON.stringify({
+          type: "call:offer",
+          message: payload.callInfo,
+        })
+        // console.log("|broadcasting", callOffer)
+        this.roomManager.broadcast(payload.callInfo.conversationId, callOffer);
+      }
+      break;
+      case 'call:answer':
+      console.log("call:offer case is going to be handled really soon", payload)
+      // console.log(payload.callInfo.conversationId)
+      if(payload && payload.callInfo && payload.callInfo.conversationId ){
+        const callOffer = JSON.stringify({
+          type: "call:answer",
+          message: payload.callInfo,
+        })
+        // console.log("|broadcasting", callOffer)
+        this.roomManager.broadcast(payload.callInfo.conversationId, callOffer);
+      }
+      break;
+      case 'call:ice-candidate':
+      console.log("call:offer case is going to be handled really soon", payload)
+      // console.log(payload.callInfo.conversationId)
+      if(payload && payload.callInfo && payload.callInfo.conversationId ){
+        const callOffer = JSON.stringify({
+          type: "call:answer",
+          message: payload.callInfo,
+        })
+        // console.log("|broadcasting", callOffer)
+        this.roomManager.broadcast(payload.callInfo.conversationId, callOffer);
+      }
+      break;
 
     default:
       console.warn('Unknown message type:', payload.type);
@@ -214,4 +250,22 @@ export class ConversationWebSocketServer {
     // console.log(conversationId, outboundMessage, message)
     this.roomManager.broadcast(conversationId, message);
   }  
+
+  public broadcastCallOfferToRoom(conversationId: string, message: any) {
+    try {
+      const data = JSON.parse(message);
+      const outboundMessage = JSON.stringify({
+        type: 'call:offer',
+        conversationId,
+        message: data,
+        timestamp: new Date().toISOString(),
+      });
+      console.log("braodcasting offer", {outboundMessage, data, message})
+      this.roomManager.broadcast(conversationId, outboundMessage);
+    } catch (error) {
+      console.log("broadcast data error", error);
+    }
+  }
+
+  
 }

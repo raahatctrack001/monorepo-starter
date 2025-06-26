@@ -34,6 +34,7 @@ export default function ShowConversationList() {
  
    useEffect(()=>{
      setConversations(convs);
+     console.log("settign up conversations", convs)
    }, [convs])
  
    useEffect(()=>{

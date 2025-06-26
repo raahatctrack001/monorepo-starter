@@ -13,7 +13,10 @@ export interface MessagePayload {
     | 'delivered'
     | 'read'
     | 'reaction'
-    | 'remove-message';
+    | 'remove-message'
+    | 'call:offer'
+    | 'call:answer'
+| 'call:ice-candidate'
 
   // General
   conversationId?: string;
@@ -24,6 +27,15 @@ export interface MessagePayload {
   message?: {
     conversation: IConversation,
     message: IMessage
+  }
+
+  //for call paylaod
+  callInfo?: {
+    conversationId: string,
+    from: string,
+    offer?: RTCSessionDescriptionInit,
+    answer?: RTCSessionDescriptionInit,
+    candidate?: RTCIceCandidateInit    
   }
 
   // For reaction

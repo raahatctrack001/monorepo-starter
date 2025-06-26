@@ -11,8 +11,8 @@ const onlineStatusSlice = createSlice({
     name: "onlineStatus",
     initialState,
     reducers: {
-        updateWebSocketConnectedStatus(state, action: PayloadAction<{status: boolean}>) {
-          state.isConnected = action.payload.status;
+        updateWebSocketConnectedStatus(state, action: PayloadAction<{isConnected: boolean}>) {
+          state.isConnected = action.payload.isConnected;
         },
         setUserOnline(state, action: PayloadAction<{userId: string, timestamp: Date}>) {
           state.users[action.payload.userId] = {

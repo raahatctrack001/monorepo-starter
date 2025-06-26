@@ -3,8 +3,10 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { safeSend } from './safeSend';
 import { updateConversation } from '../store/slices/conversation.slice';
 import { addMessageToConversation, markMessageAsDeliveredOrRead } from '../store/slices/message.slice';
-import { setTyping, setUserOffline, setUserOnline, stopTyping } from '../store/slices/status.slice';
+import { setTyping, setUserOffline, setUserOnline, stopTyping, updateWebSocketConnectedStatus } from '../store/slices/status.slice';
 import { markMessageAsDelivered } from '../services/message.service';
+import { useWebRTC } from './WebRTCContext';
+
 
 const WebSocketContext = createContext<WebSocket | null>(null);
 
@@ -14,6 +16,8 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
   const { activeConversation } = useAppSelector(state=>state.conversation)
   const { currentUser } = useAppSelector(state=>state.user);
   const dispatch = useAppDispatch();
+
+  const { peerConnection, initConnection, getOrCreatePeerConnection } = useWebRTC();
 
   useEffect(()=>{
     setConversationId(activeConversation?._id as string)
@@ -31,10 +35,11 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
     
     ws.onopen = () => {
       console.log('Connected to WebSocket');
+      dispatch(updateWebSocketConnectedStatus({isConnected: true}))
       setSocket(ws);
     };
 
-    ws.onmessage = (event) => {
+    ws.onmessage = async (event) => {
       console.log("context data", event.data);
       const data = JSON.parse(event.data);
       console.log("parsed context data", data);
@@ -80,6 +85,69 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
               console.log("message delivered from context", data)
               dispatch(markMessageAsDeliveredOrRead({conversationId: data.conversationId, message: data.message}));
             break;
+            case "call:offer":
+              // console.log("call:offer:::data", data);
+              // Ignore if the offer is from yourself
+              if (data?.message?.from === currentUser?._id.toString()) {
+                console.log("Ignoring own offer message.");
+                return;
+              }              
+              
+              (async () => {
+                if (!peerConnection) {
+                  console.warn("No peer connection available. Initializing...");
+                  initConnection();  // call your hook's method to create a connection
+                  // or ideally, wait and retry after it's ready
+                  
+                }
+                const pc = peerConnection || getOrCreatePeerConnection();
+  
+  
+                console.log("Offer received, processing...", data);
+                
+                await pc?.setRemoteDescription(new RTCSessionDescription(data?.message?.offer));
+
+                const answer = await pc?.createAnswer();
+                await pc?.setLocalDescription(answer);
+
+                console.log("Answer created and set. Sending via signaling server...");
+
+                safeSend(ws, {
+                  type: "call:answer",
+                  callInfo: {
+                    conversationId: activeConversation?._id,
+                    from: currentUser?._id,
+                    answer
+                  }
+                });
+              })();
+
+              break;
+          case "call:answer":
+            console.log("Answer received:", data);
+            if (data?.message?.from === currentUser?._id.toString()) {
+                console.log("Ignoring own answer message.");
+                return;
+              }   
+            await peerConnection?.setRemoteDescription(new RTCSessionDescription(data?.message?.answer));
+            console.log("Remote description (answer) set");
+            break;
+          case "call:ice-candidate":
+            console.log("Received ICE candidate", data);
+            if (data?.message?.from === currentUser?._id) {
+              console.log("Ignoring own ICE candidate");
+              return;
+            }
+
+            if (!peerConnection) {
+              console.warn("No peer connection available.");
+              return;
+            }
+
+            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+            console.log("ICE candidate added.");
+            break;
+
           // case "read":
           //   dispatch(markRead(data.messageId));
           //   break;
@@ -97,6 +165,7 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
     ws.onclose = (event) => {
       console.log('WebSocket connection closed', event.reason);
       setSocket(null);
+      dispatch(updateWebSocketConnectedStatus({isConnected: false}))
     };
     
     ws.onerror = (error) => {
@@ -107,6 +176,8 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
     return () => {
       if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
         ws.close(); //client exited
+        dispatch(updateWebSocketConnectedStatus({isConnected: false}))
+
       }
     };
   }, []);
