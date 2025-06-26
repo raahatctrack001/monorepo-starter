@@ -3,13 +3,17 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: IOnlineStatus = {
     users: {},
-    typingStatus: {}
+    typingStatus: {},
+    isConnected: false,
 }
 
 const onlineStatusSlice = createSlice({
     name: "onlineStatus",
     initialState,
     reducers: {
+        updateWebSocketConnectedStatus(state, action: PayloadAction<{status: boolean}>) {
+          state.isConnected = action.payload.status;
+        },
         setUserOnline(state, action: PayloadAction<{userId: string, timestamp: Date}>) {
           state.users[action.payload.userId] = {
             isOnline: true,
@@ -41,6 +45,11 @@ const onlineStatusSlice = createSlice({
         clearTypingState(state, action: PayloadAction<{ conversationId: string }>) {
             delete state.typingStatus[action.payload.conversationId];
         },   
+        cleanStatusData: (state) => {
+            state.users=  {};
+            state.typingStatus = {};
+            state.isConnected=  false;
+        }
     }
 })
 
@@ -49,7 +58,9 @@ export const {
     setUserOffline,
     setTyping,
     stopTyping,
-    clearTypingState
+    clearTypingState,
+    updateWebSocketConnectedStatus,
+    cleanStatusData,
 } = onlineStatusSlice.actions;
 
 export default onlineStatusSlice.reducer;

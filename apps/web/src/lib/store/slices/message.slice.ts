@@ -64,8 +64,10 @@ const messageSlice = createSlice({
       state.conversations[conversationId] = state.conversations[conversationId]?.map(message =>
         message._id === newMessage._id as string ? newMessage : message
       ) || [];
+    },
+    cleanMessageData: (state) => {
+      state.conversations = {};
     }
-
 
   }
 })
@@ -73,7 +75,8 @@ const messageSlice = createSlice({
 export const {
   addConversationMessages,
   addMessageToConversation,
-  markMessageAsDeliveredOrRead
+  markMessageAsDeliveredOrRead,
+  cleanMessageData,
 } = messageSlice.actions;
 
 export default messageSlice.reducer;

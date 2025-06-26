@@ -64,9 +64,13 @@ const conversationSlice = createSlice({
       state.activeConversation=null;
     },
     deleteConversations: (state)=>{
-        state.conversations = []
+        state.conversations = [];
         console.log("conversation deleted")
     },   
+    cleanConversationData: (state) => {
+      state.activeConversation = null;
+      state.conversations = [];
+    }
   },
 });
 
@@ -75,7 +79,8 @@ export const {
   deleteConversations,
   activateConverstaion,
   deactivateConversation,
-  updateConversation
+  updateConversation,
+  cleanConversationData,
 } = conversationSlice.actions;
 
 export default conversationSlice.reducer;

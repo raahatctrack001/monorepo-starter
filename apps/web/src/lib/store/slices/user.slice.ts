@@ -21,6 +21,9 @@ const userSlice = createSlice({
     deleteUserSuccess: (state) => {
       state.currentUser = null;
     },
+    cleanUserData: (state) => {
+      state.currentUser = null;
+    }
   },
 });
 
@@ -29,6 +32,7 @@ export const {
   updateSuccess,
   deleteUserSuccess,
   logOutSuccess,
+  cleanUserData,
 } = userSlice.actions;
 
 export default userSlice.reducer;
