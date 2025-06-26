@@ -71,7 +71,7 @@ yarn-error.log*
 *.mpg
 *.3gp
 *.m4v
-*.ts
+
 *.vob
 *.ogv
 *.rm
