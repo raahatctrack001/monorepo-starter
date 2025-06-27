@@ -12,7 +12,7 @@
     "start": "echo starting common packages"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./dist/index.js"
   },
   "keywords": [],
   "author": "",
