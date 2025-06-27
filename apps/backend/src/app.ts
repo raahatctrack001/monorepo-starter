@@ -6,7 +6,7 @@ import ApiError from './utils/apiError';
 import ApiResponse from './utils/apiResponse';
 
 const app = express();
-const allowedOrigins = ["http://localhost:3000", "*"];
+const allowedOrigins = ["http://localhost:3001", "http://localhost:3002", "*"];
 app
     .use(express.json({limit:'16kb'}))
     .use(express.urlencoded({extended:true, limit:"16kb"}))
