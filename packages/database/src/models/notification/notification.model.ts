@@ -2,12 +2,12 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 // 1️⃣ TypeScript Interface for Notification
 export interface INotification extends Document {
-  recieverId: Types.ObjectId; 
+  receiverId: Types.ObjectId; 
   type: 'like' | 'comment' | 'follow' | 'mention' | 'repost' | 'reactions' | 'event_invite' | 'system';
   targetId: any; //likes comments follow mentions
   message: string;
-  senderId: Types.ObjectId;
-  actionUrl: string;
+  senderId: string;
+  actionURL: string;
   delivered?: boolean;
   read?: boolean;
   pushSent?: boolean;
@@ -20,18 +20,17 @@ export interface INotification extends Document {
 }
 
 // 2️⃣ Mongoose Schema for Notification
-const NotificationSchema: Schema = new Schema<INotification>(
-  {
-    recieverId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+const NotificationSchema: Schema = new Schema<INotification>({
+    receiverId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     type: {
       type: String,
       enum: ['like', 'comment', 'follow', 'mention', 'repost', 'reactions', 'event_invite', 'system'],
       required: true,
     },
-    targetId: { type: Schema.Types.Mixed, required: false },
+    targetId: { type: String, required: false },
     message: { type: String, required: true },
-    senderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    actionUrl: { type: String, required: false },
+    senderId: { type: Schema.Types.Mixed, required: true },
+    actionURL: { type: String, required: false },
     delivered: { type: Boolean, default: false },
     read: { type: Boolean, default: false },
     pushSent: { type: Boolean, default: false },

@@ -9,6 +9,8 @@ import ApiResponse from "./apiResponse";
  */
 export const validateData = async (schema: ZodSchema, data: unknown) => {
   const result = schema.safeParse(data);
+
+  console.log(result?.error?.errors);
   if (!result.success) {
     const errors = (result.error as ZodError).errors.map((err: ZodIssue) => ({
       path: err.path.join("."),

@@ -1,42 +1,56 @@
 import express from 'express';
 import * as notificationController from '../controllers/notification.controllers';
+import { isUserLoggedIn } from '../middlewares/auth.middleware';
 
 const router = express.Router();
 
-// Create a new notification
-router.post('/create-notification', notificationController.createNotification);
+// Notifications for a single user
 
-// Bulk create notifications (e.g., system announcements)
-router.post('/bulk-create', notificationController.bulkCreateNotifications);
 
-// Get all notifications for a specific user
-router.get('/user/:userId', notificationController.getUserNotifications);
+router
+  .route('/create-notification/:userId')
+  .post(isUserLoggedIn, notificationController.createNotification)
+  .get(isUserLoggedIn, notificationController.getUserNotifications)              // get all
+  .delete(isUserLoggedIn, notificationController.deleteAllNotificationsForUser); // delete all
 
-// Get a single notification by its ID
-router.get('/:notificationId', notificationController.getNotificationById);
+// Create new notification and bulk create
+router
+  .route('/')
+  .post(notificationController.createNotification);
 
-// Mark a notification as read
-router.patch('/:notificationId/read', notificationController.markNotificationAsRead);
+router
+  .route('/bulk-create')
+  .post(notificationController.bulkCreateNotifications);
 
-// Mark all notifications for a user as read
-router.patch('/user/:userId/read-all', notificationController.markAllNotificationsAsRead);
+// Specific notification by ID
+router
+  .route('/:notificationId')
+  .get(notificationController.getNotificationById)
+  .put(notificationController.updateNotification)
+  .delete(notificationController.deleteNotification);
 
-// Delete a single notification
-router.delete('/:notificationId', notificationController.deleteNotification);
+// Mark as read / delivered
+router
+  .route('/:notificationId/read')
+  .patch(notificationController.markNotificationAsRead);
 
-// Delete all notifications for a user
-router.delete('/user/:userId', notificationController.deleteAllNotificationsForUser);
+router
+  .route('/:notificationId/delivered')
+  .patch(notificationController.markNotificationAsDelivered);
 
-// Update a notification (priority, delivery status, etc.)
-router.put('/:notificationId', notificationController.updateNotification);
+// Mark all as read for user
+router
+  .route('/user/:userId/read-all')
+  .patch(notificationController.markAllNotificationsAsRead);
 
-// Mark a notification as delivered (for push delivery tracking)
-router.patch('/:notificationId/delivered', notificationController.markNotificationAsDelivered);
+// Get unread count for user
+router
+  .route('/user/:userId/unread-count')
+  .get(notificationController.getUnreadNotificationCount);
 
-// Get unread notification count for a user
-router.get('/user/:userId/unread-count', notificationController.getUnreadNotificationCount);
-
-// Get recent N notifications for a user (optional query param ?limit=10)
-router.get('/user/:userId/recent', notificationController.getRecentNotifications);
+// Get recent notifications (optionally pass ?limit=10)
+router
+  .route('/user/:userId/recent')
+  .get(notificationController.getRecentNotifications);
 
 export default router;
