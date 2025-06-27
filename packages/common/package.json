@@ -11,13 +11,14 @@
     "dev": "tsc --watch -p tsconfig.json", 
     "start": "echo starting common packages"
   },
+  
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./dist/index.js"  
   },
+
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "dotenv": "^16.5.0",
     "zod": "^3.25.32"
