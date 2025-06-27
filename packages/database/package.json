@@ -12,7 +12,7 @@
     "start": "echo starting database server"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./dist/index.js"
   },
   "keywords": [],
   "author": "",
