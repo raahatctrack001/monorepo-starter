@@ -10,9 +10,9 @@ export const databaseConnection = async (): Promise<Connection | void> => {
         const remoteConnectionString = process.env.MONGODB_CONNECTION_STRING;
         const localConnectionString = process.env.MONGODB_CONNECTION_STRING_DOCKER;
         const connectionString = process.env.NODE_ENV !== 'production' ? remoteConnectionString : localConnectionString
-        // console.log(connectionString)
+        console.log(connectionString)
         
-        const connectionInstance = await mongoose.connect(connectionString as string);
+        const connectionInstance = await mongoose.connect(remoteConnectionString as string);
         return connectionInstance.connection;
     } catch (error) {
         console.error("MongoDB connection error:", error);
