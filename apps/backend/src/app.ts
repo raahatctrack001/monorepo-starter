@@ -12,11 +12,13 @@ app
     .use(express.urlencoded({extended:true, limit:"16kb"}))
     .use(cors({
         origin: (origin, callback) => {
-            // console.log("origin", origin)
+            console.log("origin", origin)
             if (!origin || allowedOrigins.includes(origin)) {
                 callback(null, true);
+                console.log("allowed")
             } else {
                 callback(new Error("Unidentified Origin!"));
+                console.log("rejected!")
             }
         },
         credentials: true,

@@ -13,6 +13,7 @@ import { useAppDispatch } from "@/lib/store/hooks"
 import { logInSuccess } from "@/lib/store/slices/user.slice"
 import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { authApi } from "@/lib/apiEndPoints/authEndPints"
 
 export default function LoginForm() {
   const dispatch = useAppDispatch();
@@ -29,6 +30,7 @@ const router = useRouter();
 const onSubmit = async (data: LoginUserSchema) => {
   console.log("login form submitted", data)
   console.log('Form submitted:', data);
+  console.log("api calls to", authApi.loginUser())
 
       const deviceInfo = await getDeviceInfo();
 
