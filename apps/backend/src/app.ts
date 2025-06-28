@@ -6,19 +6,22 @@ import ApiError from './utils/apiError';
 import ApiResponse from './utils/apiResponse';
 
 const app = express();
-const allowedOrigins = ["https://social-desk-web.vercel.app/"];
+const allowedOrigins = ["https://social-desk-web.vercel.app"];
 app
     .use(express.json({limit:'16kb'}))
     .use(express.urlencoded({extended:true, limit:"16kb"}))
     .use(cors({
         origin: (origin, callback) => {
-            console.log("origin", origin)
+            console.log("Received origin:", origin);
+            console.log("Allowed origins:", allowedOrigins);
+            console.log("Includes check:", allowedOrigins.includes(origin));
+            
             if (!origin || allowedOrigins.includes(origin)) {
                 callback(null, true);
-                console.log("allowed")
+                console.log("✅ CORS allowed");
             } else {
                 callback(new Error("Unidentified Origin!"));
-                console.log("rejected!")
+                console.log("❌ CORS rejected");
             }
         },
         credentials: true,
