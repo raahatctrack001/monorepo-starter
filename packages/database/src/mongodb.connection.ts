@@ -1,8 +1,14 @@
 import mongoose, { Connection } from "mongoose";
 import dotenv from 'dotenv'
-import path from "path";
+import path from 'path';
 
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// Try multiple dotenv loading strategies for monorepo
+dotenv.config(); // Load from current directory
+dotenv.config({ path: path.resolve(__dirname, '../.env') }); // App level
+dotenv.config({ path: path.resolve(__dirname, '../../.env') }); // Root level
+
+console.log('Dotenv loaded from multiple paths');
+console.log('MONGODB_CONNECTION_STRING:', process.env.MONGODB_CONNECTION_STRING ? 'SET' : 'NOT SET');
 export const databaseConnection = async (): Promise<Connection | void> => {
     // console.log("mongodb connection url from mongodb.connection.ts", process.env.MONGODB_CONNECTION_STRING)
     try  {                   

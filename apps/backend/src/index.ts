@@ -3,9 +3,15 @@ import dotenv from 'dotenv';
 import app from './app';
 import { ConversationWebSocketServer } from './websockets/servers/conversation.websocket';
 
-// Load environment variables
-dotenv.config({ path: '../.env' });
+import path from 'path';
 
+// Try multiple dotenv loading strategies for monorepo
+dotenv.config(); // Load from current directory
+dotenv.config({ path: path.resolve(__dirname, '../.env') }); // App level
+dotenv.config({ path: path.resolve(__dirname, '../../.env') }); // Root level
+
+console.log('Dotenv loaded from multiple paths');
+console.log('MONGODB_CONNECTION_STRING:', process.env.MONGODB_CONNECTION_STRING ? 'SET' : 'NOT SET');
 const startServer = async () => {
     try {
         console.log("starting server ...")
