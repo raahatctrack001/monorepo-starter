@@ -8,10 +8,11 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "tsc --watch -p tsconfig.json"
+    "dev": "tsc --watch -p tsconfig.json", 
+    "start": "echo starting common packages"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./dist/index.js"
   },
   "keywords": [],
   "author": "",
