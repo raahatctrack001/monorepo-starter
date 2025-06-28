@@ -14,7 +14,8 @@ app
         origin: (origin, callback) => {
             console.log("Received origin:", origin);
             console.log("Allowed origins:", allowedOrigins);
-            console.log("Includes check:", allowedOrigins.includes(origin));
+            
+            console.log("Includes check:", allowedOrigins.includes(origin || "undefined"));
             
             if (!origin || allowedOrigins.includes(origin)) {
                 callback(null, true);
