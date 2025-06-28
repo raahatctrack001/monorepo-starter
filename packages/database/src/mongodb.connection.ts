@@ -1,17 +1,16 @@
 import mongoose, { Connection } from "mongoose";
 import dotenv from 'dotenv'
+import path from "path";
 
-dotenv.config({
-    path: "../.env"
-})
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 export const databaseConnection = async (): Promise<Connection | void> => {
     // console.log("mongodb connection url from mongodb.connection.ts", process.env.MONGODB_CONNECTION_STRING)
-    try {
+    try  {                   
         const remoteConnectionString = process.env.MONGODB_CONNECTION_STRING;
         const localConnectionString = process.env.MONGODB_CONNECTION_STRING_DOCKER;
         const connectionString = process.env.NODE_ENV !== 'production' ? remoteConnectionString : localConnectionString
-        console.log(remoteConnectionString)
-        
+       
+                
         const connectionInstance = await mongoose.connect(remoteConnectionString);
         return connectionInstance.connection;
     } catch (error) {
