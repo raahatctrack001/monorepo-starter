@@ -9,7 +9,9 @@ export const databaseConnection = async (): Promise<Connection | void> => {
         const remoteConnectionString = process.env.MONGODB_CONNECTION_STRING;
         const localConnectionString = process.env.MONGODB_CONNECTION_STRING_DOCKER;
         const connectionString = process.env.NODE_ENV !== 'production' ? remoteConnectionString : localConnectionString
-       
+        console.log('All environment variables:', Object.keys(process.env));
+        console.log('MongoDB string:', process.env.MONGODB_CONNECTION_STRING);
+        console.log('MongoDB string length:', process.env.MONGODB_CONNECTION_STRING?.length);
                 
         const connectionInstance = await mongoose.connect(remoteConnectionString);
         return connectionInstance.connection;
