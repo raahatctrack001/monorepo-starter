@@ -6,7 +6,7 @@ import { addMessageToConversation, markMessageAsDeliveredOrRead } from '../store
 import { setTyping, setUserOffline, setUserOnline, stopTyping, updateWebSocketConnectedStatus } from '../store/slices/status.slice';
 import { markMessageAsDelivered } from '../services/message.service';
 import { useWebRTC } from './WebRTCContext';
-import { markDelivered, updateOnlineStatus } from './services';
+import { addIceCandidate, callAnswer, callOffer, markDelivered, updateOnlineStatus } from './services';
 
 
 const WebSocketContext = createContext<WebSocket | null>(null);
@@ -68,66 +68,29 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
               dispatch(markMessageAsDeliveredOrRead({conversationId: data.conversationId, message: data.message}));
             break;
             case "call:offer":
-              // console.log("call:offer:::data", data);
-              // Ignore if the offer is from yourself
-              if (data?.message?.from === currentUser?._id.toString()) {
-                console.log("Ignoring own offer message.");
-                return;
-              }              
-              
-              (async () => {
-                if (!peerConnection) {
-                  console.warn("No peer connection available. Initializing...");
-                  initConnection();  // call your hook's method to create a connection
-                  // or ideally, wait and retry after it's ready
-                  
-                }
-                const pc = peerConnection || getOrCreatePeerConnection();
-  
-  
-                console.log("Offer received, processing...", data);
-                
-                await pc?.setRemoteDescription(new RTCSessionDescription(data?.message?.offer));
-
-                const answer = await pc?.createAnswer();
-                await pc?.setLocalDescription(answer);
-
-                console.log("Answer created and set. Sending via signaling server...");
-
-                safeSend(ws, {
-                  type: "call:answer",
-                  callInfo: {
-                    conversationId: activeConversation?._id,
-                    from: currentUser?._id,
-                    answer
-                  }
-                });
-              })();
-
+              callOffer(
+                peerConnection, 
+                data, 
+                currentUser?._id as string,  
+                data.conversationId, 
+                initConnection, 
+                getOrCreatePeerConnection,
+                ws, 
+              )
               break;
           case "call:answer":
-            console.log("Answer received:", data);
-            if (data?.message?.from === currentUser?._id.toString()) {
-                console.log("Ignoring own answer message.");
-                return;
-              }   
-            await peerConnection?.setRemoteDescription(new RTCSessionDescription(data?.message?.answer));
-            console.log("Remote description (answer) set");
+            if(peerConnection)
+              callAnswer(data, currentUser?._id as string, peerConnection);
+            else{
+              console.log("No peerconnection is found")
+            }
             break;
           case "call:ice-candidate":
-            console.log("Received ICE candidate", data);
-            if (data?.message?.from === currentUser?._id) {
-              console.log("Ignoring own ICE candidate");
-              return;
+            if(peerConnection)
+              addIceCandidate(data, currentUser?._id as string, peerConnection);
+            else{
+              console.log("No peerconnection is found")
             }
-
-            if (!peerConnection) {
-              console.warn("No peer connection available.");
-              return;
-            }
-
-            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-            console.log("ICE candidate added.");
             break;
 
           // case "read":
