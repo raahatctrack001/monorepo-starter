@@ -24,6 +24,7 @@ import { useWebSocket } from "@/lib/context/WebSocketContext";
 import { safeSend } from "@/lib/context/safeSend";
 import { updateConversation } from "@/lib/store/slices/conversation.slice";
 import { markMessageAsSeen } from "@/lib/services/message.service";
+import MessageBox from "./MessageBox";
 
 const ChatWindow: React.FC = () => {
   const ws = useWebSocket();
@@ -134,52 +135,7 @@ const ChatWindow: React.FC = () => {
     );
   }
 
-  const renderMessage = (message: IMessage) => {
-    const isSender = message?.senderId?.toString() === currentUser?._id;
-
-    const status = isSender
-      ? message.seenBy && message.seenBy.length > 0
-        ? "Seen"
-        : message.deliveredTo && message.deliveredTo.length > 0
-        ? "Delivered"
-        : "Sent"
-      : "";
-
-    return (
-      <div className={`flex ${isSender ? "justify-end" : "justify-start"}`} key={message._id}>
-        <div 
-          onClick={() => message.messageType === "image" && setPreviewChat(message)}
-          className={`max-w-[75%] ${isSender ? "bg-blue-100" : "bg-gray-100"} rounded-lg p-2 relative cursor-pointer`}
-        >
-          {(() => {
-            switch (message.messageType) {
-              case "text":
-                return <TextMessage message={message} />;
-              case "image":
-                return <ImageMessage message={message} />;
-              case "video":
-                return <VideoMessage message={message} />;
-              case "audio":
-                return <AudioMessage message={message} />;
-              case "document":
-                return <DocumentMessage message={message} />;
-              default:
-                return (
-                  <div className="text-gray-500 text-sm">
-                    Unsupported message type: {message.messageType}
-                  </div>
-                );
-            }
-          })()}
-
-          <div className="text-xs text-gray-500 flex items-center gap-2 mt-1">
-            <span>{format(new Date(message.sentAt || new Date()), "hh:mm a")}</span>
-            {isSender && <span>• {status}</span>}
-          </div>
-        </div>
-      </div>
-    );
-  };
+  // <MessageBox message={message} setPreviewChat={} />
 
   let lastMessageDate: string | null = null;
 
@@ -208,7 +164,7 @@ const ChatWindow: React.FC = () => {
                   </div>
                 </div>
               )}
-              {renderMessage(message)}
+              <MessageBox message={message} setPreviewChat={setPreviewChat} />
             </div>
           );
         })}

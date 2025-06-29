@@ -280,7 +280,16 @@ export const markMessageAsSeen = asyncHandler(async (req:Request, res:Response, 
       message.seenBy?.push(new mongoose.Types.ObjectId(userId));
       await message.save();
     }
-    
+     const readNotification = JSON.stringify({
+      type: "read",
+      conversationId,
+      message,
+      deliveredTo: userId,
+      timestamp: new Date().toISOString()
+    });
+
+    ConversationWebSocketServer.instance.broadcastDeliveredToRoom(conversationId, readNotification);
+
     res.status(200).json(
       new ApiResponse(200, "Message seen", message)
     ) 

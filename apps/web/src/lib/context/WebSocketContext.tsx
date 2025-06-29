@@ -71,7 +71,12 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
             case "delivered":
               console.log("message delivered from context", data)
               dispatch(markMessageAsDeliveredOrRead({conversationId: data.conversationId, message: data.message}));
-            break;
+              break;
+            case "read":
+              console.log("read wala data agya: ", data);
+              dispatch(markMessageAsDeliveredOrRead({conversationId: data.conversationId, message: data.message}));
+
+              break;
             case "call:offer":
               callOffer(
                 peerConnection, 
@@ -98,9 +103,6 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
             }
             break;
 
-          // case "read":
-          //   dispatch(markRead(data.messageId));
-          //   break;
           // case "reaction":
           //   dispatch(addReaction(data.messageId, data.reaction));
           //   break;

@@ -260,10 +260,19 @@ export class ConversationWebSocketServer {
     const data = JSON.parse(message);
     console.log("data delivered wala", data);
     
-    const outboundMessage = JSON.stringify(data);
+    // const outboundMessage = JSON.stringify(data);
     // console.log(conversationId, outboundMessage, message)
     this.roomManager.broadcast(conversationId, message);
   }  
+
+  public broadcastReadToRoom(conversationId: string, message: any) {
+    const data = JSON.parse(message);
+    console.log("data read wala", data);
+    
+    // const outboundMessage = JSON.stringify(data);
+    // console.log(conversationId, outboundMessage, message)
+    this.roomManager.broadcast(conversationId, message);
+  }
 
   public broadcastCallOfferToRoom(conversationId: string, message: any) {
     try {

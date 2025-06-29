@@ -58,7 +58,7 @@ export const markMessageAsDelivered = async (conversationId: string, messageId: 
 
 export const markMessageAsSeen = async (conversationId: string, messageId: string, userId: string) => {
     const apiData: ApiConnectorParams = {
-      url: messageApi.markMessageAsDelivered(conversationId, messageId, userId),
+      url: messageApi.markMessageAsSeen(conversationId, messageId, userId),
       method: "PATCH",
       credentials: "include"
     };
