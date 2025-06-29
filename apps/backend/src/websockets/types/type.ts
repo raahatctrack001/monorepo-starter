@@ -6,6 +6,7 @@ export interface MessagePayload {
   type:
     | 'join'
     | 'message'
+    | 'conversation-message'
     | 'online'
     | 'offline'
     | 'typing'
@@ -16,7 +17,7 @@ export interface MessagePayload {
     | 'remove-message'
     | 'call:offer'
     | 'call:answer'
-| 'call:ice-candidate'
+    | 'call:ice-candidate'
 
   // General
   conversationId?: string;
@@ -27,6 +28,11 @@ export interface MessagePayload {
   message?: {
     conversation: IConversation,
     message: IMessage
+  }
+
+  messages? : {
+    conversation: IConversation,
+    messages: IMessage[],
   }
 
   //for call paylaod

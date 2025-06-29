@@ -76,11 +76,11 @@ const ChatWindow: React.FC = () => {
     
     const result = await getAllMessageByConversation(activeConversation._id, currentUser._id);
     if (result?.success) {
-      console.log("data fetched", result);
-      dispatch(addConversationMessages({
-        conversationId: activeConversation?._id,
-        messages: result?.data
-      }));
+      // console.log("data fetched", result);
+      // dispatch(addConversationMessages({
+      //   conversationId: activeConversation?._id,
+      //   messages: result?.data
+      // }));
     }
   }, [activeConversation?._id]);
 

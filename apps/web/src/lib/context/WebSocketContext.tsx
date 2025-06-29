@@ -2,11 +2,11 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { safeSend } from './safeSend';
 import { updateConversation } from '../store/slices/conversation.slice';
-import { addMessageToConversation, markMessageAsDeliveredOrRead } from '../store/slices/message.slice';
+import { addConversationMessages, addMessageToConversation, markMessageAsDeliveredOrRead } from '../store/slices/message.slice';
 import { setTyping, setUserOffline, setUserOnline, stopTyping, updateWebSocketConnectedStatus } from '../store/slices/status.slice';
 import { markMessageAsDelivered } from '../services/message.service';
 import { useWebRTC } from './WebRTCContext';
-import { addIceCandidate, callAnswer, callOffer, markDelivered, updateOnlineStatus } from './services';
+import { addIceCandidate, callAnswer, callOffer, fetchConversationMessage, markDelivered, updateOnlineStatus } from './services';
 
 
 const WebSocketContext = createContext<WebSocket | null>(null);
@@ -52,7 +52,12 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
                 markDelivered(message.message, message.conversation, currentUser?._id as string, dispatch);    
             }
             break;
-            case 'status':
+          case "conversation-message":
+            fetchConversationMessage(data.conversationId, data.messages, dispatch, currentUser?._id as string);
+            
+            console.log("dispatched: convesation message", data); 
+            break;
+          case 'status':
               updateOnlineStatus(data.isOnline, data.userId, dispatch, data.timestamp ); 
             break;
           case "typing":

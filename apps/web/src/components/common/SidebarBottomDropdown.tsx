@@ -12,11 +12,14 @@ import { Button } from "@/components/ui/button";
 import { getDeviceInfo } from "@/lib/deviceInfo";
 import { useLogoutUser } from "@/hooks/auth/useLogout";
 import { useAppDispatch } from "@/lib/store/hooks";
-import { logOutSuccess } from "@/lib/store/slices/user.slice";
+import { cleanUserData, logOutSuccess } from "@/lib/store/slices/user.slice";
 import { useRouter } from "next/navigation";
 import GlobalLoader from "./GlobalLoader";
 // import { clearAllAppState } from "@/lib/store/actions/clean.action";
 import { AppDispatch } from "@/lib/store/store";
+import { cleanConversationData } from "@/lib/store/slices/conversation.slice";
+import { cleanMessageData } from "@/lib/store/slices/message.slice";
+import { cleanStatusData } from "@/lib/store/slices/status.slice";
 
 export default function SidebarBottomDropdown() {
   const dispatch = useAppDispatch();
@@ -28,7 +31,10 @@ export default function SidebarBottomDropdown() {
     const result = await logoutUser({ token });
     if (result?.success) {
       dispatch(logOutSuccess());
-      // dispatch(clearAllAppState());
+      dispatch(cleanConversationData());
+      dispatch(cleanMessageData());
+      dispatch(cleanStatusData())
+      dispatch(cleanUserData());
       router.push("/login");
     }
   } catch (error) {

@@ -2,6 +2,7 @@ import { Client, MessagePayload } from './../types/type';
 import { WebSocketServer, WebSocket } from 'ws';
 import { RoomManager } from '../rooms/roomManager.websocket';
 import { Server as HttpServer } from 'http';
+import { IMessage } from '@repo/database';
 
 export class ConversationWebSocketServer {
   private static _instance: ConversationWebSocketServer;
@@ -104,7 +105,7 @@ export class ConversationWebSocketServer {
         console.log("message broadcasted from roomManager.broadcast")
       }
       break;
-
+   
     case 'online':
       if (payload.userId) {
         this.roomManager.markUserOnline(payload.userId, ws);
@@ -240,7 +241,20 @@ export class ConversationWebSocketServer {
     });
     // console.log(conversationId, outboundMessage, message)
     this.roomManager.broadcast(conversationId, outboundMessage);
-  }  
+  } 
+  
+  public broadcastConversationMessageToRoom(conversationId: string, messages: IMessage[]) {
+      console.log({conversationId, length: messages.length});
+      
+      const outboundMessage = JSON.stringify({
+      type: 'conversation-message',
+      conversationId,
+      messages,
+      timestamp: new Date().toISOString(),
+    });
+    // console.log(conversationId, outboundMessage, message)
+    this.roomManager.broadcast(conversationId, outboundMessage);
+  } 
 
   public broadcastDeliveredToRoom(conversationId: string, message: any) {
     const data = JSON.parse(message);

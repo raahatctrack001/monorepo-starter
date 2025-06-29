@@ -178,12 +178,9 @@ export const getMessagesByConversation = asyncHandler(async (req: Request, res: 
   const messages = await Message.find({
     conversationId: new mongoose.Types.ObjectId(conversationId)
   })
-  // .sort({createdAt: 1})
-  // .limit(20);
-
-  // if(messages.length === 0){
-  //   throw new ApiError(404, "Please send message to start chatting.");
-  // }
+ 
+  ConversationWebSocketServer.instance.broadcastConversationMessageToRoom(conversationId, messages);
+  
   
   return res.status(201).json(new ApiResponse(201, "Messages Fetched", messages));
 });

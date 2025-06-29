@@ -1,6 +1,6 @@
 import { IConversation } from '@/types/conversations/conversation.types';
 import { updateConversation } from '../store/slices/conversation.slice';
-import { addMessageToConversation } from '../store/slices/message.slice';
+import { addConversationMessages, addMessageToConversation } from '../store/slices/message.slice';
 import { AppDispatch } from '../store/store';
 import { markMessageAsDelivered } from './../services/message.service';
 import { IMessage } from "@/types/conversations/message.types";
@@ -10,8 +10,14 @@ import { safeSend } from './safeSend';
 
 export const markDelivered = async (message: IMessage, conversation: IConversation, userId: string, dispatch: AppDispatch ) => {
     try {
-        const result = await markMessageAsDelivered(message?.conversationId.toString(), message?._id , userId)
-        console.log("delivered api response", result);
+        if(message?.senderId.toString() !== userId && !message.deliveredTo?.some(id=>id.toString() === userId)){
+            try {
+                const result = await markMessageAsDelivered(message?.conversationId.toString(), message?._id , userId)
+                console.log("delivered api response", result);
+            } catch (error) {
+                console.log(error);
+            }        
+        }
         dispatch(updateConversation(conversation))
         dispatch(addMessageToConversation({
           conversationId: conversation?._id,
@@ -96,4 +102,24 @@ export const addIceCandidate = async (data: any, currentUserId: string, peerConn
 
         await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
         console.log("ICE candidate added.");
+}
+
+export const fetchConversationMessage = (
+    conversationId: string, 
+    messages: IMessage[], 
+    dispatch: AppDispatch,
+    userId: string,
+) => {
+    // if(messages)
+    messages.forEach( async (message)=>{
+        if(message?.senderId.toString() !== userId && !message.deliveredTo?.some(id=>id.toString() === userId)){
+            try {
+                const result = await markMessageAsDelivered(message?.conversationId.toString(), message?._id , userId)
+                console.log("delivered api response", result);
+            } catch (error) {
+                console.log(error);
+            }        
+        }
+    })
+    dispatch(addConversationMessages({conversationId: conversationId, messages: messages}));
 }
