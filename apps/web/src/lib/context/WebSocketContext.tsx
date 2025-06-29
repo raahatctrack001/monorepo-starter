@@ -6,6 +6,7 @@ import { addMessageToConversation, markMessageAsDeliveredOrRead } from '../store
 import { setTyping, setUserOffline, setUserOnline, stopTyping, updateWebSocketConnectedStatus } from '../store/slices/status.slice';
 import { markMessageAsDelivered } from '../services/message.service';
 import { useWebRTC } from './WebRTCContext';
+import { markDelivered } from './services';
 
 
 const WebSocketContext = createContext<WebSocket | null>(null);
@@ -48,22 +49,9 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
       switch (data.type) {
           case "message":        
             if(message?.conversation && message?.message){       
-              if(message?.message?.senderId != currentUser?._id && !message?.message?.deliveredTo.includes(currentUser?._id)){
-                ( async ()=>{
-                  try {
-                    const result = await markMessageAsDelivered(message?.conversation?._id as string, message?.message?._id as string, currentUser?._id as string)
-                    console.log("delivered api response", result);
-                    
-                  } catch (error) {
-                    console.log("error sending delivered notification", error)
-                  }
-                })()
-              }      
-              dispatch(updateConversation(message?.conversation))
-              dispatch(addMessageToConversation({
-                conversationId: data.conversationId,
-                messages: [message?.message]
-              }))
+              // if(message?.message?.senderId != currentUser?._id && !message?.message?.deliveredTo.includes(currentUser?._id)){
+                markDelivered(message.message, message.conversation, currentUser?._id as string, dispatch);    
+              // }
             }
             // console.log("dispatched but from socket context")
             break;
