@@ -49,13 +49,7 @@ const ChatWindow: React.FC = () => {
   useEffect(() => {
     if (!ws || !activeConversation?._id) return;
 
-    safeSend(ws, { type: 'join', conversationId: activeConversation._id as string});
-    
-    safeSend(ws, { type: "online", userId: currentUser?._id });
-    return () => {
-      safeSend(ws, { type: "offline", userId: currentUser?._id });
-    }
-    
+    safeSend(ws, { type: 'join', conversationId: activeConversation._id as string});    
   }, [ws, currentUser, activeConversation?._id]);
 
 
