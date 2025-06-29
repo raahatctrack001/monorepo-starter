@@ -18,7 +18,7 @@ const verifyToken = (token: string, secret: string): TokenPayload | null => {
 
 export const isUserLoggedIn = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   const { accessToken, refreshToken } = req.cookies;
-  console.log("cookies is here bro!", req.cookies)
+  // console.log("cookies is here bro!", req.cookies)
   // If accessToken exists, verify it
   if (accessToken) {
     const decodedAccess = verifyToken(accessToken, ACCESS_SECRET);

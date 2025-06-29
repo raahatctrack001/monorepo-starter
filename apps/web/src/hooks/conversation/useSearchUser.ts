@@ -15,7 +15,7 @@ export const useSearchUser = () => {
     
     } catch (error: any) {    
       console.log("error in searching users in conversation list", error)
-      console.log("error deteced @userSearchUser Hook", error?.response?.data?.message)
+      console.log("error deteced @userSearchUser Hook", error?.response?.data?.message || error.message)
       setError(error?.response?.data?.message || error.message || "Failed! @useSearchUser")
       
       return null
