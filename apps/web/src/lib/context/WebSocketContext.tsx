@@ -6,7 +6,7 @@ import { addMessageToConversation, markMessageAsDeliveredOrRead } from '../store
 import { setTyping, setUserOffline, setUserOnline, stopTyping, updateWebSocketConnectedStatus } from '../store/slices/status.slice';
 import { markMessageAsDelivered } from '../services/message.service';
 import { useWebRTC } from './WebRTCContext';
-import { markDelivered } from './services';
+import { markDelivered, updateOnlineStatus } from './services';
 
 
 const WebSocketContext = createContext<WebSocket | null>(null);
@@ -49,18 +49,12 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
       switch (data.type) {
           case "message":        
             if(message?.conversation && message?.message){       
-              // if(message?.message?.senderId != currentUser?._id && !message?.message?.deliveredTo.includes(currentUser?._id)){
                 markDelivered(message.message, message.conversation, currentUser?._id as string, dispatch);    
-              // }
             }
-            // console.log("dispatched but from socket context")
             break;
-            case 'status': 
-            if(data.isOnline)
-              dispatch(setUserOnline({userId:data.userId, timestamp: data.timestamp}))
-            else
-            dispatch(setUserOffline({userId: data.userId, timestamp: data.timestamp}))
-          break;
+            case 'status':
+              updateOnlineStatus(data.isOnline, data.userId, dispatch, data.timestamp ); 
+            break;
           case "typing":
             console.log("online data", data)
               dispatch(setTyping({ conversationId: data.conversationId, userId: data.userId }));
