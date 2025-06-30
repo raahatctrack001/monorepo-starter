@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 // 1️⃣ TypeScript Interface for Notification
 export interface INotification extends Document {
-  receiverId: Types.ObjectId; //
+  receiverId: Types.ObjectId; //to whome sending
   type: 'like' | 'comment' | 'follow' | 'mention' | 'repost' | 'reactions' | 'event_invite' | 'system';
   targetId: any;
   message: string;
