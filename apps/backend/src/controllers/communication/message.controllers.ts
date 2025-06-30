@@ -134,7 +134,7 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
     throw new ApiError(404, "No message to send");
   }
   
-  const messages = await createMessages(tailoredMessages);
+  const messages = await Message.insertMany(tailoredMessages, {ordered: false});
   const unreadCount: Record<string, number> = {};
 
   filteredReceivers.forEach(userId => {
@@ -189,9 +189,11 @@ export const getMessagesByConversation = asyncHandler(async (req: Request, res: 
     conversationId: new mongoose.Types.ObjectId(conversationId)
   })
  
-  ConversationWebSocketServer.instance.broadcastConversationMessageToRoom(conversationId, messages);
+  // ConversationWebSocketServer.instance.broadcastConversationMessageToRoom(conversationId, messages);
   
-  
+  if(messages.length === 0){
+    throw new ApiError(404, "No message found!")
+  }
   return res.status(201).json(new ApiResponse(201, "Messages Fetched", messages));
 });
 

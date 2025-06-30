@@ -23,7 +23,7 @@ import { addConversationMessages, addMessageToConversation } from "@/lib/store/s
 import { useWebSocket } from "@/lib/context/WebSocketContext";
 import { safeSend } from "@/lib/context/safeSend";
 import { updateConversation } from "@/lib/store/slices/conversation.slice";
-import { markMessageAsSeen } from "@/lib/services/message.service";
+import { markMessageAsDelivered, markMessageAsSeen } from "@/lib/services/message.service";
 import MessageBox from "./MessageBox";
 
 const ChatWindow: React.FC = () => {
@@ -37,7 +37,7 @@ const ChatWindow: React.FC = () => {
     return conversationId ? state.message.conversations[conversationId] || [] : [];
   });
 
-  
+  //set messages
   useEffect(()=>{
     setMsgs(messagesFromRedux);
   }, [messagesFromRedux])
@@ -47,6 +47,7 @@ const ChatWindow: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
+  //send join request
   useEffect(() => {
     if (!ws || !activeConversation?._id) return;
 
@@ -54,28 +55,46 @@ const ChatWindow: React.FC = () => {
   }, [ws, currentUser, activeConversation?._id]);
 
 
-  const { getAllMessageByConversation, loading, error } = useGetMessageByConversation();
-  
   const scrollToBottomOnSendMessage = useCallback(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
-  useEffect(()=>{scrollToBottomOnSendMessage()}, [msgs])
-
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
-
+  useEffect(()=>{scrollToBottomOnSendMessage()}, [msgs])
+  
+  //get all messages of a converstaion
+  const { getAllMessageByConversation, loading, error } = useGetMessageByConversation();
+  
   const getMessages = useCallback(async () => {
     if (!activeConversation || !currentUser?._id) return;
     
     const result = await getAllMessageByConversation(activeConversation._id, currentUser._id);
+    console.log(result)
+    if(!result?.success || !result.data ||  !Array.isArray(result.data) || result.data.length == 0)
+      return;
     if (result?.success) {
-      // console.log("data fetched", result);
-      // dispatch(addConversationMessages({
-      //   conversationId: activeConversation?._id,
-      //   messages: result?.data
-      // }));
+      console.log("data fetched", result);
+      const messages: IMessage[] | [] = result.data || [];
+      
+      dispatch(addConversationMessages({
+        conversationId: activeConversation?._id,
+        messages: result?.data
+      }));
+      
+      messages.forEach( async (message)=>{
+        if(message?.senderId.toString() !== currentUser?._id){
+          if(!message.deliveredTo?.some(id=>id.toString() === currentUser?._id)){
+            try {
+                const result = await markMessageAsDelivered(message?.conversationId.toString(), message?._id , currentUser?._id)
+                console.log("delivered api response", result);
+            } catch (error) {
+                console.log(error);
+            }        
+          }
+      }
+      })
     }
   }, [activeConversation?._id]);
 
@@ -96,7 +115,7 @@ const ChatWindow: React.FC = () => {
   }
 
   // Check for no messages - use messagesFromRedux directly
-  if (messagesFromRedux.length === 0 && !loading) {
+  if (messagesFromRedux.length === 0) {
     return (
       <div className="w-full h-full flex justify-center items-center mx-auto">
         <div className="max-w-md">
