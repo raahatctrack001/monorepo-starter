@@ -90,7 +90,7 @@ yarn-error.log*
 *.rtf
 *.txt
 *.csv
-*.json
+# *.json
 *.xml
 *.yml
 *.yaml

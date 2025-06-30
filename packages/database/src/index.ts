@@ -5,7 +5,7 @@ import Otp, { IOtp } from "./models/user/otp.model";
 import Conversation, { IConversation } from "./models/communication/conversation.model";
 import Message, { IMessage } from "./models/communication/message.model";
 import Group, { IGroup } from "./models/communication/group.model";
-
+import Notification, { INotification } from "./models/notification/notification.model";
 //Export database connection login
 export { databaseConnection }; 
 
@@ -15,7 +15,8 @@ export {
     IOtp, 
     IConversation, 
     IMessage, 
-    IGroup 
+    IGroup,
+    INotification 
 };
 
 //export database models for backend controller logic
@@ -25,4 +26,5 @@ export {
     Conversation,
     Message,
     Group,
+    Notification,
 };
