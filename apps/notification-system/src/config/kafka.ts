@@ -11,6 +11,6 @@ export const topics = {
   whatsapp: "whatsapp_notifications",
   sms: "sms_notifications",
   emailHigh: "email_high_priority",
-  emailMedium: "email_medium_priority",
+  emailMedium: "email_normal_priority",
   emailLow: "email_low_priority",
 };
