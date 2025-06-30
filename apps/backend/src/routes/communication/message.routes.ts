@@ -26,6 +26,11 @@ router
   .route("/unseen-undelivered/:conversationId/:userId")
   .get(isUserLoggedIn, messageController.getUnseenOrUndeliveredMessages);
 // 2️⃣ Single Message by ID — Get, Edit, Delete
+
+router
+  .route("/all-unseen-undelivered/:userId")
+  .get(isUserLoggedIn, messageController.getUnseenOrUndeliveredMessages);
+  
 router
   .route("/:id")
   .get(isUserLoggedIn, messageController.getMessageById)

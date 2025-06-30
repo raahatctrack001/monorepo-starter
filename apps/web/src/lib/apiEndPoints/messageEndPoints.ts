@@ -16,6 +16,7 @@ export const messageApi = {
   markMessageAsSeen: (conversationId: string, messageId: string, userId: string) =>
     withPrefix(`/mark-seen/${conversationId}/${messageId}/${userId}`),
 
+  getUndeliveredUnseenMessages: (userId: string) => withPrefix(`/all-unseen-undelivered/${userId}`),
   // 3️⃣ Single Message — Get, Edit, Delete
 
   getMessageById: (id: string) => withPrefix(`/${id}`),

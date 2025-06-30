@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
 import mongoose from "mongoose";
 import ApiError from "../../utils/apiError";
-import { Conversation, IMessage, Message} from "@repo/database";
+import { Conversation, IConversation, IMessage, Message} from "@repo/database";
 import ApiResponse from "../../utils/apiResponse";
 import { getFilesPayload } from "./messageSupporter/filePayload";
 import { IFile } from "@repo/database/dist/models/communication/message.model";
@@ -35,6 +35,7 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
   }
 
   const conversation = await Conversation.findById(conversationId);
+  
   if(!conversation){
     throw new ApiError(404, "Conversation with this user doen't exist, please initiate one and try again!")
   }
@@ -132,12 +133,21 @@ export const createMessage = asyncHandler(async (req: Request, res: Response) =>
   if(tailoredMessages && Array.isArray(tailoredMessages) && tailoredMessages?.length === 0){
     throw new ApiError(404, "No message to send");
   }
+  
   const messages = await createMessages(tailoredMessages);
-   const updatedConversation = await Conversation.findByIdAndUpdate(conversationId, {
-     $set: {
-      lastMessage: messages?.at(-1)?._id || messages?.[messages.length - 1]?._id, // Store ID, not full object
-      lastMessageAt: new Date(), // Add timestamp
-    }
+  const unreadCount: Record<string, number> = {};
+
+  filteredReceivers.forEach(userId => {
+    const id = userId.toString();
+    unreadCount[id] = (unreadCount[id] || 0) + messages?.length || 0;
+  });
+
+  const updatedConversation = await Conversation.findByIdAndUpdate(conversationId, {
+      $set: {
+        lastMessage: messages?.at(-1)?._id || messages?.[messages.length - 1]?._id, // Store ID, not full object
+        lastMessageAt: new Date(), // Add timestamp
+        unreadCount,
+      }
   }, { new: true}).populate("lastMessage");
   
   messages.forEach((message)=>{
@@ -280,7 +290,14 @@ export const markMessageAsSeen = asyncHandler(async (req:Request, res:Response, 
       message.seenBy?.push(new mongoose.Types.ObjectId(userId));
       await message.save();
     }
-     const readNotification = JSON.stringify({
+    
+    const updatedConversation = await Conversation.findByIdAndUpdate(conversationId, {
+      $inc: {
+        [`unreadCount.${userId}`]: -1
+      }
+    }, { new: true });
+
+    const readNotification = JSON.stringify({
       type: "read",
       conversationId,
       message,
@@ -288,10 +305,10 @@ export const markMessageAsSeen = asyncHandler(async (req:Request, res:Response, 
       timestamp: new Date().toISOString()
     });
 
-    ConversationWebSocketServer.instance.broadcastDeliveredToRoom(conversationId, readNotification);
+    ConversationWebSocketServer.instance.broadcastReadToRoom(conversationId, readNotification);
 
     res.status(200).json(
-      new ApiResponse(200, "Message seen", message)
+      new ApiResponse(200, "Message seen", { conversation: updatedConversation, message})
     ) 
   
   } catch (error) {
@@ -303,37 +320,86 @@ export const deleteMessage = asyncHandler(async (req: Request, res: Response) =>
   res.json({ message: "Delete message" });
 });
 
-export const getUnseenOrUndeliveredMessages = asyncHandler(async (req: Request, res: Response) => {
-  const { conversationId, userId } = req.params;
-  console.log(req.params)
-  if(!conversationId || !userId){
-    throw new ApiError(404, "Conversation or user Id is missing.")
+
+export const getUnseenOrUndeliveredMessages = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { userId } = req.params;
+    console.log({ params: req.params, body: req.body, query: req.query });
+
+    // Validate userId
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      throw new ApiError(400, 'User ID is missing or invalid');
+    }
+
+    // Check authorization - convert both to strings for comparison
+    if (req.user?._id?.toString() !== userId) {
+      throw new ApiError(401, 'Unauthorized attempt');
+    }
+
+    // Get conversation IDs where user is a participant
+    const conversationIds = await Conversation.find({
+      participants: userId
+    })
+    .select("_id")
+    .lean();
+
+    // Handle empty conversations (user has no conversations)
+    if (conversationIds.length === 0) {
+      return res.status(200).json(
+        new ApiResponse(200, 'No conversations found for user', [])
+      );
+    }
+
+    // Extract just the IDs for the query
+    const conversationObjectIds = conversationIds.map(conv => conv._id);
+
+    // Find messages that are either not delivered to this user OR not seen by this user
+    // Also exclude messages sent by this user (assuming they don't need to see their own undelivered/unread status)
+    const messages = await Message.find({
+      conversationId: { $in: conversationObjectIds },
+      sender: { $ne: userId }, // Exclude messages sent by this user
+      $or: [
+        { deliveredTo: { $nin: [userId] } }, // Not in deliveredTo array
+        { seenBy: { $nin: [userId] } } // Not in seenBy array
+      ]
+    })
+    .populate("conversationId") // Only populate needed fields
+    // .populate("sender", "name avatar") // Also populate sender info
+    .sort({ createdAt: -1 }) // Most recent first
+    .lean();
+
+    // No need to check if messages is falsy - it will be an empty array if no results
+    console.log(`Found ${messages.length} unseen or undelivered messages for user ${userId}`);
+
+    // Note: Broadcasting messages in a fetch endpoint is unusual
+    // Consider if this logic should be elsewhere (like when messages are created/updated)
+    
+    // ConversationWebSocketServer
+    // .instance
+    // .broadcastUnseenMessageToRoom( 
+    //   messages[0]?.conversationId?._id.toString(), 
+    //   messages[0]
+    // )
+    // messages.forEach((message) => {
+    //   ConversationWebSocketServer
+    //     .instance
+    //     .broadcastUnseenMessageToRoom(
+    //       message?.conversationId._id.toString(),
+    //       {
+    //         conversation: message.conversationId,
+    //         message
+    //       }
+    //     );
+    // });
+
+    return res.status(200).json(
+      new ApiResponse(200, 'Unseen or undelivered messages fetched successfully', messages)
+    );
+
+  } catch (error) {
+    console.error('Error fetching unseen/undelivered messages:', error);
+    next(error);
   }
-
-  if([conversationId, userId].some(id=>!mongoose.Types.ObjectId.isValid(id))){
-    throw new ApiError(403, "ConversationId or UserId is not valid")
-  }
-
-  if( req.user?._id !== userId ){
-    throw new ApiError(404,  "Unauthorized Attempt. Please login again.")
-  }
-
-  const pendingMessages = await Message.find({
-    conversationId: conversationId,
-    $or: [
-      { deliveredTo: { $ne: userId } },
-      { seenBy: { $ne: userId } }
-    ]
-  }).sort({ createdAt: 1 });
-
-  // .sort({createdAt: -1})
-  // .limit(20);
-
-  // if(messages.length === 0){
-  //   throw new ApiError(404, "Please send message to start chatting.");
-  // }
-  
-  return res.status(201).json(new ApiResponse(201, "Messages Fetched", pendingMessages));
 });
 // 5️⃣ Edit Message
 export const editMessage = asyncHandler(async (req: Request, res: Response) => {

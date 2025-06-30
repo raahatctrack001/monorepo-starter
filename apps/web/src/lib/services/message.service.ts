@@ -72,3 +72,20 @@ export const markMessageAsSeen = async (conversationId: string, messageId: strin
 
     return result;  
 };
+
+export const getUndeliveredUnseenMessages = async (userId: string) => {
+    const apiData: ApiConnectorParams = {
+      url: messageApi.getUndeliveredUnseenMessages(userId),
+      method: "GET",
+      credentials: "include"
+    };
+    
+    const response = await apiConnector<ApiResponse>(apiData);
+    const result = response.data;
+    console.log("result from get undelivered or unseen service", result);
+    if (!result.success) {
+      throw new Error(result.message || "Failed to mark get getUndeliveredUnseenMessages...");
+    }  
+
+    return result;  
+};

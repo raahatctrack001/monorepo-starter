@@ -5,11 +5,13 @@ import { useAppSelector } from "@/lib/store/hooks";
 import { markMessageAsSeen } from "@/lib/services/message.service";
 import { useEffect } from "react";
 import { Check, CheckCheck } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { updateConversation } from "@/lib/store/slices/conversation.slice";
 
 export default function MessageBox ({message, setPreviewChat}: {message: IMessage, setPreviewChat: (message: IMessage)=>void}){
     const { currentUser } = useAppSelector(state=>state.user);
     const isSender = message?.senderId?.toString() === currentUser?._id;
-
+    const dispatch = useDispatch();
    
     const status = isSender ? (
     message.seenBy && message.seenBy.length > 0 ? (
@@ -41,6 +43,9 @@ export default function MessageBox ({message, setPreviewChat}: {message: IMessag
                         currentUser?._id as string
                         );
                         console.log("read api response", result);
+                        if(result.success){
+                          dispatch(updateConversation(result.data?.conversation))
+                        }
                     } catch (error) {
                         console.error(error);
                     }

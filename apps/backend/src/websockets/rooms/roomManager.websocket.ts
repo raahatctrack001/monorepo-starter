@@ -31,7 +31,7 @@ export class RoomManager {
   }
 
   broadcast(conversationId: string, message: string, senderClient?: Client) {
-    console.log("message broadcasting!")
+    console.log("message broadcasting!", { conversationId, message })
     const clients = this.rooms.get(conversationId);
     if (!clients) return;
     console.log("gotthe client!")

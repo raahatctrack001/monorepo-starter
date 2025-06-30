@@ -57,6 +57,9 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
             
             console.log("dispatched: convesation message", data); 
             break;
+          // case 'unseen-message': 
+          //   console.log("unseen message data", data);
+          //   break;
           case 'status':
               updateOnlineStatus(data.isOnline, data.userId, dispatch, data.timestamp ); 
             break;

@@ -2,7 +2,7 @@ import { Client, MessagePayload } from './../types/type';
 import { WebSocketServer, WebSocket } from 'ws';
 import { RoomManager } from '../rooms/roomManager.websocket';
 import { Server as HttpServer } from 'http';
-import { IMessage } from '@repo/database';
+import { IConversation, IMessage } from '@repo/database';
 
 export class ConversationWebSocketServer {
   private static _instance: ConversationWebSocketServer;
@@ -242,6 +242,17 @@ export class ConversationWebSocketServer {
     // console.log(conversationId, outboundMessage, message)
     this.roomManager.broadcast(conversationId, outboundMessage);
   } 
+
+   public broadcastUnseenMessageToRoom(conversationId: string, message: any) {
+    const outboundMessage = JSON.stringify({
+      type: 'unseen-message',
+      conversationId,
+      message,
+      timestamp: new Date().toISOString(),
+    });
+    // console.log(conversationId, outboundMessage, message)
+    this.roomManager.broadcast(conversationId, outboundMessage);
+  }
   
   public broadcastConversationMessageToRoom(conversationId: string, messages: IMessage[]) {
       console.log({conversationId, length: messages.length});

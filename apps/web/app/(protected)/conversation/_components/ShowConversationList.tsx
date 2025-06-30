@@ -13,6 +13,7 @@ import LocalLoader from "@/components/common/LocalLoader";
 import { useWebSocket } from "@/lib/context/WebSocketContext";
 import { safeSend } from "@/lib/context/safeSend";
 import { useRouter } from "next/navigation";
+import { useUnseenMessages } from "@/hooks/conversation/message/useUnseenMessage";
 ;
 // interface ConversationListProps {
 //   conversations: IConversation[];
@@ -24,29 +25,29 @@ export default function ShowConversationList() {
   const router = useRouter();
   const { currentUser } = useAppSelector((state) => state.user);
   const { conversations: convs } = useAppSelector(state => state.conversation);
-
   const dispatch = useAppDispatch();
   const [conversations, setConversations] = useState<IConversation[] | []>([])
   
 
   
   const { getAllConversations, loading, error } = useGetAllConversations(); 
- 
-   useEffect(()=>{
-     setConversations(convs);
-     console.log("settign up conversations", convs)
-   }, [convs])
- 
-   useEffect(()=>{
-     (async ()=>{
-       const result = await getAllConversations(currentUser?._id as string);
-       console.log(result)
-       if(result?.success){
-         setConversations(result.data.conversations)
-         dispatch(storeConverstaions(result.data.conversations))
-       }
-     })()
-   }, []) 
+  
+
+  useEffect(()=>{
+    setConversations(convs);
+    console.log("settign up conversations", convs)
+  }, [convs])
+
+  useEffect(()=>{
+    (async ()=>{
+      const result = await getAllConversations(currentUser?._id as string);
+      console.log(result)
+      if(result?.success){
+        setConversations(result.data.conversations)
+        dispatch(storeConverstaions(result.data.conversations))
+      }
+    })()
+  }, []) 
 
   const handleConversationClick = (conversation: IConversation) => {
     dispatch(activateConverstaion(conversation))
@@ -115,6 +116,15 @@ export default function ShowConversationList() {
                   : format(new Date(lastMessage.sentAt), "dd MMM")
                 : ""}
             </div>
+
+            {/* unread count */}
+            {/* <div>
+                {
+                  conversation && 
+                  conversation?.unreadCount && 
+                  conversation?.unreadCount[currentUser?._id as string] || 0
+                }
+            </div> */}
           </div>
         );
         })
