@@ -1,6 +1,7 @@
 import { INotification } from '@repo/database';
-import { kafka, topics } from '../../config/kafka';
+
 import { sendEmail } from '../../services/delivery.service';
+import { kafka, topics } from '@repo/kafka';
 
 const consumer = kafka.consumer({ groupId: 'email_high_group' });
 

@@ -1,6 +1,7 @@
 import { INotification } from "@repo/database";
-import { kafka, topics } from "../config/kafka";
+
 import { getUserPreferences } from "../services/notification.service";
+import { kafka, topics } from "@repo/kafka";
 
 const consumer = kafka.consumer({ groupId: "main_notification_group" });
 const producer = kafka.producer();

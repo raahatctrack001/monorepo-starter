@@ -1,7 +1,7 @@
 
 // src/consumers/smsConsumer.ts
 import { INotification } from '@repo/database';
-import { kafka, topics } from '../config/kafka';
+import { kafka, topics } from '@repo/kafka';
 import { sendSmsMessage } from '../services/delivery.service';
 
 const consumer = kafka.consumer({ groupId: 'sms_group' });

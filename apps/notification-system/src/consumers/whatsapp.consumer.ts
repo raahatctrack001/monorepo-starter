@@ -1,4 +1,4 @@
-import { kafka, topics } from "../config/kafka";
+import { kafka, topics } from "@repo/kafka";
 import { INotification } from "@repo/database";
 import { sendWhatsappMessage } from "../services/delivery.service";
 
