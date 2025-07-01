@@ -5,6 +5,8 @@ import { sendWhatsappMessage } from "../services/delivery.service";
 const consumer = kafka.consumer({ groupId: "whatsapp_group" });
 
 export const startWhatsappConsumer = async () => {
+  console.log("start whatsapp consumer for high priority")
+
   await consumer.connect();
   await consumer.subscribe({ topic: topics.whatsapp });
 
@@ -14,4 +16,6 @@ export const startWhatsappConsumer = async () => {
       await sendWhatsappMessage(notification);
     },
   });
+  console.log("start whatsapp consumer for high priority")
+
 };

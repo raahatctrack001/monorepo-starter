@@ -7,6 +7,8 @@ const consumer = kafka.consumer({ groupId: "main_notification_group" });
 const producer = kafka.producer();
 
 export const startNotificationConsumer = async () => {
+  console.log("start notification consumer for high priority")
+
   await consumer.connect();
   await producer.connect();
   await consumer.subscribe({ topic: topics.notification });
@@ -43,4 +45,6 @@ export const startNotificationConsumer = async () => {
         }
     },
   });
+  console.log("start notification consumer for high priority")
+
 };

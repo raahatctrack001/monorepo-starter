@@ -1,8 +1,14 @@
-import * as dotenv from "dotenv";
 
-dotenv.config();
+import * as dotenv from "dotenv";
+import path from "path";
+
+dotenv.config(); // Load from current directory
+dotenv.config({ path: path.resolve(__dirname, '../.env') }); // App level
+dotenv.config({ path: path.resolve(__dirname, '../../.env') }); // Root level
+
 
 export const env = {
   kafkaBroker: process.env.KAFKA_BROKER!,
-  mongoUri: process.env.MONGO_URI!,
 };
+
+console.log("env", env);

@@ -7,6 +7,8 @@ import { sendSmsMessage } from '../services/delivery.service';
 const consumer = kafka.consumer({ groupId: 'sms_group' });
 
 export const startSmsConsumer = async () => {
+  console.log("start sms consumer for high priority")
+
   await consumer.connect();
   await consumer.subscribe({ topic: topics.sms });
 
@@ -16,4 +18,6 @@ export const startSmsConsumer = async () => {
       await sendSmsMessage(notification);
     },
   });
+  console.log("start sms consumer for high priority")
+
 };

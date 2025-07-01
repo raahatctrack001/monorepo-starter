@@ -5,6 +5,8 @@ import { sendEmail } from "../../services/delivery.service";
 const consumer = kafka.consumer({ groupId: 'email_low_group' });
 
 export const startEmailLowConsumer = async () => {
+  console.log("start email consumer for low priority")
+
   await consumer.connect();
   await consumer.subscribe({ topic: topics.emailLow });
 
@@ -14,4 +16,6 @@ export const startEmailLowConsumer = async () => {
       await sendEmail(notification);
     },
   });
+  console.log("end email consumer for low priority")
+
 };
