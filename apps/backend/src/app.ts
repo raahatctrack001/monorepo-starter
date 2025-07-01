@@ -7,6 +7,7 @@ import ApiResponse from './utils/apiResponse';
 
 const app = express();
 const allowedOrigins = ["https://social-desk-web.vercel.app", "http://localhost:3001"];
+
 app
     .use(express.json({limit:'16kb'}))
     .use(express.urlencoded({extended:true, limit:"16kb"}))
@@ -42,6 +43,7 @@ import otpRouter from './routes/otp.route';
 import conversationRouter from './routes/communication/conversation.routes';
 import groupRouter from './routes/communication/group.routes';
 import messageRouter from './routes/communication/message.routes';
+import notificationRouter from './routes/notification.route';
 
 app
     .use('/api/v1/auth', authRouter)
@@ -50,6 +52,8 @@ app
     .use('/api/v1/conversation', conversationRouter)
     .use('/api/v1/group', groupRouter)
     .use('/api/v1/message', messageRouter)
+    .use('/api/v1/notification', notificationRouter)
+
 
 app.use((err: ApiError, req: Request, res: Response, next: NextFunction)=>{
         res

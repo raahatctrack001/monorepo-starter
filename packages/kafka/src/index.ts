@@ -1,16 +1,26 @@
-import { Kafka } from "kafkajs";
-import { env } from "./config/env";
+import { INotification } from "@repo/database";
 
-export const kafka = new Kafka({
-  clientId: "notification-service",
-  brokers: [env.kafkaBroker],
-});
+import { produceNotification } from "./producers/notification.producer";
+import mongoose from "mongoose";
 
-export const topics = {
-  notification: "notifications",
-  whatsapp: "whatsapp_notifications",
-  sms: "sms_notifications",
-  emailHigh: "email_high_priority",
-  emailMedium: "email_normal_priority",
-  emailLow: "email_low_priority",
-};
+export * from "./config/kafka";
+export * from "./producers/notification.producer";
+
+const data = {
+    _id: "685de70ac8855f4e2df217b4",
+    receiverId: new mongoose.Types.ObjectId("6853afbde78ba1764d5e5ff9"),
+    type: "follow",
+    targetId: "685663e151695cec3d2c29a0",
+    message: "test notification",
+    senderId: new mongoose.Types.ObjectId("6853afbde78ba1764d5e5ff9"),
+    delivered: false,
+    read: false,
+    pushSent: false,
+    emailSent: false,
+    priority: "normal",
+    isSystem: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+}
+
+produceNotification(data as INotification);

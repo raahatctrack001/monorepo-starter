@@ -1,30 +1,3 @@
-// createConversation
-// getAllConversations (for a user)
-// getConversationById
-// updateConversation
-// deleteConversation
-// addParticipant
-// removeParticipant
-// setGroupInfo (name, description, image, etc.)
-// updateLastMessage
-// pinMessage
-// muteConversation
-// // archiveConversation
-// unarchiveConversation
-// setCustomTheme
-// setCustomNickname
-// blockUserInConversation
-// unblockUserInConversation
-// reportConversation
-// updateTypingStatus
-// getUnreadCount
-// markConversationAsRead
-// scheduleMessageInConversation
-// getActivityLogs
-// incrementMessagesCount
-// incrementAttachmentsCount
-// updateCustomOrder
-
 import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../../utils/asyncHandler";
 import ApiError, { apiErrorFunction } from "../../utils/apiError";
@@ -44,7 +17,7 @@ async function generatePublicKey() {
 
 async function migrateUsers() {
   const usersWithoutKey = await User.find({ publicKey: { $exists: false } });
-
+ 
   for (const user of usersWithoutKey) {
     const publicKey = await generatePublicKey();
     user.publicKey = publicKey;

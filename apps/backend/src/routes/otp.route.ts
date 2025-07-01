@@ -1,7 +1,7 @@
 import express from "express";
 import { upload } from "../middlewares/multer.middleware";
 import { otpLimiter, veirfyOtpLimiter } from "../middlewares/rateLimiter.middleware";
-import { sendOTP, verifyOTP } from "../controllers/otp.controller";
+import { sendOTP, verifyOTP } from "../controllers/otp.controllers";
 
 const router = express.Router();
 

@@ -30,7 +30,7 @@ import {
   getAllUserProfile,
   searchUsers,
   uploadPicture
-} from '../controllers/user.controller';
+} from '../controllers/user.controllers';
 import { isUserLoggedIn } from '../middlewares/auth.middleware';
 import { upload } from '../middlewares/multer.middleware';
 

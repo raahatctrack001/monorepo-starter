@@ -46,7 +46,7 @@ import {
     verifyPhonePasswordResetOTP,  
     verifyTwoFactorAuthCode, 
     isAuthorised,
-} from "../controllers/auth.controller";
+} from "../controllers/auth.controllers";
 import { loginLimiter,registerLimiter } from '../middlewares/rateLimiter.middleware';
 
 
