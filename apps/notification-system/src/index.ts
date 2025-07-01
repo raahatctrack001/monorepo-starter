@@ -15,3 +15,5 @@ import { startWhatsappConsumer } from "./consumers/whatsapp.consumer";
     startSmsConsumer(),
   ]);
 })();
+
+

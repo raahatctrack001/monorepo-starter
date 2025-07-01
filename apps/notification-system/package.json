@@ -21,6 +21,7 @@
     "@repo/common": "*",
     "@repo/database": "*",
     "@repo/kafka": "*",
+    "@sendgrid/mail": "^8.1.5",
     "axios": "^1.10.0",
     "dotenv": "^17.0.0",
     "kafkajs": "^2.2.4",
