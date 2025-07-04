@@ -1,6 +1,5 @@
 import { Kafka } from "kafkajs";
 import { env } from "./env";
-export * from "../producers/notification.producer";
 
 export const kafka = new Kafka({
   clientId: "notification-service",

@@ -4,19 +4,19 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 export interface INotification extends Document {
   receiverId: Types.ObjectId; //to whome sending
   type: 'like' | 'comment' | 'follow' | 'mention' | 'repost' | 'reactions' | 'event_invite' | 'system';
-  targetId: any;
+  targetId: any; //likedId, commedId, followId
   message: string;
   senderId: Types.ObjectId; //liker commenter follower .... or system
   actionUrl: string;
-  delivered: boolean;
-  read: boolean;
+  delivered?: boolean;
+  read?: boolean;
   pushSent: boolean;
   emailSent: boolean;
   priority: 'low' | 'normal' | 'high';
   isSystem: boolean;
-  meta: any;
-  createdAt: Date;
-  updatedAt: Date;
+  meta?: any;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // 2️⃣ Mongoose Schema for Notification

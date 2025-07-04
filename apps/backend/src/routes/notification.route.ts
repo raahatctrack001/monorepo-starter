@@ -1,9 +1,9 @@
 import express, { Router } from "express";
 import { isUserLoggedIn } from "../middlewares/auth.middleware";
-import { testController } from "../controllers/notification.controllers";
+import { createNotification } from "../controllers/notification.controllers";
 
 const router = Router();
 
-router.route("/test").post(isUserLoggedIn, testController);
+router.route("/create-notification/:creatorId").post(isUserLoggedIn, createNotification);
 
 export default router;

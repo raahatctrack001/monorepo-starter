@@ -7,7 +7,7 @@ const consumer = kafka.consumer({ groupId: "main_notification_group" });
 const producer = kafka.producer();
 
 export const startNotificationConsumer = async () => {
-  console.log("start notification consumer for high priority")
+  console.log("start notification consumer")
 
   await consumer.connect();
   await producer.connect();
@@ -17,6 +17,29 @@ export const startNotificationConsumer = async () => {
     eachMessage: async ({ message }) => {
         const notification = JSON.parse(message.value!.toString()) as INotification;
         const prefs = await getUserPreferences(notification.receiverId.toString());
+        console.log(`
+          *
+          *
+          * *
+          * *
+          * *
+          * *
+          * *
+          * *
+          * *
+          * *
+          * *
+          * user preference
+          * 
+          * 
+          * 
+          * 
+          * 
+          * 
+          * 
+          * 
+          * 
+          * ` ,prefs)
         if (!prefs){ 
           console.log("failed to fetch user preference")    
           return; //don't return just send notifiation on email only.
