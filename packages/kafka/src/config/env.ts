@@ -7,7 +7,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') }); // App level
 dotenv.config({ path: path.resolve(__dirname, '../../.env') }); // Root level
 
 
-export const env = {
+export const env: Readonly<{kafkaBroker: string}> = {
   kafkaBroker: process.env.KAFKA_BROKER!,
 };
 
