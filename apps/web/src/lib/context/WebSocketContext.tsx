@@ -25,10 +25,12 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
   }, [activeConversation])
 
   useEffect(() => {
-    const url = process.env.NEXT_PUBLIC_NODE_ENV === "development" ?  
-                  process.env.NEXT_PUBLIC_WEBSOCKET_URL :
-                  process.env.NEXT_PUBLIC_WEBSOCKET_URL_PRODUCTION
+    const url = "wss://monorepo-starter-0iuu.onrender.com"
     
+    // process.env.NEXT_PUBLIC_NODE_ENV === "development" ?  
+    //             process.env.NEXT_PUBLIC_WEBSOCKET_URL:
+    //             process.env.NEXT_PUBLIC_WEBSOCKET_URL_PRODUCTION;    
+
     console.log("websocket url", url)
     if (!url) {
       console.error('WebSocket url is not configured');
