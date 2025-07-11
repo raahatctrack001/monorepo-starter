@@ -46,6 +46,7 @@ import {
     verifyPhonePasswordResetOTP,  
     verifyTwoFactorAuthCode, 
     isAuthorised,
+    checkIfUsernameExists,
 } from "../controllers/auth.controllers";
 import { loginLimiter,registerLimiter } from '../middlewares/rateLimiter.middleware';
 
@@ -58,7 +59,8 @@ const isAdmin = ()=>{
 
 }
 
-router.route("/register").post(upload.none(), registerLimiter, registerUser);
+router.route("/check-username").get(checkIfUsernameExists);
+router.route("/register").post(upload.none(), registerUser);
 router.route("/login").post(upload.none(), loginLimiter,  loginUser);
 router.route("/logout").post(upload.none(), isUserLoggedIn, logoutUser);
 router.route("/is-authenticated").post(isUserLoggedIn, isAuthorised);

@@ -25,7 +25,7 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
   }, [activeConversation])
 
   useEffect(() => {
-    const port = process.env.NEXT_PUBLIC_WEBSOCKET_PORT;
+    const port = process.env.NEXT_PUBLIC_WEBSOCKET_PORT || 3010;
     
     if (!port) {
       console.error('WebSocket port not configured');

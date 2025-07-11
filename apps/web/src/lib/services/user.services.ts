@@ -54,6 +54,7 @@ export const searchUsers = async (searchTerm: string) => {
     return result;  
 };
 
+
 export const handleClickOnSearchedUser = async (user: IUser) => {
   console.log("search user clicked", user);
 }

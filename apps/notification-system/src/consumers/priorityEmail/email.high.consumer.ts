@@ -1,7 +1,8 @@
 import { INotification } from '@repo/database';
 
-import { sendEmail } from '../../services/delivery.service';
 import { kafka, topics } from '@repo/kafka';
+import { welcomeEmailHTML } from '../../utils/email-templates/welcome.email';
+import { sendEmail } from '../../services/email.service';
 
 const consumer = kafka.consumer({ groupId: 'email_high_group' });
 
@@ -12,8 +13,13 @@ export const startEmailHighConsumer = async () => {
 
   await consumer.run({
     eachMessage: async ({ message }) => {
-      const notification = JSON.parse(message.value!.toString()) as INotification;
-      await sendEmail(notification);
+      const notificationDetail = JSON.parse(message.value!.toString());
+      const { notification, user } = notificationDetail;
+
+      console.log("notification for high email is here!", notification)
+      const html = welcomeEmailHTML(user?.username);
+      const emailResponse = await sendEmail(user?.email, "test subject", html);
+      console.log("email resposne", emailResponse);
     },
   });
   console.log("end email consumer for high priority")

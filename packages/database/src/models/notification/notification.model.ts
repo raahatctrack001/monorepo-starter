@@ -7,6 +7,8 @@ export interface INotification extends Document {
   targetId: any; //likedId, commedId, followId
   message: string;
   senderId: Types.ObjectId; //liker commenter follower .... or system
+  email?: string,
+  phone?: number,
   actionUrl: string;
   delivered?: boolean;
   read?: boolean;
@@ -31,6 +33,8 @@ const NotificationSchema: Schema = new Schema<INotification>(
     targetId: { type: Schema.Types.Mixed, required: false },
     message: { type: String, required: true },
     senderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    email: { type: String },
+    phone: { type: Number },
     actionUrl: { type: String, required: false },
     delivered: { type: Boolean, default: false },
     read: { type: Boolean, default: false },

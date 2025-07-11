@@ -1,23 +1,19 @@
-import { ZodError, ZodIssue } from "zod";
+import { getRedisClient } from '@repo/redis';
 import ApiError from "../utils/apiError";
 import { asyncHandler } from "../utils/asyncHandler";
 import { NextFunction, Request, Response } from "express";
 import { passwordSchema, registerUserSchema } from "@repo/common";
 import ApiResponse from "../utils/apiResponse";
 import bcrypt from "bcrypt";
-import { User } from "@repo/database";
+import { Notification, User } from "@repo/database";
 import { generateAccessAndRefreshToken, options } from "../services/tokens/login.token";
 import { validateData } from "../utils/zod.validator";
 import { emptyDeviceData } from "../utils/constants";
 import { generatePasswordResetToken } from "../services/tokens/resetPassword.token";
 import { resetPasswordHTML } from "../services/email/email-template/reset.password";
 import { sendEmail } from "../services/email/email.service";
-
-
-
-
-
-
+import mongoose from "mongoose";
+import { produceNotification } from "@repo/kafka";
 
 
 export const isAuthorised = asyncHandler(async (req:Request, res:Response, next:NextFunction)=>{
@@ -26,6 +22,43 @@ export const isAuthorised = asyncHandler(async (req:Request, res:Response, next:
         return res.status(200).json( new ApiResponse(200, "User is authorised to use this app!", {status:true, use: req.user}))
     }    
     return res.status(401).json( new ApiResponse(401, "Unauthorised!", {status: false}))
+})
+
+export const checkIfUsernameExists = asyncHandler( async (req: Request, res: Response, next: NextFunction) => {
+  
+    const { username } = req.query;
+    const redis = getRedisClient();
+  
+
+    if (!username || typeof username !== 'string') {
+      return res.status(400).json(new ApiResponse(400, "Username is required", {available: false}));
+    }
+
+    const cacheKey = `checkUsername:${username.toLowerCase()}`;
+    console.log("cache key", cacheKey);
+    //Check Redis cache first
+    const cachedResult = await redis.get(cacheKey);
+    if (cachedResult !== null) {
+      return res
+        .status(200)
+        .json(
+          new ApiResponse(200, "Username already exist", { available: !(cachedResult === 'available') })
+        );
+    }
+
+    //If not cached, check MongoDB
+    const exists = await User.exists({ username: username.toLowerCase() });
+
+    //cache on return
+    if(exists)
+      await redis.set(cacheKey, 'available', 'EX', 30);
+
+    //Return availability
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, "Username availability status", { available: !exists })
+      );
 })
 
 export const registerUser = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {  
@@ -83,12 +116,51 @@ export const registerUser = asyncHandler(async (req: Request, res: Response, nex
                      loginTimestamp: new Date(),   
                      deviceToken: token 
                  }],
-                 device: deviceInfo[0]
+                 device: deviceInfo[0], 
+                 notificaionPreference: {
+                  whatsapp: true,
+                  sms: false,
+                  email: true,
+                 },
+                 statusUpdateDetails: {
+                  status: 'active',
+                  reason: 'registered',
+                  timestamp: new Date(),
+                  // device: deviceInfo,
+                 }
              });
 
     
             if(!newUser){
                 throw new ApiError(500, "Internal error while registering user", newUser);
+            }
+
+            newUser.password = "";
+            const redis = getRedisClient();
+            const cacheKey = `checkUsername:${newUser?.username}`;
+            redis.set(cacheKey, "available");
+
+            const notification = await Notification.create({
+              receiverId: newUser?._id,
+              type: 'system',
+              targetId: newUser?._id,
+              message: `user with username: ${newUser?.username}  and email: ${newUser?.email} successfully registered.`,
+              senderId: new mongoose.Types.ObjectId(),
+              actionUrl: `/profile/${newUser?._id}`,
+              pushSent: true,
+              emailSent: true,
+              priority: "high"
+            })
+
+            if (!notification) {
+              throw new ApiError(500, 'Failed to create notification');
+            }
+                        
+            try {
+              
+              produceNotification(notification);
+            } catch (error) {
+              console.log("notifiatoin error",error);
             }
             //generate token to add into cookies for direct login after registration
             const { accessToken, refreshToken } = await generateAccessAndRefreshToken(newUser._id as string);
@@ -97,7 +169,7 @@ export const registerUser = asyncHandler(async (req: Request, res: Response, nex
             }            
 
             //set cookies and send required data
-            newUser.password = "";
+
             return res
                 .status(201)
                 .cookie('accessToken', accessToken, options)
@@ -166,6 +238,24 @@ export const loginUser = asyncHandler(async (req: Request, res: Response, next: 
                 device: deviceInfo[0],
             }
         }, { new: true })
+      
+      const notification = await Notification.create({
+        receiverId: updateUser?._id,
+        type: 'system',
+        targetId: updateUser?._id,
+        message: `${updateUser?.fullName} logged in.`,
+        senderId: new mongoose.Types.ObjectId(),
+        actionUrl: `/profile/${updateUser?._id}`,
+        pushSent: true,
+        emailSent: true,
+        priority: "high"
+      })
+
+      if (!notification) {
+        throw new ApiError(500, 'Failed to create notification');
+      }
+      
+      produceNotification(notification)
       return res
               .status(200)
               .cookie('accessToken', accessToken, options)

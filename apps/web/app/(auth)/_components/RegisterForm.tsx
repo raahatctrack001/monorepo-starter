@@ -12,6 +12,8 @@ import { getDeviceInfo } from '@/lib/deviceInfo';
 import { useRegisterUser } from '@/hooks/auth/useRegister';
 import RedAlert from '@/components/common/RedAlert';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useUsernameStatus } from '@/hooks/auth/useLogin';
 
 export default function RegisterForm() {
     const router = useRouter();  
@@ -25,9 +27,43 @@ export default function RegisterForm() {
         repeatPassword: '',
       },
     });
-  
+    const usernameValue = form.watch('username');
+    const [usernameAvailable, setUsernameAvailable] = useState<null | boolean>(null);    
+    const [checkingUsername, setCheckingUsername] = useState(false);
+    const { usernameStatus } = useUsernameStatus();
+
+    useEffect(() => {
+      const delayDebounce = setTimeout(async () => {
+        if (!usernameValue) {
+          setUsernameAvailable(null);
+          return;
+        }
+        
+        setCheckingUsername(true);
+
+        try {
+          const res = await usernameStatus(usernameValue);
+          setUsernameAvailable(res?.data.available);
+        } catch (err) {
+          console.error("Error checking username", err);
+          setUsernameAvailable(null);
+        } finally {
+          setCheckingUsername(false);
+        }
+      }, 1000);  // 1000ms debounce
+
+      return () => clearTimeout(delayDebounce);
+    }, [usernameValue]);
+
+    
     const {registerUser, loading, error } = useRegisterUser();
     const onSubmit = async (data: RegisterUserSchema) => {
+      if(!usernameAvailable){
+        console.warn("username is already taken, please choose another username!");
+        alert("username is already taken, please choose another username!");
+        
+        return;
+      }
       console.log('Form submitted:', data);
 
       const deviceInfo = await getDeviceInfo();
@@ -83,12 +119,26 @@ export default function RegisterForm() {
                 )}
                 />
   
+              
               <FormField
                 control={form.control}
                 name="username"
                 render={({ field }) => (
                   <FormItem>
+                    <div className='flex justify-between'>
+
                     <FormLabel>Username</FormLabel>
+                    <div className=''>
+                      {checkingUsername && <p className="text-gray-500">Checking username...</p>}
+                      {!checkingUsername && usernameAvailable === false && (
+                        <p className="text-red-500">already taken 😥</p>
+                      )}
+                      {!checkingUsername && usernameAvailable === true && (
+                        <p className="text-green-500">available! 😎</p>
+                      )}
+                  </div>
+                    </div>
+
                     <FormControl>
                       <Input type="text" placeholder="john_doe" {...field} />
                     </FormControl>
@@ -96,6 +146,7 @@ export default function RegisterForm() {
                   </FormItem>
                 )}
                 />
+
   
               <FormField
                 control={form.control}

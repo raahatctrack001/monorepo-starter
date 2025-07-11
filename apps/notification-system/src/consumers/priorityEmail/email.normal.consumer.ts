@@ -9,7 +9,7 @@ export const startEmailMediumConsumer = async () => {
   console.log("start email consumer for normal priority")
 
   await consumer.connect();
-  await consumer.subscribe({ topic: topics.emailMedium });
+  await consumer.subscribe({ topic: topics.emailNormal });
 
   await consumer.run({
     eachMessage: async ({ message }) => {

@@ -1,3 +1,4 @@
+import { NotificationPreference } from './../services/notification.service';
 import { INotification } from "@repo/database";
 
 import { getUserPreferences } from "../services/notification.service";
@@ -16,7 +17,8 @@ export const startNotificationConsumer = async () => {
   await consumer.run({
     eachMessage: async ({ message }) => {
         const notification = JSON.parse(message.value!.toString()) as INotification;
-        const prefs = await getUserPreferences(notification.receiverId.toString());
+        const user = await getUserPreferences(notification.receiverId.toString());
+        const prefs = user?.notificaionPreference as NotificationPreference;
         console.log(`
           *
           *
@@ -59,11 +61,11 @@ export const startNotificationConsumer = async () => {
         if (prefs.email) {
           let emailTopic = topics.emailLow;
           if (notification.priority === "high") emailTopic = topics.emailHigh;
-          else if (notification.priority === "normal") emailTopic = topics.emailMedium;
+          else if (notification.priority === "normal") emailTopic = topics.emailNormal;
 
           await producer.send({
             topic: emailTopic,
-            messages: [{ value: JSON.stringify(notification) }],
+            messages: [{ value: JSON.stringify({notification, user: prefs}) }],
           });
         }
     },

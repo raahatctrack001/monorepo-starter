@@ -6,7 +6,7 @@ export const authApi = {
   registerUser: () => withPrefix('/register'),
   verifyEmailOTP: () => withPrefix('/verify-email-otp'),
   resendEmailOTP: () => withPrefix('/resend-email-otp'),
-  checkUsernameAvailability: () => withPrefix('/check-username'),
+  checkUsernameAvailability: (username: string) => withPrefix(`/check-username?username=${username}`),
   isUserAuthenticated: () => withPrefix('/is-authenticated'),
 
   // Login

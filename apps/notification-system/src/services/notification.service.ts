@@ -5,7 +5,7 @@ export type NotificationPreference = {
   email: boolean,
   sms: boolean,
 }
-export const getUserPreferences = async (userId: string): Promise<NotificationPreference | undefined> => {
+export const getUserPreferences = async (userId: string) => {
     try {
         if(!userId){
             throw new Error('userId is required')
@@ -15,7 +15,7 @@ export const getUserPreferences = async (userId: string): Promise<NotificationPr
         if(!user){
             throw new Error("Failed to fetch user details from database")
         }
-        return user.notificaionPreference;
+        return user;
     } catch (error) {
         console.log("error getting user details for notification", error);
     }

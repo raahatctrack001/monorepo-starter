@@ -100,7 +100,7 @@ export interface IUser extends Document {
   refreshToken?: string,
   resetPasswordToken?: string,
   resetPasswordTokenExpiry?: Date,
-  publicKey: string
+  publicKey?: string
   createdAt: Date;
   updatedAt: Date;
 }
@@ -235,7 +235,7 @@ const UserSchema = new Schema<IUser>(
     refreshToken: { type: String, default: "", select: false  },
     resetPasswordToken: { type: String, default: "", select: false },
     resetPasswordTokenExpiry: { type: Date, select: false },
-    publicKey: {type: String, required: true},
+    publicKey: {type: String},
     otp: {  type: String, select: false  }
   },
   { timestamps: true }

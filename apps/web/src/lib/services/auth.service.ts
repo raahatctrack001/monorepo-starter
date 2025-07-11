@@ -3,6 +3,23 @@ import { apiConnector } from "@/lib/axiosConnector";
 import { ApiConnectorParams, ApiResponse } from "@/types/apiConnector.type";
 import { LoginUserSchema, RegisterUserSchema } from "@/types/user.validator";
 
+export const checkIfUsernameExists = async (username: string) => {
+  const apiData: ApiConnectorParams = {
+      url: authApi.checkUsernameAvailability(username),
+      method: "GET",
+      credentials: "include"
+    };
+    
+    const response = await apiConnector<ApiResponse>(apiData);
+    const result = response.data;
+  
+    if (!result.success) {
+      throw new Error(result.message || "Failed to check username availability status!");
+    }  
+
+    return result;  
+}
+
 export const registerUserService = async (data: RegisterUserSchema) => {
     const apiData: ApiConnectorParams = {
       url: authApi.registerUser(),
