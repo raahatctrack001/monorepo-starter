@@ -25,14 +25,17 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
   }, [activeConversation])
 
   useEffect(() => {
-    const port = process.env.NEXT_PUBLIC_WEBSOCKET_PORT || 3010;
-    
-    if (!port) {
-      console.error('WebSocket port not configured');
+    const url = process.env.NEXT_PUBLIC_NODE_ENV === "development" ?  
+                process.env.NEXT_PUBLIC_WEBSOCKET_URL:
+                process.env.NEXT_PUBLIC_WEBSOCKET_URL_PRODUCTION;    
+
+    console.log("websocket url", url)
+    if (!url) {
+      console.error('WebSocket url is not configured');
       return;
     }
 
-    const ws = new WebSocket(`ws://localhost:${port}`); //client joined: a customer came to the cafe i.e. websocketserver
+    const ws = new WebSocket(url); //client joined: a customer came to the cafe i.e. websocketserver
     
     ws.onopen = () => {
       console.log('Connected to WebSocket');
