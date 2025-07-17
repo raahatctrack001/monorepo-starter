@@ -156,7 +156,12 @@ export const registerUser = asyncHandler(async (req: Request, res: Response, nex
               throw new ApiError(500, 'Failed to create notification');
             }
                         
-            
+            try {
+              
+              produceNotification(notification);
+            } catch (error) {
+              console.log("notifiatoin error",error);
+            }
             //generate token to add into cookies for direct login after registration
             const { accessToken, refreshToken } = await generateAccessAndRefreshToken(newUser._id as string);
             if(!(accessToken && refreshToken)){
