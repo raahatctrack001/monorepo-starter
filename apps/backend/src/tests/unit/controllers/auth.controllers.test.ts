@@ -1,8 +1,8 @@
 import { getRedisClient } from "@repo/redis";
 import { Request, Response, NextFunction } from "express";
 import { vi, describe, it, expect, beforeEach, Mock, afterEach } from "vitest";
-import { checkIfUsernameExists } from "../../controllers/auth.controllers";
-import ApiResponse from "../../utils/apiResponse";
+import { checkIfUsernameExists } from "../../../controllers/auth.controllers";
+import ApiResponse from "../../../utils/apiResponse";
 import { User } from "@repo/database";
 
 vi.mock("@repo/redis");
